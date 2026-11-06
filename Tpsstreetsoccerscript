@@ -2689,6 +2689,48 @@ v33:CreateButton({Name="Restore Original", Callback=function()
 end})
 v33:CreateButton({Name="Save Current", Callback=function() avSave(); notify("Avatar","Saved",2) end})
 
+-- ═══ AUTO BALL ═══
+v33:CreateSection("Auto Ball")
+local abOn, abConn, abRad = false, nil, 3
+v33:CreateToggle({
+    Name = "Auto Ball (Walk to ball)",
+    CurrentValue = false,
+    Callback = function(v)
+        abOn = v
+        if abConn then abConn:Disconnect(); abConn = nil end
+        if not v then
+            local ch = LocalPlayer.Character
+            if ch then
+                local h = ch:FindFirstChildOfClass("Humanoid")
+                if h then h:MoveTo(ch:GetPivot().Position) end
+            end
+            return
+        end
+        abConn = RunService.Heartbeat:Connect(function()
+            local ch = LocalPlayer.Character; if not ch then return end
+            local hrp = ch:FindFirstChild("HumanoidRootPart")
+            local hum = ch:FindFirstChildOfClass("Humanoid")
+            if not hrp or not hum then return end
+            local ball = func25()
+            if not ball then return end
+            local dist = (hrp.Position - ball.Position).Magnitude
+            if dist > abRad then
+                hum:MoveTo(ball.Position)
+            else
+                hum:MoveTo(hrp.Position)
+            end
+        end)
+        v1:Notify({Title = "Auto Ball", Content = "Enabled", Duration = 2})
+    end,
+})
+v33:CreateSlider({
+    Name = "Stop Distance",
+    Range = {1, 10},
+    Increment = 1,
+    CurrentValue = 3,
+    Callback = function(v) abRad = v end,
+})
+
 local v34 = v2:CreateTab({Name = "Player", Desc = "Script 2 player mods", Icon = "user-round"})
 v34:CreateSection("Gravity")
 local tbl20 = {
