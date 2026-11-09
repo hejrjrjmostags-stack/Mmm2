@@ -1,0 +1,5700 @@
+-- Spectre features running inside the original Punish UI.
+-- The original Punish UI library is retained as the only visible menu.
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local UserInputService = game:GetService("UserInputService")
+local TweenService = game:GetService("TweenService")
+local HttpService = game:GetService("HttpService")
+local LocalPlayer = Players.LocalPlayer
+
+local executorName = ""
+pcall(function()
+    if identifyexecutor then
+        executorName = tostring(identifyexecutor()):lower()
+    elseif getexecutorname then
+        executorName = tostring(getexecutorname()):lower()
+    end
+end)
+local isXenoOrSolara = executorName:find("xeno") ~= nil or executorName:find("solara") ~= nil
+
+local librarySource = game:HttpGet("https://raw.githubusercontent.com/cezarinst-ship-it/punishuilib/refs/heads/main/s")
+librarySource = librarySource
+    :gsub("cezar", "Spectre")
+    :gsub("Cezar", "Spectre")
+    :gsub("Punishment", "Spectre")
+    :gsub("punishment", "spectre")
+    :gsub("TopBar%.InputBegan:Connect%(function%(input%)", "TopBar.InputBegan:Connect(function(input)\n        if punishgoatby97mzu.Locked then return end")
+local Library = loadstring(librarySource)()
+local Window = Library:CreateWindow("Spectre")
+
+
+local tbl, Players, UserInputService, RunService, LocalPlayer, CurrentCamera, tbl1, tbl2, func, func1, func2, func3, flag, num, func4, v4, v5, v6, func5, num2, num3, num4, num5, func6, v7, v8, v9, v10, v13, v15
+do
+	tbl = {}
+	Players = game:GetService("Players")
+	UserInputService = game:GetService("UserInputService")
+	RunService = game:GetService("RunService")
+	LocalPlayer = Players.LocalPlayer
+	CurrentCamera = workspace.CurrentCamera
+	local v1 = gethui and gethui() or game:GetService("CoreGui")
+	for _, v2 in ipairs({"Spectre", "MiddleNight", "MNLoad"}) do
+		local v3 = v1:FindFirstChild(v2)
+		if v3 then
+			v3:Destroy()
+		end
+	end
+	tbl1 = {
+		white = Color3.fromRGB(255, 255, 255),
+		black = Color3.fromRGB(0, 0, 0),
+		bg = Color3.fromRGB(14, 14, 14),
+		bg2 = Color3.fromRGB(30, 30, 30),
+		bg3 = Color3.fromRGB(52, 52, 52),
+		item = Color3.fromRGB(24, 24, 24),
+		itemSel = Color3.fromRGB(44, 44, 44),
+		hover = Color3.fromRGB(40, 40, 40),
+		stroke = Color3.fromRGB(46, 46, 46),
+		stroke2 = Color3.fromRGB(80, 80, 80),
+		txt = Color3.fromRGB(255, 255, 255),
+		txt2 = Color3.fromRGB(190, 190, 190),
+		txt3 = Color3.fromRGB(130, 130, 130),
+		a1 = Color3.fromRGB(255, 255, 255),
+		a2 = Color3.fromRGB(255, 255, 255),
+		a3 = Color3.fromRGB(255, 255, 255),
+		ink = Color3.fromRGB(0, 0, 0),
+		green = Color3.fromRGB(255, 255, 255),
+		accent = Color3.fromRGB(255, 255, 255),
+	}
+	tbl2 = {}
+	function func()
+		local accent = tbl1.accent
+		return accent.R + accent.G + accent.B > 2.2 and tbl1.black or tbl1.white
+	end
+	function func1(arg1, arg2, arg3)
+		local instance = Instance.new(arg1)
+		for k, v1 in pairs(arg2 or {}) do
+			if type(v1) == "function" then
+				instance[k] = v1()
+			else
+				instance[k] = v1
+			end
+		end
+		if arg3 then
+			instance.Parent = arg3
+		end
+		return instance
+	end
+	function func2(arg1, arg2, arg3, arg4, arg5)
+		return (func1("UIPadding", {
+			PaddingTop = UDim.new(0, arg2),
+			PaddingRight = UDim.new(0, arg3),
+			PaddingBottom = UDim.new(0, arg4),
+			PaddingLeft = UDim.new(0, arg5),
+		}, arg1))
+	end
+	function func3(arg1, arg2, arg3)
+		local v1 = arg2
+		if type(arg2) == "string" then
+			v1 = tbl1[arg2]
+		end
+		return (func1("UIStroke", {Color = v1 or tbl1.stroke, Thickness = arg3 or 1, ApplyStrokeMode = Enum.ApplyStrokeMode.Border}, arg1))
+	end
+	local TweenService = game:GetService("TweenService")
+	flag = true
+	num = 1
+	function func4(arg1, arg2, arg3, arg4, arg5)
+		local v1 = flag and (arg2 or 0.15) / num
+		local v2 = TweenService:Create(arg1, TweenInfo.new(v1 or 0, arg4 or Enum.EasingStyle.Quad, arg5 or Enum.EasingDirection.Out), arg3)
+		v2:Play()
+		return v2
+	end
+	v4 = func1("ScreenGui", {
+		Name = "Spectre",
+		ResetOnSpawn = false,
+		IgnoreGuiInset = true,
+		ZIndexBehavior = Enum.ZIndexBehavior.Sibling,
+		DisplayOrder = 999,
+	}, nil)
+	v5 = func1("Frame", {
+		AnchorPoint = Vector2.new(1, 0),
+		Position = UDim2.new(1, -14, 0, 14),
+		Size = UDim2.new(0, 280, 1, -28),
+		BackgroundTransparency = 1,
+		ZIndex = 50,
+	}, v4)
+	v6 = func1("UIListLayout", {Padding = UDim.new(0, 6), SortOrder = Enum.SortOrder.LayoutOrder}, v5)
+	local num1 = 0
+	function func5(arg1, arg2, arg3)
+		local v1 = arg3 or 3
+		num1 = num1 + 1
+		local v2 = func1("CanvasGroup", {
+			Size = UDim2.new(1, 0, 0, 52),
+			BackgroundColor3 = tbl1.bg2,
+			BorderSizePixel = 0,
+			LayoutOrder = num1,
+			ZIndex = 50,
+			GroupTransparency = flag and 1 or 0,
+		}, v5)
+		func1("UICorner", {CornerRadius = UDim.new(0, 10)}, v2)
+		func1("UICorner", {CornerRadius = UDim.new(0, 10)}, v2)
+		func3(v2, "stroke", 1)
+		local v3 = func1("UIScale", {Scale = flag and 0.94 or 1}, v2)
+		local tbl = {
+			Size = UDim2.new(1, -24, 0, 16),
+			Position = UDim2.new(0, 12, 0, 9),
+			BackgroundTransparency = 1,
+			Text = tostring(arg1),
+		}
+		tbl.Font = Enum.Font.GothamBold
+		tbl.TextSize = 13
+		tbl.TextColor3 = tbl1.txt
+		tbl.TextXAlignment = Enum.TextXAlignment.Left
+		tbl.TextTruncate = Enum.TextTruncate.AtEnd
+		tbl.ZIndex = 51
+		func1("TextLabel", tbl, v2)
+		local tbl2 = {
+			Size = UDim2.new(1, -24, 0, 14),
+			Position = UDim2.new(0, 12, 0, 28),
+			BackgroundTransparency = 1,
+			Text = tostring(arg2 or ""),
+		}
+		tbl2.Font = Enum.Font.Gotham
+		tbl2.TextSize = 11
+		tbl2.TextColor3 = tbl1.txt2
+		tbl2.TextXAlignment = Enum.TextXAlignment.Left
+		tbl2.TextTruncate = Enum.TextTruncate.AtEnd
+		tbl2.ZIndex = 51
+		func1("TextLabel", tbl2, v2)
+		func4(v2, 0.25, {GroupTransparency = 0})
+		func4(v3, 0.3, {Scale = 1}, Enum.EasingStyle.Back)
+		task.delay(v1, function()
+			if not v2.Parent then
+				return
+			end
+			func4(v2, 0.25, {GroupTransparency = 1})
+			func4(v3, 0.25, {Scale = 0.94})
+			task.delay(0.28, function()
+				v2:Destroy()
+			end)
+		end)
+	end
+	num2 = 660
+	num3 = 440
+	num4 = 176
+	num5 = 1
+	function func6()
+		local ViewportSize = CurrentCamera.ViewportSize
+		if not ViewportSize or ViewportSize.X <= 0 then
+			return 0.9 * num5
+		end
+		local min = math.min
+		local v1 = ViewportSize.X - 24
+		local Y = ViewportSize.Y
+		local v2 = min(v1 / num2, (Y - 24) / num3)
+		local v3 = math.clamp(v2, 0.5, 1)
+		return math.clamp(v3 * num5, 0.4, math.max(v2, 0.4))
+	end
+	v7 = func6()
+	v8 = func1("Frame", {
+		AnchorPoint = Vector2.new(0.5, 0.5),
+		Position = UDim2.new(0.5, 0, 0.5, 0),
+		Size = UDim2.new(0, num2, 0, num3),
+		BackgroundColor3 = tbl1.bg,
+		BorderSizePixel = 0,
+		ClipsDescendants = true,
+	}, v4)
+	func1("UICorner", {CornerRadius = UDim.new(0, 14)}, v8)
+	func1("UICorner", {CornerRadius = UDim.new(0, 14)}, v8)
+	func3(v8, "stroke", 1)
+	v9 = func1("UIScale", {Scale = v7}, v8)
+	v10 = func1("Frame", {Size = UDim2.new(1, 0, 0, 50), BackgroundTransparency = 1}, v8)
+	func1("Frame", {
+		Size = UDim2.new(1, 0, 0, 1),
+		Position = UDim2.new(0, 0, 1, -1),
+		BackgroundColor3 = tbl1.stroke,
+		BorderSizePixel = 0,
+	}, v10)
+	local v11 = func1("Frame", {
+		Size = UDim2.new(0, 0, 1, 0),
+		AutomaticSize = Enum.AutomaticSize.X,
+		Position = UDim2.new(0, 16, 0, 0),
+		BackgroundTransparency = 1,
+	}, v10)
+	func1("UIListLayout", {
+		FillDirection = Enum.FillDirection.Horizontal,
+		VerticalAlignment = Enum.VerticalAlignment.Center,
+		Padding = UDim.new(0, 10),
+		SortOrder = Enum.SortOrder.LayoutOrder,
+	}, v11)
+	local tbl3 = {Size = UDim2.new(0, 0, 0, 24)}
+	tbl3.AutomaticSize = Enum.AutomaticSize.X
+	tbl3.BackgroundTransparency = 1
+	tbl3.Text = "Spectre"
+	tbl3.Font = Enum.Font.GothamBold
+	tbl3.TextSize = 18
+	tbl3.TextColor3 = tbl1.txt
+	tbl3.TextXAlignment = Enum.TextXAlignment.Left
+	tbl3.LayoutOrder = 1
+	func1("TextLabel", tbl3, v11)
+	local v12 = Color3.fromRGB(88, 101, 242)
+	v13 = func1("TextButton", {
+		Size = UDim2.new(0, 28, 0, 28),
+		BackgroundColor3 = tbl1.bg2,
+		BorderSizePixel = 0,
+		Text = "",
+		AutoButtonColor = false,
+		LayoutOrder = 2,
+	}, v11)
+	func1("UICorner", {CornerRadius = UDim.new(0, 8)}, v13)
+	func1("UICorner", {CornerRadius = UDim.new(0, 8)}, v13)
+	local v14 = func3(v13, "stroke", 1)
+	v15 = func1("UIScale", {Scale = 1}, v13)
+	local v16 = func1("Frame", {
+		AnchorPoint = Vector2.new(0.5, 0.5),
+		Position = UDim2.new(0.5, 0, 0.5, 0),
+		Size = UDim2.new(0, 18, 0, 18),
+		BackgroundTransparency = 1,
+	}, v13)
+	local v17 = func1("Frame", {
+		Position = UDim2.fromOffset(0, 4),
+		Size = UDim2.fromOffset(18, 12),
+		BackgroundColor3 = tbl1.txt2,
+		BorderSizePixel = 0,
+	}, v16)
+	local v18 = func1("Frame", {
+		Position = UDim2.fromOffset(2, 1),
+		Size = UDim2.fromOffset(6, 6),
+		Rotation = -18,
+		BackgroundColor3 = tbl1.txt2,
+		BorderSizePixel = 0,
+	}, v16)
+	local tbl4 = {}
+	tbl4[1], tbl4[3], tbl4[2] = v17, func1("Frame", {
+		Position = UDim2.fromOffset(10, 1),
+		Size = UDim2.fromOffset(6, 6),
+		Rotation = 18,
+		BackgroundColor3 = tbl1.txt2,
+		BorderSizePixel = 0,
+	}, v16), v18
+	local v19 = tbl4[1]
+	func1("UICorner", {CornerRadius = UDim.new(0, 5)}, v19)
+	func1("UICorner", {CornerRadius = UDim.new(0, 5)}, v19)
+	local v20 = tbl4[2]
+	func1("UICorner", {CornerRadius = UDim.new(0, 2)}, v20)
+	func1("UICorner", {CornerRadius = UDim.new(0, 2)}, v20)
+	local v21 = tbl4[3]
+	func1("UICorner", {CornerRadius = UDim.new(0, 2)}, v21)
+	func1("UICorner", {CornerRadius = UDim.new(0, 2)}, v21)
+	local v22 = func1("Frame", {
+		Position = UDim2.fromOffset(4, 8),
+		Size = UDim2.fromOffset(3, 4),
+		BackgroundColor3 = tbl1.bg2,
+		BorderSizePixel = 0,
+	}, v16)
+	func1("UICorner", {CornerRadius = UDim.new(0, 2)}, v22)
+	func1("UICorner", {CornerRadius = UDim.new(0, 2)}, v22)
+	local v23 = func1("Frame", {
+		Position = UDim2.fromOffset(11, 8),
+		Size = UDim2.fromOffset(3, 4),
+		BackgroundColor3 = tbl1.bg2,
+		BorderSizePixel = 0,
+	}, v16)
+	func1("UICorner", {CornerRadius = UDim.new(0, 2)}, v23)
+	func1("UICorner", {CornerRadius = UDim.new(0, 2)}, v23)
+	local v24 = func1("ImageLabel", {
+		AnchorPoint = Vector2.new(0.5, 0.5),
+		Position = UDim2.new(0.5, 0, 0.5, 0),
+		Size = UDim2.new(0, 18, 0, 18),
+		BackgroundTransparency = 1,
+		ImageColor3 = tbl1.txt2,
+		ScaleType = Enum.ScaleType.Fit,
+		Visible = false,
+	}, v13)
+	local function func7(arg1)
+		for _, v1 in ipairs(tbl4) do
+			func4(v1, 0.15, {BackgroundColor3 = arg1})
+		end
+		func4(v24, 0.15, {ImageColor3 = arg1})
+	end
+	local function func8()
+		if not (writefile and isfile and getcustomasset) then
+			return nil
+		end
+		pcall(function()
+			if makefolder and isfolder and not isfolder("SpectreTouchline") then
+				makefolder("SpectreTouchline")
+			end
+		end)
+		local v1, v2 = pcall(isfile, "SpectreTouchline/discord_icon.png")
+		if not (v1 and v2) then
+			for _, v3 in ipairs({
+				"https://img.icons8.com/ios-filled/100/ffffff/discord-logo.png",
+				"https://img.icons8.com/ios-glyphs/100/ffffff/discord-logo.png",
+			}) do
+				local v4, v5 = pcall(function()
+					return game:HttpGet(v3)
+				end)
+				if v4 and type(v5) == "string" and #v5 > 200 and v5:sub(2, 4) == "PNG" then
+					pcall(writefile, "SpectreTouchline/discord_icon.png", v5)
+					break
+				end
+			end
+		end
+		local v6, v7 = pcall(isfile, "SpectreTouchline/discord_icon.png")
+		if v6 and v7 then
+			local v8, v9 = pcall(getcustomasset, "SpectreTouchline/discord_icon.png")
+			if v8 and v9 then
+				return v9
+			end
+		end
+		return nil
+	end
+	task.spawn(function()
+		local v1 = func8()
+		if v1 and v13.Parent then
+			v24.Image = v1
+			v24.Visible = true
+			v16.Visible = false
+		end
+	end)
+	v13.MouseEnter:Connect(function()
+		func4(v13, 0.15, {BackgroundColor3 = tbl1.hover})
+		func4(v14, 0.15, {Color = tbl1.stroke2})
+		func7(v12)
+	end)
+	v13.MouseLeave:Connect(function()
+		func4(v13, 0.15, {BackgroundColor3 = tbl1.bg2})
+		func4(v14, 0.15, {Color = tbl1.stroke})
+		func7(tbl1.txt2)
+		func4(v15, 0.12, {Scale = 1})
+	end)
+end
+local v27, flag1, flag2, func10, func13, func15, func16, v29, v30, v31, v33, v34, tbl8, func18, tbl9, num6, v64, tbl10, func19, tbl24
+do
+	v13.MouseButton1Down:Connect(function()
+		func4(v15, 0.08, {Scale = 0.88})
+	end)
+	v13.MouseButton1Up:Connect(function()
+		func4(v15, 0.14, {Scale = 1}, Enum.EasingStyle.Back)
+	end)
+	v13.MouseButton1Click:Connect(function()
+		local v1 = setclipboard or toclipboard or set_clipboard
+		local flag = false
+		if v1 then
+			flag = pcall(v1, "https://discord.gg/QK2PdhxQUJ")
+		end
+		if flag then
+			func5("Discord", "Invite link copied to clipboard", 2.5)
+		else
+			func5("Discord", "https://discord.gg/QK2PdhxQUJ", 6)
+		end
+	end)
+	local v25 = func1("TextButton", {
+		AnchorPoint = Vector2.new(0, 0.5),
+		Size = UDim2.new(0, 46, 0, 46),
+		Position = UDim2.new(0, 14, 0.5, 0),
+		BackgroundColor3 = tbl1.bg2,
+		BorderSizePixel = 0,
+		Text = "",
+		AutoButtonColor = false,
+		Visible = false,
+		ZIndex = 100,
+	}, v4)
+	func1("UICorner", {CornerRadius = UDim.new(0, 12)}, v25)
+	func1("UICorner", {CornerRadius = UDim.new(0, 12)}, v25)
+	func3(v25, "stroke2", 1)
+	local v26 = func1("ImageLabel", {
+		Size = UDim2.new(0, 32, 0, 32),
+		Position = UDim2.new(0.5, -16, 0.5, -16),
+		BackgroundTransparency = 1,
+		Image = "rbxassetid://79892880586382",
+		ScaleType = Enum.ScaleType.Fit,
+		ZIndex = 101,
+	}, v25)
+	func1("UICorner", {CornerRadius = UDim.new(0, 8)}, v26)
+	func1("UICorner", {CornerRadius = UDim.new(0, 8)}, v26)
+	v27 = func1("UIScale", {Scale = v7}, v25)
+	flag1 = false
+	flag2 = false
+	local flag3 = false
+	local function func9(arg1, arg2, arg3)
+		local AbsoluteSize = v4.AbsoluteSize
+		local AnchorPoint = arg1.AnchorPoint
+		local AbsoluteSize1 = arg1.AbsoluteSize
+		local v1 = math.clamp(arg2, 0, math.max(0, AbsoluteSize.X - AbsoluteSize1.X))
+		local v2 = math.clamp(arg3, 0, math.max(0, AbsoluteSize.Y - AbsoluteSize1.Y))
+		arg1.Position = UDim2.fromOffset(v1 + AnchorPoint.X * AbsoluteSize1.X, v2 + AnchorPoint.Y * AbsoluteSize1.Y)
+	end
+	function func10()
+		func9(v8, v8.AbsolutePosition.X, v8.AbsolutePosition.Y)
+		func9(v25, v25.AbsolutePosition.X, v25.AbsolutePosition.Y)
+	end
+	local function func11()
+		if not flag then
+			v27.Scale = v7
+			return
+		end
+		v27.Scale = v7 * 0.6
+		func4(v27, 0.25, {Scale = v7}, Enum.EasingStyle.Back)
+	end
+	local function func12()
+		if not flag then
+			v9.Scale = v7
+			return
+		end
+		v9.Scale = v7 * 0.93
+		func4(v9, 0.26, {Scale = v7}, Enum.EasingStyle.Back)
+	end
+	function func13()
+		if flag1 or flag2 then
+			return
+		end
+		flag1 = true
+		local tbl = {Scale = v7 * 0.93}
+		func4(v9, 0.14, tbl, Enum.EasingStyle.Quad, Enum.EasingDirection.In)
+		task.delay(flag and 0.14 or 0, function()
+			if flag1 and not flag2 then
+				v8.Visible = false
+				v9.Scale = v7
+				v25.Visible = true
+				func11()
+			end
+		end)
+	end
+	local function func14()
+		if flag2 then
+			return
+		end
+		flag2 = true
+		v4.Enabled = false
+	end
+	function func15()
+		if not flag1 then
+			return
+		end
+		flag1 = false
+		v25.Visible = false
+		v8.Visible = true
+		func12()
+	end
+	function func16()
+		flag1 = false
+		flag2 = false
+		v4.Enabled = true
+		v8.Visible = true
+		v25.Visible = false
+		func12()
+	end
+	CurrentCamera:GetPropertyChangedSignal("ViewportSize"):Connect(function()
+		v7 = func6()
+		v9.Scale = v7
+		v27.Scale = v7
+		task.defer(func10)
+	end)
+	func12()
+	local function func17(arg1, arg2, arg3)
+		local v1 = func1("TextButton", {
+			Size = UDim2.new(0, 34, 0, 34),
+			Position = UDim2.new(1, arg2, 0.5, -17),
+			BackgroundTransparency = 1,
+			Text = "",
+			AutoButtonColor = false,
+		}, v10)
+		local tbl = {}
+		local function func(arg1, arg2, arg3)
+			local v2 = func1("Frame", {
+				AnchorPoint = Vector2.new(0.5, 0.5),
+				Position = UDim2.new(0.5, 0, 0.5, 0),
+				Size = UDim2.new(0, arg1, 0, arg2),
+				Rotation = arg3 or 0,
+				BackgroundColor3 = tbl1.txt2,
+				BorderSizePixel = 0,
+			}, v1)
+			tbl[#tbl + 1] = v2
+		end
+		if arg1 == "hide" then
+			func(14, 2)
+		else
+			func(17, 2, 45)
+			func(17, 2, -45)
+		end
+		v1.MouseEnter:Connect(function()
+			for _, v1 in ipairs(tbl) do
+				v1.BackgroundColor3 = tbl1.white
+			end
+		end)
+		v1.MouseLeave:Connect(function()
+			for _, v1 in ipairs(tbl) do
+				v1.BackgroundColor3 = tbl1.txt2
+			end
+		end)
+		v1.MouseButton1Click:Connect(arg3)
+	end
+	func17("hide", -86, func13)
+	func17("close", -46, func14)
+	local tbl5 = {active = false}
+	local tbl57
+	v10.InputBegan:Connect(function(arg1)
+		if arg1.UserInputType == Enum.UserInputType.MouseButton1 or arg1.UserInputType == Enum.UserInputType.Touch then
+			if not flag3 then
+				tbl5.active = true
+				tbl5.start = arg1.Position
+				tbl5.tl = v8.AbsolutePosition
+			end
+		end
+	end)
+	v25.InputBegan:Connect(function(arg1)
+		if arg1.UserInputType == Enum.UserInputType.MouseButton1 or arg1.UserInputType == Enum.UserInputType.Touch then
+			tbl57 = {start = arg1.Position, tl = v25.AbsolutePosition, moved = false}
+		end
+	end)
+	UserInputService.InputChanged:Connect(function(arg1)
+		if arg1.UserInputType ~= Enum.UserInputType.MouseMovement and arg1.UserInputType ~= Enum.UserInputType.Touch then
+			return
+		end
+		if tbl5.active then
+			local v1 = arg1.Position - tbl5.start
+			local X = v1.X
+			local X1 = tbl5.tl.X
+			local tl = tbl5.tl
+			func9(v8, X1 + X, tl.Y + v1.Y)
+		end
+		if tbl57 then
+			local v2 = arg1.Position - tbl57.start
+			if v2.Magnitude > 6 and not flag3 then
+				tbl57.moved = true
+			end
+			if tbl57.moved then
+				local X2 = tbl57.tl.X
+				local X3 = v2.X
+				local tl1 = tbl57.tl
+				func9(v25, X2 + X3, tl1.Y + v2.Y)
+			end
+		end
+	end)
+	UserInputService.InputEnded:Connect(function(arg1)
+		if arg1.UserInputType == Enum.UserInputType.MouseButton1 or arg1.UserInputType == Enum.UserInputType.Touch then
+			tbl5.active = false
+			if tbl57 then
+				local v1 = not tbl57.moved
+				tbl57 = nil
+				if v1 then
+					func15()
+				end
+			end
+		end
+	end)
+	local v28 = func1("Frame", {
+		Position = UDim2.new(0, 0, 0, 50),
+		Size = UDim2.new(1, 0, 1, -50),
+		BackgroundTransparency = 1,
+		ClipsDescendants = true,
+	}, v8)
+	v29 = func1("Frame", {Size = UDim2.new(0, 176, 1, 0), BackgroundTransparency = 1}, v28)
+	v30 = func1("ScrollingFrame", {
+		Size = UDim2.new(1, -20, 1, -76),
+		Position = UDim2.new(0, 10, 0, 0),
+		BackgroundTransparency = 1,
+		BorderSizePixel = 0,
+		ScrollBarThickness = 0,
+		CanvasSize = UDim2.new(0, 0, 0, 0),
+		AutomaticCanvasSize = Enum.AutomaticSize.Y,
+	}, v29)
+	func1("UIListLayout", {Padding = UDim.new(0, 5), SortOrder = Enum.SortOrder.LayoutOrder}, v30)
+	v31 = func1("Frame", {
+		Size = UDim2.new(1, -20, 0, 52),
+		Position = UDim2.new(0, 10, 1, -62),
+		BackgroundColor3 = tbl1.item,
+		BorderSizePixel = 0,
+	}, v29)
+	func1("UICorner", {CornerRadius = UDim.new(0, 10)}, v31)
+	func1("UICorner", {CornerRadius = UDim.new(0, 10)}, v31)
+	local v32 = func1("ImageLabel", {
+		Size = UDim2.new(0, 36, 0, 36),
+		Position = UDim2.new(0, 8, 0.5, -18),
+		BackgroundColor3 = tbl1.bg3,
+		BorderSizePixel = 0,
+		Image = "rbxthumb://type=AvatarHeadShot&id=" .. LocalPlayer.UserId .. "&w=150&h=150",
+	}, v31)
+	func1("UICorner", {CornerRadius = UDim.new(0, 18)}, v32)
+	func1("UICorner", {CornerRadius = UDim.new(0, 18)}, v32)
+	local tbl6 = {
+		Size = UDim2.new(1, -58, 0, 16),
+		Position = UDim2.new(0, 52, 0, 9),
+		BackgroundTransparency = 1,
+		Text = LocalPlayer.DisplayName,
+	}
+	tbl6.Font = Enum.Font.GothamBold
+	tbl6.TextSize = 12
+	tbl6.TextColor3 = tbl1.txt
+	tbl6.TextXAlignment = Enum.TextXAlignment.Left
+	tbl6.TextTruncate = Enum.TextTruncate.AtEnd
+	func1("TextLabel", tbl6, v31)
+	local tbl7 = {
+		Size = UDim2.new(1, -58, 0, 14),
+		Position = UDim2.new(0, 52, 0, 26),
+		BackgroundTransparency = 1,
+		Text = "Spectre User",
+	}
+	tbl7.Font = Enum.Font.Gotham
+	tbl7.TextSize = 10
+	tbl7.TextColor3 = tbl1.txt2
+	tbl7.TextXAlignment = Enum.TextXAlignment.Left
+	tbl7.TextTruncate = Enum.TextTruncate.AtEnd
+	func1("TextLabel", tbl7, v31)
+	v33 = func1("Frame", {
+		Size = UDim2.new(0, 1, 1, -20),
+		Position = UDim2.new(0, 176, 0, 0),
+		BackgroundColor3 = tbl1.stroke,
+		BorderSizePixel = 0,
+	}, v28)
+	v34 = func1("CanvasGroup", {
+		Size = UDim2.new(1, -177, 1, 0),
+		Position = UDim2.new(0, 177, 0, 0),
+		BackgroundTransparency = 1,
+		BorderSizePixel = 0,
+		GroupTransparency = 0,
+	}, v28)
+	local v65
+	pcall(function()
+		local v1 = game:HttpGet("https://github.com/latte-soft/lucide-roblox/releases/latest/download/lucide-roblox.luau")
+		local v2 = loadstring(v1)
+		if v2 then
+			v65 = v2()
+		end
+	end)
+	tbl8 = {
+		Home = {"home", "house"},
+		Reach = {"crosshair", "target"},
+		["Xeno / Solara"] = {"footprints", "move"},
+		["Head Reach"] = {"smile", "user-round", "user"},
+		React = {"zap"},
+		["Xeno Moss"] = {"leaf", "sprout"},
+		Flags = {"flag"},
+		["Avatar Stealer"] = {"user-round", "user"},
+		["Air Dribble"] = {"wind"},
+		Settings = {"settings", "sliders-horizontal"},
+		["Info's"] = {"info", "book-open"},
+		Goalkeeper = {"hand", "shield"},
+		Helpers = {"wand-sparkles", "wand", "sparkles"},
+		Miscellaneous = {"layout-dashboard", "grid-2x2"},
+		Skyes = {"cloud"},
+		Spectre = {"home", "house"},
+		["Spectre Reach"] = {"crosshair", "target"},
+		["Ball Reach"] = {"crosshair", "target"},
+		["Leg Reach"] = {"footprints", "move"},
+		["Air Helper"] = {"rocket", "wind"},
+		["Ball Predict"] = {"trending-up", "activity"},
+		Misc = {"layout-dashboard", "layers"},
+		Skies = {"cloud"},
+	}
+	function func18(arg1)
+		local v1 = arg1
+		if not v65 or not arg1 then
+			return nil
+		end
+		if type(arg1) == "string" then
+			v1 = {arg1}
+		end
+		for _, v2 in ipairs(v1) do
+			local v3, v4 = pcall(function()
+				return v65.GetAsset(v2, 48)
+			end)
+			if v3 and v4 then
+				return v4
+			end
+		end
+		return nil
+	end
+	tbl9 = {}
+	num6 = 0
+	tbl10 = {}
+	function func19(arg1)
+		if v64 == arg1 then
+			return
+		end
+		for _, v1 in pairs(tbl9) do
+			if v1 ~= arg1 then
+				v1.content.Visible = false
+				func4(v1.btn, 0.2, {BackgroundColor3 = tbl1.item})
+				func4(v1.lbl, 0.2, {TextColor3 = tbl1.txt2})
+				if v1.icon then
+					func4(v1.icon, 0.2, {ImageColor3 = tbl1.txt2})
+				end
+				func4(v1.bar, 0.2, {Size = UDim2.new(0, 3, 0, 0)})
+			end
+		end
+		v64 = arg1
+		func4(arg1.btn, 0.2, {BackgroundColor3 = tbl1.itemSel})
+		func4(arg1.lbl, 0.2, {TextColor3 = tbl1.txt})
+		if arg1.icon then
+			func4(arg1.icon, 0.2, {ImageColor3 = tbl1.txt})
+		end
+		func4(arg1.bar, 0.25, {Size = UDim2.new(0, 3, 0, 18)}, Enum.EasingStyle.Quart)
+		arg1.content.Visible = true
+		if flag then
+			arg1.content.Position = UDim2.new(0, 0, 0, 12)
+			v34.GroupTransparency = 1
+			func4(v34, 0.24, {GroupTransparency = 0})
+			func4(arg1.content, 0.3, {Position = UDim2.new(0, 0, 0, 0)}, Enum.EasingStyle.Quart)
+		else
+			arg1.content.Position = UDim2.new(0, 0, 0, 0)
+			v34.GroupTransparency = 0
+		end
+	end
+	local tbl11 = {}
+	tbl11[1], tbl11[2] = "Black", {
+		bg = Color3.fromRGB(14, 14, 14),
+		bg2 = Color3.fromRGB(30, 30, 30),
+		bg3 = Color3.fromRGB(52, 52, 52),
+		item = Color3.fromRGB(24, 24, 24),
+		itemSel = Color3.fromRGB(44, 44, 44),
+		hover = Color3.fromRGB(40, 40, 40),
+		stroke = Color3.fromRGB(46, 46, 46),
+		stroke2 = Color3.fromRGB(80, 80, 80),
+	}
+	local tbl12 = {}
+	tbl12[2], tbl12[1] = {
+		bg = Color3.fromRGB(24, 24, 26),
+		bg2 = Color3.fromRGB(40, 40, 43),
+		bg3 = Color3.fromRGB(66, 66, 70),
+		item = Color3.fromRGB(34, 34, 37),
+		itemSel = Color3.fromRGB(58, 58, 62),
+		hover = Color3.fromRGB(52, 52, 56),
+		stroke = Color3.fromRGB(58, 58, 62),
+		stroke2 = Color3.fromRGB(95, 95, 100),
+	}, "Charcoal"
+	local tbl13 = {
+		"Midnight",
+		{
+			bg = Color3.fromRGB(10, 13, 24),
+			bg2 = Color3.fromRGB(22, 28, 46),
+			bg3 = Color3.fromRGB(42, 52, 82),
+			item = Color3.fromRGB(17, 22, 38),
+			itemSel = Color3.fromRGB(34, 44, 72),
+			hover = Color3.fromRGB(30, 38, 62),
+			stroke = Color3.fromRGB(34, 42, 66),
+			stroke2 = Color3.fromRGB(70, 84, 125),
+		},
+	}
+	local tbl14 = {}
+	tbl14[2], tbl14[1] = {
+		bg = Color3.fromRGB(10, 18, 14),
+		bg2 = Color3.fromRGB(22, 38, 30),
+		bg3 = Color3.fromRGB(42, 70, 56),
+		item = Color3.fromRGB(16, 28, 22),
+		itemSel = Color3.fromRGB(34, 60, 48),
+		hover = Color3.fromRGB(30, 52, 42),
+		stroke = Color3.fromRGB(34, 56, 45),
+		stroke2 = Color3.fromRGB(70, 110, 90),
+	}, "Forest"
+	local tbl15 = {}
+	tbl15[2], tbl15[1] = {
+		bg = Color3.fromRGB(20, 9, 11),
+		bg2 = Color3.fromRGB(40, 20, 24),
+		bg3 = Color3.fromRGB(72, 38, 44),
+		item = Color3.fromRGB(30, 14, 17),
+		itemSel = Color3.fromRGB(60, 30, 36),
+		hover = Color3.fromRGB(52, 26, 31),
+		stroke = Color3.fromRGB(58, 30, 35),
+		stroke2 = Color3.fromRGB(110, 60, 68),
+	}, "Crimson"
+	local tbl16 = {
+		"Purple",
+		{
+			bg = Color3.fromRGB(16, 10, 24),
+			bg2 = Color3.fromRGB(32, 22, 48),
+			bg3 = Color3.fromRGB(58, 42, 84),
+			item = Color3.fromRGB(24, 16, 36),
+			itemSel = Color3.fromRGB(48, 34, 70),
+			hover = Color3.fromRGB(42, 30, 62),
+			stroke = Color3.fromRGB(46, 34, 66),
+			stroke2 = Color3.fromRGB(90, 70, 125),
+		},
+	}
+	local tbl17 = {
+		"Ocean",
+		{
+			bg = Color3.fromRGB(8, 18, 20),
+			bg2 = Color3.fromRGB(18, 38, 42),
+			bg3 = Color3.fromRGB(36, 70, 76),
+			item = Color3.fromRGB(14, 28, 32),
+			itemSel = Color3.fromRGB(30, 60, 66),
+			hover = Color3.fromRGB(26, 52, 58),
+			stroke = Color3.fromRGB(30, 56, 60),
+			stroke2 = Color3.fromRGB(62, 110, 118),
+		},
+	}
+	local tbl18 = {}
+	tbl18[2], tbl18[1] = {
+		bg = Color3.fromRGB(22, 10, 16),
+		bg2 = Color3.fromRGB(44, 22, 34),
+		bg3 = Color3.fromRGB(78, 40, 60),
+		item = Color3.fromRGB(32, 16, 25),
+		itemSel = Color3.fromRGB(66, 34, 52),
+		hover = Color3.fromRGB(58, 29, 45),
+		stroke = Color3.fromRGB(62, 32, 48),
+		stroke2 = Color3.fromRGB(118, 64, 92),
+	}, "Rose"
+	local tbl19 = {}
+	tbl19[1], tbl19[2] = "Amber", {
+		bg = Color3.fromRGB(20, 14, 8),
+		bg2 = Color3.fromRGB(42, 30, 18),
+		bg3 = Color3.fromRGB(76, 56, 34),
+		item = Color3.fromRGB(30, 21, 12),
+		itemSel = Color3.fromRGB(62, 45, 28),
+		hover = Color3.fromRGB(54, 39, 24),
+		stroke = Color3.fromRGB(58, 42, 26),
+		stroke2 = Color3.fromRGB(112, 84, 54),
+	}
+	local tbl20 = {}
+	tbl20[2], tbl20[1] = {
+		bg = Color3.fromRGB(14, 16, 20),
+		bg2 = Color3.fromRGB(30, 34, 42),
+		bg3 = Color3.fromRGB(54, 60, 74),
+		item = Color3.fromRGB(22, 25, 31),
+		itemSel = Color3.fromRGB(46, 52, 64),
+		hover = Color3.fromRGB(40, 45, 56),
+		stroke = Color3.fromRGB(46, 52, 64),
+		stroke2 = Color3.fromRGB(84, 94, 114),
+	}, "Steel"
+	local tbl21 = {tbl11, tbl12, tbl13, tbl14, tbl15, tbl16, tbl17, tbl18, tbl19, tbl20}
+	local tbl22 = {"bg", "bg2", "bg3", "item", "itemSel", "hover", "stroke", "stroke2"}
+	local str = "Black"
+	local function func20(arg1, arg2)
+		return math.abs(arg1.R - arg2.R) < 0.004 and math.abs(arg1.G - arg2.G) < 0.004 and math.abs(arg1.B - arg2.B) < 0.004
+	end
+	local function func21(arg1)
+		local v2
+		for _, v1 in ipairs(tbl21) do
+			if v1[1] == arg1 then
+				v2 = v1[2]
+			end
+		end
+		if not v2 then
+			return false
+		end
+		local tbl = {}
+		for _, v3 in ipairs(tbl22) do
+			local v5 = #tbl + 1
+			local tbl2 = {}
+			tbl2[2], tbl2[1] = v2[v3], tbl1[v3]
+			tbl[v5] = tbl2
+		end
+		for _, v6 in ipairs(v4:GetDescendants()) do
+			if v6:IsA("GuiObject") then
+				local BackgroundColor3 = v6.BackgroundColor3
+				local v8
+				for _, v7 in ipairs(tbl) do
+					if func20(BackgroundColor3, v7[1]) then
+						v8 = v7[2]
+						break
+					end
+				end
+				if v8 then
+					v6.BackgroundColor3 = v8
+				end
+				if v6:IsA("ScrollingFrame") then
+					local ScrollBarImageColor3 = v6.ScrollBarImageColor3
+					local v10
+					for _, v9 in ipairs(tbl) do
+						if func20(ScrollBarImageColor3, v9[1]) then
+							v10 = v9[2]
+							break
+						end
+					end
+					if v10 then
+						v6.ScrollBarImageColor3 = v10
+					end
+				end
+			elseif v6:IsA("UIStroke") then
+				local Color = v6.Color
+				local v12
+				for _, v11 in ipairs(tbl) do
+					if func20(Color, v11[1]) then
+						v12 = v11[2]
+						break
+					end
+				end
+				if v12 then
+					v6.Color = v12
+				end
+			end
+		end
+		for _, v13 in ipairs(tbl22) do
+			tbl1[v13] = v2[v13]
+		end
+		str = arg1
+		return true
+	end
+	local tbl23 = {}
+	for _, v35 in ipairs(tbl21) do
+		local v36 = #tbl23
+		local v37 = v35[1]
+		tbl23[v36 + 1] = v37
+	end
+	tbl24 = {Notify = func5, Elements = tbl10, Themes = tbl23}
+	tbl24.ApplyTheme = func21
+	tbl24.GetTheme = function()
+		return str
+	end
+	tbl24.SetBackground = function() end
+	tbl24.SetUIScale = function(arg1)
+		num5 = arg1
+		v7 = func6()
+		local v1 = v7
+		func4(v9, 0.15, {Scale = v1})
+		func4(v27, 0.15, {Scale = v1})
+		task.delay(0.18, func10)
+	end
+	tbl24.SetLocked = function(arg1)
+		flag3 = arg1 and true or false
+		if flag3 then
+			tbl5.active = false
+		end
+	end
+end
+local InsertService, Lighting, VirtualInputManager, func24, C, v40, v41, v42, v66, v46, v48
+do
+	local tbl25 = {}
+	tbl25[1], tbl25[2], tbl25[3] = "Gotham", Enum.Font.Gotham, Enum.Font.GothamBold
+	local tbl26 = {}
+	tbl26[1], tbl26[2], tbl26[3] = "Source Sans", Enum.Font.SourceSans, Enum.Font.SourceSansBold
+	local tbl27 = {}
+	tbl27[1], tbl27[3], tbl27[2] = "Ubuntu", Enum.Font.Ubuntu, Enum.Font.Ubuntu
+	local tbl28 = {}
+	tbl28[2], tbl28[3], tbl28[1] = Enum.Font.Arial, Enum.Font.ArialBold, "Arial"
+	local tbl29 = {}
+	tbl29[2], tbl29[1], tbl29[3] = Enum.Font.Code, "Code", Enum.Font.Code
+	local tbl30 = {}
+	tbl30[2], tbl30[1], tbl30[3] = Enum.Font.Merriweather, "Merriweather", Enum.Font.Merriweather
+	local tbl31 = {tbl25, tbl26, tbl27, tbl28, tbl29, tbl30}
+	local v38 = tbl31[1]
+	local num7 = 1
+	local num8 = 1
+	local flag4 = true
+	local function func22(arg1)
+		if arg1:IsA("TextLabel") or arg1:IsA("TextButton") or arg1:IsA("TextBox") then
+			local Attribute = arg1:GetAttribute("SpKind")
+			if Attribute == nil then
+				if arg1.Font == Enum.Font.Gotham then
+					Attribute = "r"
+				elseif arg1.Font == Enum.Font.GothamBold then
+					Attribute = "b"
+				else
+					Attribute = "x"
+				end
+				arg1:SetAttribute("SpKind", Attribute)
+				arg1:SetAttribute("SpTS", arg1.TextSize)
+			end
+			if Attribute ~= "x" then
+				arg1.Font = Attribute == "b" and v38[3] or v38[2]
+			end
+			local Attribute1 = arg1:GetAttribute("SpTS")
+			if Attribute1 then
+				arg1.TextSize = math.max(8, math.floor(Attribute1 * num7 + 0.5))
+			end
+		elseif arg1:IsA("UICorner") then
+			local Attribute2 = arg1:GetAttribute("SpR")
+			if Attribute2 == nil then
+				local Parent = arg1.Parent
+				local v1 = Parent and Parent:IsA("GuiObject") and not Parent:IsA("ImageLabel") and Parent.Size.Y.Scale == 0 and Parent.Size.Y.Offset >= 30 and arg1.CornerRadius.Scale == 0 and arg1.CornerRadius.Offset or -1
+				Attribute2 = v1
+				arg1:SetAttribute("SpR", v1)
+			end
+			if Attribute2 >= 0 then
+				arg1.CornerRadius = UDim.new(0, math.floor(Attribute2 * num8 + 0.5))
+			end
+		elseif arg1:IsA("UIStroke") then
+			arg1.Enabled = flag4
+		end
+	end
+	v4.DescendantAdded:Connect(function(arg1)
+		task.defer(func22, arg1)
+	end)
+	tbl24.Fonts = {}
+	for _, v39 in ipairs(tbl31) do
+		tbl24.Fonts[#tbl24.Fonts + 1] = v39[1]
+	end
+	tbl24.SetFont = function(arg1)
+		for _, v1 in ipairs(tbl31) do
+			if v1[1] == arg1 then
+				v38 = v1
+				for _, v2 in ipairs(v4:GetDescendants()) do
+					func22(v2)
+				end
+				return true
+			end
+		end
+		return false
+	end
+	tbl24.SetTextScale = function(arg1)
+		num7 = arg1
+		for _, v1 in ipairs(v4:GetDescendants()) do
+			func22(v1)
+		end
+	end
+	tbl24.SetRound = function(arg1)
+		num8 = arg1
+		for _, v1 in ipairs(v4:GetDescendants()) do
+			func22(v1)
+		end
+	end
+	tbl24.SetBorders = function(arg1)
+		flag4 = arg1 and true or false
+		for _, v1 in ipairs(v4:GetDescendants()) do
+			func22(v1)
+		end
+	end
+	local tbl32 = {
+		White = Color3.fromRGB(255, 255, 255),
+		Blue = Color3.fromRGB(88, 150, 255),
+		Purple = Color3.fromRGB(160, 110, 255),
+		Green = Color3.fromRGB(80, 200, 120),
+		Red = Color3.fromRGB(235, 80, 90),
+		Orange = Color3.fromRGB(245, 150, 60),
+		Pink = Color3.fromRGB(240, 110, 170),
+		Cyan = Color3.fromRGB(60, 200, 220),
+		Gold = Color3.fromRGB(235, 190, 70),
+	}
+	tbl24.Accents = {"White", "Blue", "Purple", "Green", "Red", "Orange", "Pink", "Cyan", "Gold"}
+	tbl24.SetAccent = function(arg1)
+		local v1 = tbl32[arg1]
+		if not v1 then
+			return false
+		end
+		tbl1.accent = v1
+		for _, v2 in ipairs(tbl2) do
+			pcall(v2)
+		end
+		return true
+	end
+	tbl24.SetOpacity = function(arg1)
+		v8.BackgroundTransparency = 1 - math.clamp(arg1, 0, 1)
+	end
+	tbl24.SetAnim = function(arg1)
+		flag = arg1 and true or false
+	end
+	tbl24.SetAnimSpeed = function(arg1)
+		num = math.max(arg1, 0.1)
+	end
+	tbl24.SetWinSize = function(arg1, arg2)
+		if arg1 then
+			num2 = arg1
+		end
+		if arg2 then
+			num3 = arg2
+		end
+		v8.Size = UDim2.new(0, num2, 0, num3)
+		local v1 = func6()
+		v7 = v1
+		local v2 = v7
+		func4(v9, 0.15, {Scale = v2})
+		func4(v27, 0.15, {Scale = v2})
+		task.delay(0.18, func10)
+	end
+	tbl24.SetSidebar = function(arg1)
+		num4 = arg1
+		local v1 = num4
+		v29.Size = UDim2.new(0, v1, 1, 0)
+		v33.Position = UDim2.new(0, v1, 0, 0)
+		v34.Position = UDim2.new(0, v1 + 1, 0, 0)
+		v34.Size = UDim2.new(1, -(num4 + 1), 1, 0)
+	end
+	tbl24.SetSpacing = function(arg1)
+		for _, v1 in pairs(tbl9) do
+			local UIListLayout = v1.content:FindFirstChildOfClass("UIListLayout")
+			if UIListLayout then
+				UIListLayout.Padding = UDim.new(0, arg1)
+			end
+		end
+	end
+	tbl24.SetProfile = function(arg1)
+		v31.Visible = arg1 and true or false
+		v30.Size = arg1 and UDim2.new(1, -20, 1, -76) or UDim2.new(1, -20, 1, -16)
+	end
+	tbl24.SetDiscordBtn = function(arg1)
+		v13.Visible = arg1 and true or false
+	end
+	tbl24.NotifPositions = {"Top Right", "Top Left", "Bottom Right", "Bottom Left"}
+	tbl24.SetNotifPos = function(arg1)
+		local v1 = arg1:find("Right") ~= nil
+		local v2 = arg1:find("Bottom") ~= nil
+		v5.AnchorPoint = Vector2.new(v1 and 1 or 0, 0)
+		v5.Position = UDim2.new(v1 and 1 or 0, v1 and -14 or 14, 0, 14)
+		v6.VerticalAlignment = v2 and Enum.VerticalAlignment.Bottom or Enum.VerticalAlignment.Top
+	end
+	tbl24.MakeTab = function(_, arg2, arg3, arg4)
+		num6 = num6 + 1
+		local v1 = func1("TextButton", {
+			Size = UDim2.new(1, 0, 0, 38),
+			BackgroundColor3 = tbl1.item,
+			BorderSizePixel = 0,
+			Text = "",
+			AutoButtonColor = false,
+			LayoutOrder = arg4 or num6,
+		}, v30)
+		func1("UICorner", {CornerRadius = UDim.new(0, 10)}, v1)
+		func1("UICorner", {CornerRadius = UDim.new(0, 10)}, v1)
+		local v2 = func1("Frame", {
+			AnchorPoint = Vector2.new(0, 0.5),
+			Size = UDim2.new(0, 3, 0, 0),
+			Position = UDim2.new(0, 0, 0.5, 0),
+			BackgroundColor3 = tbl1.accent,
+			BorderSizePixel = 0,
+		}, v1)
+		func1("UICorner", {CornerRadius = UDim.new(0, 2)}, v2)
+		func1("UICorner", {CornerRadius = UDim.new(0, 2)}, v2)
+		tbl2[#tbl2 + 1] = function()
+			v2.BackgroundColor3 = tbl1.accent
+		end
+		local v3 = func18(arg3 or tbl8[arg2] or "circle")
+		local v4
+		if v3 then
+			v4 = func1("ImageLabel", {
+				Size = UDim2.new(0, 18, 0, 18),
+				Position = UDim2.new(0, 12, 0.5, -9),
+				BackgroundTransparency = 1,
+				Image = v3.Url,
+				ImageRectSize = v3.ImageRectSize,
+				ImageRectOffset = v3.ImageRectOffset,
+				ImageColor3 = tbl1.txt2,
+			}, v1)
+		end
+		local tbl = {
+			Size = UDim2.new(1, -44, 1, 0),
+			Position = UDim2.new(0, v3 and 40 or 14, 0, 0),
+			BackgroundTransparency = 1,
+			Text = arg2,
+		}
+		tbl.Font = Enum.Font.Gotham
+		tbl.TextSize = 13
+		tbl.TextColor3 = tbl1.txt2
+		tbl.TextXAlignment = Enum.TextXAlignment.Left
+		tbl.TextTruncate = Enum.TextTruncate.AtEnd
+		local v5 = func1("TextLabel", tbl, v1)
+		local v6 = func1("ScrollingFrame", {
+			Size = UDim2.new(1, 0, 1, 0),
+			BackgroundTransparency = 1,
+			BorderSizePixel = 0,
+			ScrollBarThickness = 2,
+			ScrollBarImageColor3 = tbl1.stroke2,
+			CanvasSize = UDim2.new(0, 0, 0, 0),
+			AutomaticCanvasSize = Enum.AutomaticSize.Y,
+			Visible = false,
+		}, v34)
+		func2(v6, 6, 14, 14, 12)
+		func1("UIListLayout", {Padding = UDim.new(0, 8), SortOrder = Enum.SortOrder.LayoutOrder}, v6)
+		local tbl3 = {btn = v1, content = v6, lbl = v5, icon = v4, bar = v2}
+		tbl9[arg2] = tbl3
+		v1.MouseEnter:Connect(function()
+			if v64 ~= tbl3 then
+				func4(v1, 0.14, {BackgroundColor3 = tbl1.hover})
+			end
+		end)
+		v1.MouseLeave:Connect(function()
+			if v64 ~= tbl3 then
+				func4(v1, 0.14, {BackgroundColor3 = tbl1.item})
+			end
+		end)
+		v1.MouseButton1Click:Connect(function()
+			func19(tbl3)
+		end)
+		local tbl4 = {}
+		local num = 0
+		local function func5(arg1, arg21, arg3, arg4)
+			local v1 = arg2 .. "/" .. arg1
+			local v2 = v1
+			local num = 1
+			while tbl10[v2] do
+				num = num + 1
+				v2 = v1 .. "#" .. num
+			end
+			tbl10[v2] = {kind = arg21, get = arg3, set = arg4}
+		end
+		local function func6(arg1, arg2)
+			local tbl = {Size = UDim2.new(1, 0, 0, arg2), BackgroundColor3 = tbl1.bg2, BorderSizePixel = 0}
+			num = num + 1
+			tbl.LayoutOrder = num
+			local v1 = func1(arg1, tbl, v6)
+			func1("UICorner", {CornerRadius = UDim.new(0, 10)}, v1)
+			func1("UICorner", {CornerRadius = UDim.new(0, 10)}, v1)
+			if arg1 == "TextButton" then
+				v1.Text = ""
+				v1.AutoButtonColor = false
+			end
+			return v1
+		end
+		local function func7(arg1, arg2, arg3, arg4)
+			if arg3 and arg3 ~= "" then
+				local tbl = {
+					Size = UDim2.new(1, -arg4, 0, 18),
+					Position = UDim2.new(0, 14, 0, 8),
+					BackgroundTransparency = 1,
+					Text = tostring(arg2),
+				}
+				tbl.Font = Enum.Font.Gotham
+				tbl.TextSize = 13
+				tbl.TextColor3 = tbl1.txt
+				tbl.TextXAlignment = Enum.TextXAlignment.Left
+				tbl.TextTruncate = Enum.TextTruncate.AtEnd
+				func1("TextLabel", tbl, arg1)
+				local v1 = -arg4
+				local tbl2 = {
+					Size = UDim2.new(1, v1, 0, 14),
+					Position = UDim2.new(0, 14, 0, 28),
+					BackgroundTransparency = 1,
+					Text = tostring(arg3),
+				}
+				tbl2.Font = Enum.Font.Gotham
+				tbl2.TextSize = 11
+				tbl2.TextColor3 = tbl1.txt2
+				tbl2.TextXAlignment = Enum.TextXAlignment.Left
+				tbl2.TextTruncate = Enum.TextTruncate.AtEnd
+				func1("TextLabel", tbl2, arg1)
+			else
+				local tbl3 = {
+					Size = UDim2.new(1, -arg4, 1, 0),
+					Position = UDim2.new(0, 14, 0, 0),
+					BackgroundTransparency = 1,
+					Text = tostring(arg2),
+				}
+				tbl3.Font = Enum.Font.Gotham
+				tbl3.TextSize = 13
+				tbl3.TextColor3 = tbl1.txt
+				tbl3.TextXAlignment = Enum.TextXAlignment.Left
+				tbl3.TextTruncate = Enum.TextTruncate.AtEnd
+				func1("TextLabel", tbl3, arg1)
+			end
+		end
+		local function func8(arg1)
+			arg1.MouseEnter:Connect(function()
+				func4(arg1, 0.14, {BackgroundColor3 = tbl1.hover})
+			end)
+			arg1.MouseLeave:Connect(function()
+				func4(arg1, 0.14, {BackgroundColor3 = tbl1.bg2})
+			end)
+		end
+		tbl4.AddSection = function(_, arg2, arg3)
+			local v1 = num == 0 or arg3
+			local tbl = {Size = UDim2.new(1, 0, 0, v1 and 26 or 46), BackgroundTransparency = 1}
+			num = num + 1
+			tbl.LayoutOrder = num
+			local v2 = func1("Frame", tbl, v6)
+			if not v1 then
+				func1("Frame", {
+					Size = UDim2.new(1, 0, 0, 1),
+					Position = UDim2.new(0, 0, 0, 10),
+					BackgroundColor3 = tbl1.stroke,
+					BorderSizePixel = 0,
+				}, v2)
+			end
+			local tbl2 = {
+				Size = UDim2.new(1, 0, 0, 22),
+				Position = UDim2.new(0, 4, 0, v1 and 2 or 22),
+				BackgroundTransparency = 1,
+				Text = tostring(arg2),
+			}
+			tbl2.Font = Enum.Font.GothamBold
+			tbl2.TextSize = 14
+			tbl2.TextColor3 = tbl1.txt2
+			tbl2.TextXAlignment = Enum.TextXAlignment.Left
+			tbl2.TextTruncate = Enum.TextTruncate.AtEnd
+			func1("TextLabel", tbl2, v2)
+		end
+		tbl4.AddParagraph = function(_, arg2, arg3)
+			local tbl = {
+				Size = UDim2.new(1, 0, 0, 0),
+				AutomaticSize = Enum.AutomaticSize.Y,
+				BackgroundColor3 = tbl1.bg2,
+				BorderSizePixel = 0,
+			}
+			num = num + 1
+			tbl.LayoutOrder = num
+			local v1 = func1("Frame", tbl, v6)
+			func1("UICorner", {CornerRadius = UDim.new(0, 10)}, v1)
+			func1("UICorner", {CornerRadius = UDim.new(0, 10)}, v1)
+			func2(v1, 12, 14, 12, 14)
+			func1("UIListLayout", {Padding = UDim.new(0, 6), SortOrder = Enum.SortOrder.LayoutOrder}, v1)
+			local tbl2 = {Size = UDim2.new(1, 0, 0, 18), BackgroundTransparency = 1, Text = tostring(arg2)}
+			tbl2.Font = Enum.Font.GothamBold
+			tbl2.TextSize = 13
+			tbl2.TextColor3 = tbl1.txt
+			tbl2.TextXAlignment = Enum.TextXAlignment.Left
+			tbl2.LayoutOrder = 0
+			func1("TextLabel", tbl2, v1)
+			local tbl3 = {Size = UDim2.new(1, 0, 0, 0)}
+			tbl3.AutomaticSize = Enum.AutomaticSize.Y
+			tbl3.BackgroundTransparency = 1
+			tbl3.Text = tostring(arg3)
+			tbl3.Font = Enum.Font.Gotham
+			tbl3.TextSize = 12
+			tbl3.TextColor3 = tbl1.txt2
+			tbl3.TextXAlignment = Enum.TextXAlignment.Left
+			tbl3.TextYAlignment = Enum.TextYAlignment.Top
+			tbl3.TextWrapped = true
+			tbl3.LayoutOrder = 1
+			func1("TextLabel", tbl3, v1)
+		end
+		tbl4.AddNote = function(_, arg2)
+			local tbl = {
+				Size = UDim2.new(1, 0, 0, 0),
+				AutomaticSize = Enum.AutomaticSize.Y,
+				BackgroundTransparency = 1,
+				Text = tostring(arg2 or ""),
+			}
+			tbl.Font = Enum.Font.Gotham
+			tbl.TextSize = 11
+			tbl.TextColor3 = tbl1.txt3
+			tbl.TextXAlignment = Enum.TextXAlignment.Left
+			tbl.TextWrapped = true
+			num = num + 1
+			tbl.LayoutOrder = num
+			return (func1("TextLabel", tbl, v6))
+		end
+		tbl4.AddButton = function(_, arg2, arg3, arg4)
+			local v1 = func6("TextButton", arg4 and arg4 ~= "" and 52 or 42)
+			func7(v1, arg2, arg4, 64)
+			local v2 = func1("Frame", {
+				AnchorPoint = Vector2.new(1, 0.5),
+				Size = UDim2.new(0, 30, 0, 26),
+				Position = UDim2.new(1, -12, 0.5, 0),
+				BackgroundColor3 = tbl1.item,
+				BorderSizePixel = 0,
+			}, v1)
+			func1("UICorner", {CornerRadius = UDim.new(0, 7)}, v2)
+			func1("UICorner", {CornerRadius = UDim.new(0, 7)}, v2)
+			func1("TextLabel", {
+				Size = UDim2.new(1, 0, 1, 0),
+				BackgroundTransparency = 1,
+				Text = ">",
+				Font = Enum.Font.GothamBold,
+				TextSize = 13,
+				TextColor3 = tbl1.txt,
+			}, v2)
+			func8(v1)
+			v1.MouseButton1Click:Connect(function()
+				if arg3 then
+					pcall(arg3)
+				end
+			end)
+		end
+		tbl4.AddToggle = function(_, arg2)
+			local v1 = arg2.Default or false
+			local v2 = func6("TextButton", arg2.Description and arg2.Description ~= "" and 52 or 42)
+			func7(v2, arg2.Name, arg2.Description, 80)
+			local v3 = func1("Frame", {
+				AnchorPoint = Vector2.new(1, 0.5),
+				Size = UDim2.new(0, 42, 0, 22),
+				Position = UDim2.new(1, -14, 0.5, 0),
+				BackgroundColor3 = tbl1.bg3,
+				BorderSizePixel = 0,
+			}, v2)
+			func1("UICorner", {CornerRadius = UDim.new(0, 11)}, v3)
+			func1("UICorner", {CornerRadius = UDim.new(0, 11)}, v3)
+			local v4 = func1("Frame", {
+				Size = UDim2.new(0, 16, 0, 16),
+				Position = UDim2.new(0, 3, 0.5, -8),
+				BackgroundColor3 = Color3.fromRGB(200, 200, 200),
+				BorderSizePixel = 0,
+			}, v3)
+			func1("UICorner", {CornerRadius = UDim.new(0, 8)}, v4)
+			func1("UICorner", {CornerRadius = UDim.new(0, 8)}, v4)
+			local function func2(arg1, arg2)
+				local v1 = arg1 and tbl1.accent or tbl1.bg3
+				local v2 = arg1 and func() or Color3.fromRGB(200, 200, 200)
+				local v5 = arg1 and UDim2.new(1, -19, 0.5, -8) or UDim2.new(0, 3, 0.5, -8)
+				if arg2 then
+					v3.BackgroundColor3 = v1
+					v4.BackgroundColor3 = v2
+					v4.Position = v5
+				else
+					func4(v3, 0.18, {BackgroundColor3 = v1})
+					func4(v4, 0.18, {BackgroundColor3 = v2, Position = v5})
+				end
+			end
+			func2(v1, true)
+			tbl2[#tbl2 + 1] = function()
+				func2(v1, true)
+			end
+			local function func3(arg1)
+				v1 = arg1
+				func2(arg1)
+				if arg2.Callback then
+					pcall(arg2.Callback, arg1)
+				end
+			end
+			func8(v2)
+			v2.MouseButton1Click:Connect(function()
+				func3(not v1)
+			end)
+			if not arg2.NoSave then
+				func5(arg2.Name, "toggle", function()
+					return v1
+				end, function(arg1)
+					if type(arg1) == "boolean" and arg1 ~= v1 then
+						v1 = arg1
+						func2(arg1)
+						if arg2.Callback then
+							pcall(arg2.Callback, arg1)
+						end
+					end
+				end)
+			end
+			return {
+				Set = func3,
+				Get = function()
+					return v1
+				end,
+			}
+		end
+		tbl4.AddSlider = function(_, arg2)
+			local v1 = arg2.Default or arg2.Min or 0
+			local v2 = arg2.Description and arg2.Description ~= ""
+			local v3 = v2 and 76 or 62
+			local v4 = func6("Frame", v3)
+			local tbl = {
+				Size = UDim2.new(1, -100, 0, 18),
+				Position = UDim2.new(0, 14, 0, 8),
+				BackgroundTransparency = 1,
+				Text = tostring(arg2.Name),
+			}
+			tbl.Font = Enum.Font.Gotham
+			tbl.TextSize = 13
+			tbl.TextColor3 = tbl1.txt
+			tbl.TextXAlignment = Enum.TextXAlignment.Left
+			tbl.TextTruncate = Enum.TextTruncate.AtEnd
+			func1("TextLabel", tbl, v4)
+			if v2 then
+				local tbl3 = {
+					Size = UDim2.new(1, -100, 0, 14),
+					Position = UDim2.new(0, 14, 0, 28),
+					BackgroundTransparency = 1,
+					Text = tostring(arg2.Description),
+				}
+				tbl3.Font = Enum.Font.Gotham
+				tbl3.TextSize = 11
+				tbl3.TextColor3 = tbl1.txt2
+				tbl3.TextXAlignment = Enum.TextXAlignment.Left
+				tbl3.TextTruncate = Enum.TextTruncate.AtEnd
+				func1("TextLabel", tbl3, v4)
+			end
+			local v5 = func1("Frame", {
+				Size = UDim2.new(0, 54, 0, 22),
+				Position = UDim2.new(1, -68, 0, 8),
+				BackgroundColor3 = tbl1.item,
+				BorderSizePixel = 0,
+			}, v4)
+			func1("UICorner", {CornerRadius = UDim.new(0, 6)}, v5)
+			func1("UICorner", {CornerRadius = UDim.new(0, 6)}, v5)
+			local v7 = func1("TextLabel", {
+				Size = UDim2.new(1, 0, 1, 0),
+				BackgroundTransparency = 1,
+				Text = tostring(v1),
+				Font = Enum.Font.Gotham,
+				TextSize = 12,
+				TextColor3 = tbl1.txt,
+			}, v5)
+			local v8 = func1("Frame", {
+				Size = UDim2.new(1, -28, 0, 4),
+				Position = UDim2.new(0, 14, 0, v3 - 18),
+				BackgroundColor3 = tbl1.bg3,
+				BorderSizePixel = 0,
+			}, v4)
+			func1("UICorner", {CornerRadius = UDim.new(0, 2)}, v8)
+			func1("UICorner", {CornerRadius = UDim.new(0, 2)}, v8)
+			local v9 = func1("Frame", {
+				Size = UDim2.new(0, 0, 1, 0),
+				BackgroundColor3 = tbl1.accent:Lerp(tbl1.black, 0.41),
+				BorderSizePixel = 0,
+			}, v8)
+			func1("UICorner", {CornerRadius = UDim.new(0, 2)}, v9)
+			func1("UICorner", {CornerRadius = UDim.new(0, 2)}, v9)
+			tbl2[#tbl2 + 1] = function()
+				v9.BackgroundColor3 = tbl1.accent:Lerp(tbl1.black, 0.41)
+			end
+			local v10 = func1("Frame", {
+				Size = UDim2.new(0, 16, 0, 16),
+				AnchorPoint = Vector2.new(0.5, 0.5),
+				Position = UDim2.new(0, 0, 0.5, 0),
+				BackgroundColor3 = Color3.fromRGB(215, 215, 215),
+				BorderSizePixel = 0,
+				ZIndex = 2,
+			}, v8)
+			func1("UICorner", {CornerRadius = UDim.new(0, 8)}, v10)
+			func1("UICorner", {CornerRadius = UDim.new(0, 8)}, v10)
+			local function func()
+				local clamp = math.clamp
+				local Min = arg2.Min
+				local Max = arg2.Max
+				local v2 = clamp((v1 - Min) / (Max - arg2.Min), 0, 1)
+				v9.Size = UDim2.new(v2, 0, 1, 0)
+				v10.Position = UDim2.new(v2, 0, 0.5, 0)
+				v7.Text = tostring(math.floor(v1 * 100 + 0.5) / 100)
+			end
+			func()
+			local flag = false
+			local InputBegan = func1("TextButton", {
+				Size = UDim2.new(1, 0, 0, 30),
+				Position = UDim2.new(0, 0, 0.5, -15),
+				BackgroundTransparency = 1,
+				Text = "",
+				ZIndex = 3,
+			}, v8).InputBegan
+			local function func2(arg1)
+				local v2 = math.clamp((arg1.Position.X - v8.AbsolutePosition.X) / v8.AbsoluteSize.X, 0, 1)
+				v1 = arg2.Min + (arg2.Max - arg2.Min) * v2
+				v1 = math.floor(v1 / (arg2.Increase or 1) + 0.5) * (arg2.Increase or 1)
+				func()
+				if arg2.Callback then
+					pcall(arg2.Callback, v1)
+				end
+			end
+			InputBegan:Connect(function(arg1)
+				if arg1.UserInputType == Enum.UserInputType.MouseButton1 or arg1.UserInputType == Enum.UserInputType.Touch then
+					flag = true
+					v6.ScrollingEnabled = false
+					func2(arg1)
+				end
+			end)
+			UserInputService.InputChanged:Connect(function(arg1)
+				if flag and (arg1.UserInputType == Enum.UserInputType.MouseMovement or arg1.UserInputType == Enum.UserInputType.Touch) then
+					func2(arg1)
+				end
+			end)
+			UserInputService.InputEnded:Connect(function(arg1)
+				if flag and (arg1.UserInputType == Enum.UserInputType.MouseButton1 or arg1.UserInputType == Enum.UserInputType.Touch) then
+					flag = false
+					v6.ScrollingEnabled = true
+				end
+			end)
+			if not arg2.NoSave then
+				func5(arg2.Name, "slider", function()
+					return v1
+				end, function(arg1)
+					if type(arg1) ~= "number" then
+						return
+					end
+					v1 = math.clamp(arg1, arg2.Min, arg2.Max)
+					func()
+					if arg2.Callback then
+						pcall(arg2.Callback, v1)
+					end
+				end)
+			end
+		end
+		tbl4.AddTextBox = function(_, arg2)
+			local v1 = func6("Frame", 62)
+			local tbl = {
+				Size = UDim2.new(1, -28, 0, 18),
+				Position = UDim2.new(0, 14, 0, 7),
+				BackgroundTransparency = 1,
+				Text = tostring(arg2.Name),
+			}
+			tbl.Font = Enum.Font.Gotham
+			tbl.TextSize = 13
+			tbl.TextColor3 = tbl1.txt
+			tbl.TextXAlignment = Enum.TextXAlignment.Left
+			func1("TextLabel", tbl, v1)
+			local tbl2 = {
+				Size = UDim2.new(1, -28, 0, 26),
+				Position = UDim2.new(0, 14, 0, 29),
+				BackgroundColor3 = tbl1.item,
+				BorderSizePixel = 0,
+				Text = "",
+				PlaceholderText = arg2.PlaceholderText or "",
+				PlaceholderColor3 = tbl1.txt3,
+			}
+			tbl2.Font = Enum.Font.Gotham
+			tbl2.TextSize = 12
+			tbl2.TextColor3 = tbl1.txt
+			tbl2.TextXAlignment = Enum.TextXAlignment.Left
+			tbl2.ClearTextOnFocus = false
+			local v2 = func1("TextBox", tbl2, v1)
+			func1("UICorner", {CornerRadius = UDim.new(0, 6)}, v2)
+			func1("UICorner", {CornerRadius = UDim.new(0, 6)}, v2)
+			func2(v2, 0, 8, 0, 10)
+			local v3 = func3(v2, "stroke", 1)
+			v2.Focused:Connect(function()
+				v3.Color = tbl1.stroke2
+			end)
+			v2.FocusLost:Connect(function()
+				v3.Color = tbl1.stroke
+				if arg2.Callback and v2.Text ~= "" then
+					pcall(arg2.Callback, v2.Text)
+				end
+			end)
+			if not arg2.NoSave then
+				func5(arg2.Name, "textbox", function()
+					return v2.Text
+				end, function(arg1)
+					v2.Text = tostring(arg1 or "")
+					if arg2.Callback and v2.Text ~= "" then
+						pcall(arg2.Callback, v2.Text)
+					end
+				end)
+			end
+		end
+		tbl4.AddList = function(_, arg2)
+			local v5
+			local v1 = arg2.Height or 140
+			local v2 = func6("Frame", v1 + 40)
+			local tbl = {
+				Size = UDim2.new(1, -28, 0, 20),
+				Position = UDim2.new(0, 14, 0, 7),
+				BackgroundTransparency = 1,
+				Text = tostring(arg2.Name),
+			}
+			tbl.Font = Enum.Font.Gotham
+			tbl.TextSize = 13
+			tbl.TextColor3 = tbl1.txt
+			tbl.TextXAlignment = Enum.TextXAlignment.Left
+			func1("TextLabel", tbl, v2)
+			local v3 = func1("ScrollingFrame", {
+				Size = UDim2.new(1, -24, 0, v1),
+				Position = UDim2.new(0, 12, 0, 30),
+				BackgroundColor3 = tbl1.item,
+				BorderSizePixel = 0,
+				ScrollBarThickness = 2,
+				ScrollBarImageColor3 = tbl1.stroke2,
+				CanvasSize = UDim2.new(0, 0, 0, 0),
+				AutomaticCanvasSize = Enum.AutomaticSize.Y,
+			}, v2)
+			func1("UICorner", {CornerRadius = UDim.new(0, 8)}, v3)
+			func1("UICorner", {CornerRadius = UDim.new(0, 8)}, v3)
+			func2(v3, 6, 6, 6, 6)
+			func1("UIListLayout", {Padding = UDim.new(0, 4), SortOrder = Enum.SortOrder.LayoutOrder}, v3)
+			local v4 = func1("TextLabel", {
+				Size = UDim2.new(1, 0, 0, 40),
+				BackgroundTransparency = 1,
+				Text = arg2.EmptyText or "Nothing here yet",
+				Font = Enum.Font.Gotham,
+				TextSize = 12,
+				TextColor3 = tbl1.txt3,
+				LayoutOrder = 0,
+			}, v3)
+			local tbl2 = {}
+			local tbl3 = {}
+			local function func()
+				for k, v1 in pairs(tbl2) do
+					v1.btn.BackgroundColor3 = v5 == k and tbl1.bg3 or tbl1.item
+				end
+			end
+			tbl3.SetItems = function(arg1)
+				for _, v1 in pairs(tbl2) do
+					v1.btn:Destroy()
+				end
+				tbl2 = {}
+				if v5 then
+					local flag = false
+					for _, v2 in ipairs(arg1) do
+						if v2 == v5 then
+							flag = true
+						end
+					end
+					if not flag then
+						v5 = nil
+					end
+				end
+				v4.Visible = #arg1 == 0
+				for i, v6 in ipairs(arg1) do
+					local tbl = {
+						Size = UDim2.new(1, 0, 0, 28),
+						BackgroundColor3 = v5 == v6 and tbl1.bg3 or tbl1.item,
+						BorderSizePixel = 0,
+						Text = v6,
+						Font = Enum.Font.Gotham,
+						TextSize = 12,
+						TextColor3 = tbl1.txt,
+						AutoButtonColor = false,
+						LayoutOrder = i,
+					}
+					local textButton = Instance.new("TextButton")
+					for k, v7 in pairs(tbl or {}) do
+						if type(v7) == "function" then
+							textButton[k] = v7()
+						else
+							textButton[k] = v7
+						end
+					end
+					if v3 then
+						textButton.Parent = v3
+					end
+					func1("UICorner", {CornerRadius = UDim.new(0, 6)}, textButton)
+					func1("UICorner", {CornerRadius = UDim.new(0, 6)}, textButton)
+					tbl2[v6] = {btn = textButton}
+					textButton.MouseButton1Click:Connect(function()
+						v5 = v6
+						func()
+						if arg2.OnSelect then
+							pcall(arg2.OnSelect, v6)
+						end
+					end)
+				end
+			end
+			tbl3.Get = function()
+				return v5
+			end
+			tbl3.Select = function(arg1)
+				v5 = arg1
+				func()
+			end
+			return tbl3
+		end
+		tbl4.AddStepper = function(_, arg2)
+			local v1 = arg2.Default or arg2.Min
+			local v2 = func6("Frame", arg2.Description and arg2.Description ~= "" and 52 or 46)
+			func7(v2, arg2.Name, arg2.Description, 150)
+			local function func(arg1, arg2)
+				local v1 = func1("TextButton", {
+					AnchorPoint = Vector2.new(1, 0.5),
+					Size = UDim2.new(0, 30, 0, 26),
+					Position = UDim2.new(1, arg2, 0.5, 0),
+					BackgroundColor3 = tbl1.item,
+					BorderSizePixel = 0,
+					Text = arg1,
+					Font = Enum.Font.GothamBold,
+					TextSize = 16,
+					TextColor3 = tbl1.txt,
+					AutoButtonColor = false,
+				}, v2)
+				func1("UICorner", {CornerRadius = UDim.new(0, 7)}, v1)
+				func1("UICorner", {CornerRadius = UDim.new(0, 7)}, v1)
+				v1.MouseEnter:Connect(function()
+					func4(v1, 0.12, {BackgroundColor3 = tbl1.bg3})
+				end)
+				v1.MouseLeave:Connect(function()
+					func4(v1, 0.12, {BackgroundColor3 = tbl1.item})
+				end)
+				return v1
+			end
+			local v3 = func("+", -12)
+			local v4 = func("-", -106)
+			local v5 = func1("TextLabel", {
+				AnchorPoint = Vector2.new(1, 0.5),
+				Size = UDim2.new(0, 56, 0, 26),
+				Position = UDim2.new(1, -46, 0.5, 0),
+				BackgroundTransparency = 1,
+				Text = "",
+				Font = Enum.Font.Gotham,
+				TextSize = 12,
+				TextColor3 = tbl1.txt,
+			}, v2)
+			local function func2()
+				v5.Text = arg2.Format and arg2.Format(v1) or tostring(v1)
+			end
+			func2()
+			local function func3(arg1, arg21)
+				local v2 = math.clamp(math.floor(arg1 * 100 + 0.5) / 100, arg2.Min, arg2.Max)
+				if v2 == v1 then
+					return
+				end
+				v1 = v2
+				func2()
+				if arg21 ~= false and arg2.Callback then
+					pcall(arg2.Callback, v1)
+				end
+			end
+			local function func8(arg1, arg21)
+				local num = 0
+				local function func()
+					num = num + 1
+				end
+				arg1.MouseButton1Down:Connect(function()
+					num = num + 1
+					local v2 = num
+					func3(v1 + arg21 * (arg2.Step or 1))
+					task.delay(0.4, function()
+						while num == v2 do
+							func3(v1 + arg21 * (arg2.Step or 1))
+							task.wait(0.07)
+						end
+					end)
+				end)
+				arg1.MouseButton1Up:Connect(func)
+				arg1.MouseLeave:Connect(func)
+			end
+			func8(v3, 1)
+			func8(v4, -1)
+			if not arg2.NoSave then
+				func5(arg2.Name, "stepper", function()
+					return v1
+				end, function(arg1)
+					if type(arg1) == "number" then
+						func3(arg1)
+					end
+				end)
+			end
+			return {
+				Get = function()
+					return v1
+				end,
+				Set = function(arg1)
+					func3(arg1)
+				end,
+			}
+		end
+		tbl4.AddThemeGrid = function(_) end
+		tbl4.AddKeybind = function(_, arg2)
+			local function func(arg1)
+				if typeof(arg1) == "EnumItem" then
+					return arg1
+				end
+				if type(arg1) == "string" then
+					local v1, v2 = pcall(function()
+						return Enum.KeyCode[arg1]
+					end)
+					if v1 then
+						return v2
+					end
+				end
+				return nil
+			end
+			local v1 = func(arg2.Default)
+			local v2 = func6("Frame", 42)
+			func7(v2, arg2.Name, nil, 120)
+			local v3 = func1("TextButton", {
+				AnchorPoint = Vector2.new(1, 0.5),
+				Size = UDim2.new(0, 90, 0, 26),
+				Position = UDim2.new(1, -12, 0.5, 0),
+				BackgroundColor3 = tbl1.item,
+				BorderSizePixel = 0,
+				Text = v1 and v1.Name or "None",
+				Font = Enum.Font.Gotham,
+				TextSize = 12,
+				TextColor3 = tbl1.txt,
+				AutoButtonColor = false,
+			}, v2)
+			func1("UICorner", {CornerRadius = UDim.new(0, 7)}, v3)
+			func1("UICorner", {CornerRadius = UDim.new(0, 7)}, v3)
+			local flag = false
+			local function func2(arg1, arg21)
+				v1 = arg1
+				v3.Text = v1 and v1.Name or "None"
+				if arg21 and arg2.ChangedCallback then
+					pcall(arg2.ChangedCallback, v1)
+				end
+			end
+			v3.MouseButton1Click:Connect(function()
+				if flag then
+					return
+				end
+				flag = true
+				tbl24.Listening = true
+				v3.Text = "..."
+				local connection
+				connection = UserInputService.InputBegan:Connect(function(arg1)
+					if arg1.UserInputType == Enum.UserInputType.Keyboard then
+						connection:Disconnect()
+						flag = false
+						task.defer(function()
+							tbl24.Listening = false
+						end)
+						if arg1.KeyCode == Enum.KeyCode.Escape then
+							v3.Text = v1 and v1.Name or "None"
+						else
+							func2(arg1.KeyCode, true)
+						end
+					end
+				end)
+			end)
+			func5(arg2.Name, "keybind", function()
+				return v1 and v1.Name or ""
+			end, function(arg1)
+				local v1 = func(arg1)
+				if v1 then
+					func2(v1, true)
+				end
+			end)
+			return {
+				Get = function()
+					return v1
+				end,
+				Set = function(arg1)
+					func2(func(arg1), true)
+				end,
+			}
+		end
+		tbl4.AddColorpicker = function(_, arg2)
+			local v1 = arg2.Default or Color3.fromRGB(255, 255, 255)
+			local tbl = {math.floor(v1.R * 255 + 0.5), math.floor(v1.G * 255 + 0.5), math.floor(v1.B * 255 + 0.5)}
+			local flag = false
+			local v2 = func6("Frame", 42)
+			v2.ClipsDescendants = true
+			func7(v2, arg2.Name, nil, 90)
+			local v3 = func1("Frame", {
+				Size = UDim2.new(0, 40, 0, 22),
+				Position = UDim2.new(1, -54, 0, 10),
+				BackgroundColor3 = v1,
+				BorderSizePixel = 0,
+			}, v2)
+			func1("UICorner", {CornerRadius = UDim.new(0, 6)}, v3)
+			func1("UICorner", {CornerRadius = UDim.new(0, 6)}, v3)
+			func3(v3, "stroke2", 1)
+			local v4 = func1("TextButton", {Size = UDim2.new(1, 0, 0, 42), BackgroundTransparency = 1, Text = "", ZIndex = 3}, v2)
+			local tbl2 = {"R", "G", "B"}
+			local tbl3 = {}
+			local num = 1
+			local function func(arg1)
+				v1 = Color3.fromRGB(tbl[1], tbl[2], tbl[3])
+				v3.BackgroundColor3 = v1
+				if arg1 and arg2.Callback then
+					pcall(arg2.Callback, v1)
+				end
+			end
+			local num1 = 1
+			repeat
+				local v5 = num1
+				local v7 = 46 + (v5 - 1) * 30
+				local tbl4 = {
+					Size = UDim2.new(0, 14, 0, 24),
+					Position = UDim2.new(0, 14, 0, v7),
+					BackgroundTransparency = 1,
+					Text = tbl2[v5],
+					Font = Enum.Font.GothamBold,
+					TextSize = 11,
+					TextColor3 = tbl1.txt2,
+				}
+				local textLabel = Instance.new("TextLabel")
+				for k, v8 in pairs(tbl4 or {}) do
+					if type(v8) == "function" then
+						textLabel[k] = v8()
+					else
+						textLabel[k] = v8
+					end
+				end
+				if v2 then
+					textLabel.Parent = v2
+				end
+				local tbl5 = {
+					Size = UDim2.new(1, -110, 0, 4),
+					Position = UDim2.new(0, 38, 0, v7 + 10),
+					BackgroundColor3 = tbl1.bg3,
+					BorderSizePixel = 0,
+				}
+				local frame = Instance.new("Frame")
+				for k1, v9 in pairs(tbl5 or {}) do
+					if type(v9) == "function" then
+						frame[k1] = v9()
+					else
+						frame[k1] = v9
+					end
+				end
+				if v2 then
+					frame.Parent = v2
+				end
+				func1("UICorner", {CornerRadius = UDim.new(0, 2)}, frame)
+				func1("UICorner", {CornerRadius = UDim.new(0, 2)}, frame)
+				local tbl6 = {
+					Size = UDim2.new(tbl[v5] / 255, 0, 1, 0),
+					BackgroundColor3 = Color3.fromRGB(150, 150, 150),
+					BorderSizePixel = 0,
+				}
+				local frame1 = Instance.new("Frame")
+				for k2, v10 in pairs(tbl6 or {}) do
+					if type(v10) == "function" then
+						frame1[k2] = v10()
+					else
+						frame1[k2] = v10
+					end
+				end
+				if frame then
+					frame1.Parent = frame
+				end
+				func1("UICorner", {CornerRadius = UDim.new(0, 2)}, frame1)
+				func1("UICorner", {CornerRadius = UDim.new(0, 2)}, frame1)
+				local tbl7 = {
+					Size = UDim2.new(0, 14, 0, 14),
+					AnchorPoint = Vector2.new(0.5, 0.5),
+					Position = UDim2.new(tbl[v5] / 255, 0, 0.5, 0),
+					BackgroundColor3 = Color3.fromRGB(215, 215, 215),
+					BorderSizePixel = 0,
+					ZIndex = 2,
+				}
+				local frame2 = Instance.new("Frame")
+				for k3, v11 in pairs(tbl7 or {}) do
+					if type(v11) == "function" then
+						frame2[k3] = v11()
+					else
+						frame2[k3] = v11
+					end
+				end
+				if frame then
+					frame2.Parent = frame
+				end
+				func1("UICorner", {CornerRadius = UDim.new(0, 7)}, frame2)
+				func1("UICorner", {CornerRadius = UDim.new(0, 7)}, frame2)
+				local tbl8 = {
+					Size = UDim2.new(0, 40, 0, 24),
+					Position = UDim2.new(1, -54, 0, v7),
+					BackgroundTransparency = 1,
+					Text = tostring(tbl[v5]),
+					Font = Enum.Font.Gotham,
+					TextSize = 11,
+					TextColor3 = tbl1.txt,
+				}
+				local textLabel1 = Instance.new("TextLabel")
+				for k4, v12 in pairs(tbl8 or {}) do
+					if type(v12) == "function" then
+						textLabel1[k4] = v12()
+					else
+						textLabel1[k4] = v12
+					end
+				end
+				if v2 then
+					textLabel1.Parent = v2
+				end
+				local function func2()
+					local v1 = tbl[v5] / 255
+					frame1.Size = UDim2.new(v1, 0, 1, 0)
+					frame2.Position = UDim2.new(v1, 0, 0.5, 0)
+					textLabel1.Text = tostring(tbl[v5])
+				end
+				tbl3[v5] = func2
+				local tbl9 = {
+					Size = UDim2.new(1, 0, 0, 24),
+					Position = UDim2.new(0, 0, 0.5, -12),
+					BackgroundTransparency = 1,
+					Text = "",
+					ZIndex = 3,
+				}
+				local textButton = Instance.new("TextButton")
+				for k5, v13 in pairs(tbl9 or {}) do
+					if type(v13) == "function" then
+						textButton[k5] = v13()
+					else
+						textButton[k5] = v13
+					end
+				end
+				if frame then
+					textButton.Parent = frame
+				end
+				local flag1 = false
+				local function func8(arg1)
+					local v1 = math.clamp((arg1.Position.X - frame.AbsolutePosition.X) / frame.AbsoluteSize.X, 0, 1)
+					tbl[v5] = math.floor(v1 * 255 + 0.5)
+					func2()
+					func(true)
+				end
+				textButton.InputBegan:Connect(function(arg1)
+					if arg1.UserInputType == Enum.UserInputType.MouseButton1 or arg1.UserInputType == Enum.UserInputType.Touch then
+						flag1 = true
+						v6.ScrollingEnabled = false
+						func8(arg1)
+					end
+				end)
+				UserInputService.InputChanged:Connect(function(arg1)
+					if flag1 and (arg1.UserInputType == Enum.UserInputType.MouseMovement or arg1.UserInputType == Enum.UserInputType.Touch) then
+						func8(arg1)
+					end
+				end)
+				UserInputService.InputEnded:Connect(function(arg1)
+					if flag1 and (arg1.UserInputType == Enum.UserInputType.MouseButton1 or arg1.UserInputType == Enum.UserInputType.Touch) then
+						flag1 = false
+						v6.ScrollingEnabled = true
+					end
+				end)
+				num = num + 1
+				num1 = num
+			until num > 3
+			v4.MouseButton1Click:Connect(function()
+				flag = not flag
+				func4(v2, 0.2, {Size = UDim2.new(1, 0, 0, flag and 142 or 42)})
+			end)
+			func5(arg2.Name, "color", function()
+				local tbl1 = {}
+				tbl1[3], tbl1[2], tbl1[1] = tbl[3], tbl[2], tbl[1]
+				return tbl1
+			end, function(arg1)
+				if type(arg1) ~= "table" then
+					return
+				end
+				for i = 1, 3 do
+					local num = tonumber(arg1[i])
+					if num then
+						tbl[i] = math.clamp(math.floor(num + 0.5), 0, 255)
+						tbl3[i]()
+					end
+				end
+				func(true)
+			end)
+			return {
+				Get = function()
+					return v1
+				end,
+			}
+		end
+		tbl4.Content = v6
+		tbl4._select = function()
+			func19(tbl3)
+		end
+		if num6 == 1 then
+			func19(tbl3)
+		end
+		return tbl4
+	end
+	UserInputService.InputBegan:Connect(function(arg1, arg2)
+		if arg2 then
+			return
+		end
+		if arg1.KeyCode == Enum.KeyCode.End or arg1.KeyCode == Enum.KeyCode.RightShift then
+			if flag2 then
+				func16()
+			elseif flag1 then
+				func15()
+			else
+				func13()
+			end
+		end
+	end)
+	tbl.BuildSettings = function()
+		local HttpService = game:GetService("HttpService")
+		local v1 = tbl24:MakeTab("Settings", nil, 1000)
+		local v2 = writefile and readfile and isfile and isfolder and makefolder and listfiles and delfile and true or false
+		local tbl = {}
+		local v8
+		if v2 then
+			pcall(function()
+				if not isfolder("SpectreTouchline") then
+					makefolder("SpectreTouchline")
+				end
+				if not isfolder("SpectreTouchline/configs") then
+					makefolder("SpectreTouchline/configs")
+				end
+			end)
+		end
+		local function func(arg1)
+			local v1 = tostring(arg1 or ""):gsub("[^%w%-_ ]", ""):gsub("^%s+", ""):gsub("%s+$", "")
+			return string.sub(v1, 1, 32)
+		end
+		local function func1()
+			local tbl = {}
+			for k, v1 in pairs(tbl24.Elements) do
+				local v2, v3 = pcall(v1.get)
+				if v2 then
+					tbl[k] = v3
+				end
+			end
+			return {version = 1, theme = tbl24.GetTheme(), values = tbl}
+		end
+		local function func2()
+			local tbl1 = {}
+			if v2 then
+				local v1, v3 = pcall(listfiles, "SpectreTouchline/configs")
+				if v1 and v3 then
+					for _, v4 in ipairs(v3) do
+						local v5 = tostring(v4):match("([^/\\]+)%.json$")
+						if v5 then
+							tbl1[#tbl1 + 1] = v5
+						end
+					end
+				end
+			else
+				for k in pairs(tbl) do
+					tbl1[#tbl1 + 1] = k
+				end
+			end
+			table.sort(tbl1, function(arg1, arg2)
+				return arg1:lower() < arg2:lower()
+			end)
+			return tbl1
+		end
+		local function func3(arg1)
+			local v8
+			if v2 then
+				local v1 = "/" .. arg1 .. ".json"
+				local v3 = "SpectreTouchline/configs" .. v1
+				local v4, v5 = pcall(isfile, v3)
+				if not (v4 and v5) then
+					return nil
+				end
+				local v6, v7 = pcall(readfile, v3)
+				if not v6 then
+					return nil
+				end
+				v8 = v7
+			else
+				v8 = tbl[arg1]
+			end
+			if not v8 then
+				return nil
+			end
+			local v9, v10 = pcall(function()
+				return HttpService:JSONDecode(v8)
+			end)
+			if v9 and type(v10) == "table" then
+				return v10
+			end
+			return nil
+		end
+		local function func4(arg1)
+			local v1 = func(arg1)
+			if v1 == "" then
+				return false, "Type a config name first"
+			end
+			local v3, v4 = pcall(function()
+				return HttpService:JSONEncode((func1()))
+			end)
+			if not v3 then
+				return false, "Could not encode config"
+			end
+			if v2 then
+				local v5, v6 = pcall(writefile, "SpectreTouchline/configs" .. "/" .. v1 .. ".json", v4)
+				if not v5 then
+					return false, tostring(v6)
+				end
+			else
+				tbl[v1] = v4
+			end
+			return true, v1
+		end
+		local function func6(arg1)
+			local v1 = func3(arg1)
+			if not v1 then
+				return false, "Config not found or corrupted"
+			end
+			if v1.theme then
+				tbl24.ApplyTheme(v1.theme)
+			end
+			local num = 0
+			for k, v2 in pairs(v1.values or {}) do
+				local v3 = tbl24.Elements[k]
+				if v3 then
+					if pcall(v3.set, v2) then
+						num = num + 1
+					end
+				end
+			end
+			return true, num
+		end
+		local function func7(arg1)
+			if v2 then
+				local v1, v3 = pcall(delfile, "SpectreTouchline/configs" .. "/" .. arg1 .. ".json")
+				if not v1 then
+					return false, tostring(v3)
+				end
+			else
+				tbl[arg1] = nil
+			end
+			return true
+		end
+		local function func8()
+			if v2 then
+				local v1, v3 = pcall(isfile, "SpectreTouchline/autoload.txt")
+				if v1 and v3 then
+					local v4, v5 = pcall(readfile, "SpectreTouchline/autoload.txt")
+					if v4 then
+						local v6 = func(v5)
+						if v6 ~= "" then
+							return v6
+						end
+					end
+				end
+				return nil
+			end
+			return v8
+		end
+		local function func9(arg1)
+			if v2 then
+				if arg1 then
+					pcall(writefile, "SpectreTouchline/autoload.txt", arg1)
+				else
+					pcall(delfile, "SpectreTouchline/autoload.txt")
+				end
+			else
+				v8 = arg1
+			end
+		end
+		v1:AddSection("Configs")
+		if not v2 then
+			v1:AddParagraph("Heads up", "Your executor has no file support, so configs are kept in memory only and vanish when you leave the game.")
+		end
+		local str = ""
+		v1:AddTextBox({
+			Name = "Config Name",
+			PlaceholderText = "type a name, then press Save Config",
+			NoSave = true,
+			Callback = function(arg1)
+				str = arg1
+			end,
+		})
+		local v3 = v1:AddList({
+			Name = "Saved Configs",
+			Height = 150,
+			EmptyText = "No configs saved yet",
+			OnSelect = function() end,
+		})
+		v3.SetItems((func2()))
+		v1:AddButton("Save Config", function()
+			local v1 = func(str)
+			if v1 == "" then
+				v1 = v3.Get() or ""
+			end
+			local v2, v4 = func4(v1)
+			if v2 then
+				func5("Config", "Saved '" .. v4 .. "'", 2)
+				v3.SetItems((func2()))
+				v3.Select(v4)
+			else
+				func5("Config", tostring(v4), 3)
+			end
+		end)
+		v1:AddButton("Load Selected", function()
+			local v1 = v3.Get()
+			if not v1 then
+				func5("Config", "Select a config first", 2)
+				return
+			end
+			local v2, v4 = func6(v1)
+			if v2 then
+				func5("Config", "Loaded '" .. v1 .. "' (" .. v4 .. " settings)", 3)
+			else
+				func5("Config", tostring(v4), 3)
+			end
+		end)
+		v1:AddButton("Delete Selected", function()
+			local v1 = v3.Get()
+			if not v1 then
+				func5("Config", "Select a config first", 2)
+				return
+			end
+			local v2, v4 = func7(v1)
+			if v2 then
+				func5("Config", "Deleted '" .. v1 .. "'", 2)
+				v3.Select(nil)
+				v3.SetItems((func2()))
+			else
+				func5("Config", tostring(v4), 3)
+			end
+		end)
+		v1:AddButton("Refresh List", function()
+			v3.SetItems((func2()))
+			func5("Config", "List refreshed", 1.5)
+		end)
+		v1:AddSection("Auto Load")
+		v1:AddButton("Set Selected As Auto-Load", function()
+			local v1 = v3.Get()
+			if not v1 then
+				func5("Auto Load", "Select a config first", 2)
+				return
+			end
+			func9(v1)
+			func5("Auto Load", "'" .. v1 .. "' loads on start", 2)
+		end)
+		v1:AddButton("Clear Auto-Load", function()
+			func9(nil)
+			func5("Auto Load", "Cleared", 2)
+		end)
+		local tbl1 = {}
+		local flag = true
+		if v2 then
+			pcall(function()
+				if isfile("SpectreTouchline/appearance.json") then
+					local v1 = HttpService:JSONDecode(readfile("SpectreTouchline/appearance.json"))
+					if type(v1) == "table" then
+						tbl1 = v1
+					end
+				end
+			end)
+		end
+		local function func10()
+			if flag or not v2 then
+				return
+			end
+			pcall(function()
+				writefile("SpectreTouchline/appearance.json", HttpService:JSONEncode(tbl1))
+			end)
+		end
+		v1:AddSection("Themes")
+		local v5 = v1:AddList({
+			Name = "Theme",
+			Height = 130,
+			OnSelect = function(arg1)
+				if tbl24.ApplyTheme(arg1) then
+					tbl1.theme = arg1
+					func10()
+					func5("Theme", arg1 .. " applied", 2)
+				end
+			end,
+		})
+		v5.SetItems(tbl24.Themes)
+		v5.Select(tbl24.GetTheme())
+		v1:AddSection("Interface")
+		local v6 = v1:AddToggle({
+			Name = "Hide UI",
+			Default = false,
+			NoSave = true,
+			Callback = function(arg1)
+				if arg1 then
+					func13()
+				else
+					func15()
+				end
+			end,
+		})
+		task.spawn(function()
+			while v4.Parent do
+				if flag1 ~= v6.Get() then
+					v6.Set(flag1)
+				end
+				task.wait(0.2)
+			end
+		end)
+		local tbl2 = {}
+		local function func11(arg1, arg2, arg3)
+			arg2.NoSave = true
+			arg2.Callback = function(arg2)
+				tbl1[arg1] = arg2
+				arg3(arg2)
+				func10()
+			end
+			local v2 = v1:AddStepper(arg2)
+			tbl2[arg1] = {
+				default = arg2.Default,
+				set = function(arg1)
+					v2.Set(arg1)
+				end,
+			}
+		end
+		local function func12(arg1, arg2, arg3)
+			arg2.NoSave = true
+			arg2.Callback = function(arg2)
+				tbl1[arg1] = arg2
+				arg3(arg2)
+				func10()
+			end
+			local v2 = v1:AddToggle(arg2)
+			tbl2[arg1] = {
+				default = arg2.Default,
+				set = function(arg1)
+					v2.Set(arg1)
+				end,
+			}
+		end
+		local function func14(arg1, arg2, arg3, arg4, arg5)
+			arg2.OnSelect = function(arg2)
+				tbl1[arg1] = arg2
+				arg5(arg2)
+				func10()
+			end
+			local v2 = v1:AddList(arg2)
+			v2.SetItems(arg3)
+			v2.Select(arg4)
+			tbl2[arg1] = {
+				default = arg4,
+				set = function(arg2)
+					v2.Select(arg2)
+					tbl1[arg1] = arg2
+					arg5(arg2)
+				end,
+			}
+		end
+		local function func16(arg1)
+			return math.floor(arg1 + 0.5) .. "px"
+		end
+		local function func17(arg1)
+			return math.floor(arg1 * 100 + 0.5) .. "%"
+		end
+		v1:AddSection("Size & Layout")
+		func11("uiSize", {
+			Name = "UI Size",
+			Description = "+ bigger   /   - smaller",
+			Min = 0.5,
+			Max = 1.5,
+			Step = 0.05,
+			Default = 1,
+			Format = func17,
+		}, function(arg1)
+			tbl24.SetUIScale(arg1)
+		end)
+		func11("textSize", {Name = "Text Size", Min = 0.8, Max = 1.3, Step = 0.05, Default = 1, Format = func17}, function(arg1)
+			tbl24.SetTextScale(arg1)
+		end)
+		func11("winW", {Name = "Window Width", Min = 520, Max = 820, Step = 20, Default = 660, Format = func16}, function(arg1)
+			tbl24.SetWinSize(arg1, nil)
+		end)
+		func11("winH", {Name = "Window Height", Min = 360, Max = 580, Step = 20, Default = 440, Format = func16}, function(arg1)
+			tbl24.SetWinSize(nil, arg1)
+		end)
+		func11("sidebar", {Name = "Sidebar Width", Min = 140, Max = 240, Step = 10, Default = 176, Format = func16}, function(arg1)
+			tbl24.SetSidebar(arg1)
+		end)
+		func11("spacing", {Name = "Row Spacing", Min = 2, Max = 16, Step = 2, Default = 8, Format = func16}, function(arg1)
+			tbl24.SetSpacing(arg1)
+		end)
+		v1:AddSection("Style")
+		func11("opacity", {Name = "Window Opacity", Min = 0.4, Max = 1, Step = 0.05, Default = 1, Format = func17}, function(arg1)
+			tbl24.SetOpacity(arg1)
+		end)
+		func11("round", {Name = "Corner Roundness", Min = 0, Max = 1.5, Step = 0.1, Default = 1, Format = func17}, function(arg1)
+			tbl24.SetRound(arg1)
+		end)
+		func12("borders", {Name = "Borders", Description = "Thin outlines around panels", Default = true}, function(arg1)
+			tbl24.SetBorders(arg1)
+		end)
+		func14("accent", {Name = "Accent Color", Height = 120}, tbl24.Accents, "White", function(arg1)
+			tbl24.SetAccent(arg1)
+		end)
+		func14("font", {Name = "UI Font", Height = 120}, tbl24.Fonts, "Gotham", function(arg1)
+			tbl24.SetFont(arg1)
+		end)
+		v1:AddSection("Motion")
+		func12("anim", {Name = "Animations", Description = "Turn off for instant switching with no fades", Default = true}, function(arg1)
+			tbl24.SetAnim(arg1)
+		end)
+		func11("animSpeed", {
+			Name = "Animation Speed",
+			Min = 0.5,
+			Max = 2,
+			Step = 0.25,
+			Default = 1,
+			Format = function(arg1)
+				return math.floor(arg1 * 100 + 0.5) / 100 .. "x"
+			end,
+		}, function(arg1)
+			tbl24.SetAnimSpeed(arg1)
+		end)
+		v1:AddSection("Visibility")
+		v1:AddToggle({
+			Name = "Lock UI",
+			Description = "Stops the window and floating button from being dragged",
+			Default = false,
+			NoSave = true,
+			Callback = function(arg1)
+				tbl24.SetLocked(arg1)
+				func5("Lock UI", arg1 and "Locked in place" or "Unlocked", 2)
+			end,
+		})
+		func12("profile", {
+			Name = "Profile Card",
+			Description = "Your avatar card at the bottom of the sidebar",
+			Default = true,
+		}, function(arg1)
+			tbl24.SetProfile(arg1)
+		end)
+		func12("discordBtn", {Name = "Discord Button", Description = "The icon next to the title", Default = true}, function(arg1)
+			tbl24.SetDiscordBtn(arg1)
+		end)
+		v1:AddSection("Notifications")
+		func14("notifPos", {Name = "Notification Position", Height = 120}, tbl24.NotifPositions, "Top Right", function(arg1)
+			tbl24.SetNotifPos(arg1)
+		end)
+		v1:AddButton("Test Notification", function()
+			func5("Spectre", "This is how notifications look", 3)
+		end)
+		v1:AddSection("Reset")
+		v1:AddButton("Reset Appearance", function()
+			for _, v1 in pairs(tbl2) do
+				pcall(v1.set, v1.default)
+			end
+			tbl24.ApplyTheme("Black")
+			v5.Select("Black")
+			tbl1 = {}
+			func10()
+			func5("Appearance", "Reset to defaults", 2)
+		end, "Size, font, colors, theme and layout")
+		for k, v7 in pairs(tbl2) do
+			if tbl1[k] ~= nil then
+				pcall(v7.set, tbl1[k])
+			end
+		end
+		if tbl1.theme and tbl24.ApplyTheme(tbl1.theme) then
+			v5.Select(tbl1.theme)
+		end
+		flag = false
+		task.delay(2.5, function()
+			local v1 = func8()
+			if v1 and func3(v1) then
+				if func6(v1) then
+					func5("Auto Load", "Loaded '" .. v1 .. "'", 2.5)
+				end
+			end
+		end)
+		func5("Ready", "All modules loaded", 3)
+	end
+
+-- ============================================================
+-- SPECTRE FEATURE -> PUNISH UI COMPATIBILITY BRIDGE
+-- Keeps the original Punish UI as the only visible interface.
+-- ============================================================
+if v4 then
+    pcall(function() v4:Destroy() end)
+end
+
+func5 = function(title, content, duration)
+    pcall(function()
+        Library:Notify({
+            Title = tostring(title or "Spectre"),
+            Content = tostring(content or ""),
+            Duration = tonumber(duration) or 3
+        })
+    end)
+end
+
+local cachedMainGui = nil
+local function findPunishGui()
+    if cachedMainGui and cachedMainGui.Parent then
+        return cachedMainGui
+    end
+    local roots = {}
+    pcall(function()
+        if gethui then
+            local h = gethui()
+            if h then table.insert(roots, h) end
+        end
+    end)
+    pcall(function() table.insert(roots, game:GetService("CoreGui")) end)
+    local playerGui = LocalPlayer:FindFirstChildOfClass("PlayerGui")
+    if playerGui then table.insert(roots, playerGui) end
+    -- 1) exact name
+    for _, root in ipairs(roots) do
+        local gui = root:FindFirstChild("punishgoatUI")
+        if gui and gui:IsA("ScreenGui") then
+            cachedMainGui = gui
+            return gui
+        end
+    end
+    -- 2) any punish UI fallback
+    for _, root in ipairs(roots) do
+        for _, child in ipairs(root:GetChildren()) do
+            if child:IsA("ScreenGui") and child.Name:lower():find("punish") then
+                cachedMainGui = child
+                return child
+            end
+        end
+    end
+    return nil
+end
+
+local function setSpectreMainVisible(isVisible)
+    local mainGui = findPunishGui()
+    if mainGui then
+        mainGui.Enabled = isVisible == true
+    end
+end
+
+func13 = function() setSpectreMainVisible(false) end
+func15 = function() setSpectreMainVisible(true) end
+func16 = function() setSpectreMainVisible(true) end
+
+-- Track feature controls so named configs can save and restore feature state.
+tbl24.Elements = tbl24.Elements or {}
+local function registerSpectreControl(tabName, controlName, initialValue, setter)
+    local key = tostring(tabName or "Features") .. "/" .. tostring(controlName or "Control")
+    local safeKey, suffix = key, 2
+    while tbl24.Elements[safeKey] do
+        safeKey = key .. " #" .. suffix
+        suffix = suffix + 1
+    end
+    local value = initialValue
+    tbl24.Elements[safeKey] = {
+        get = function() return value end,
+        set = function(newValue)
+            value = newValue
+            if setter then setter(newValue) end
+        end
+    }
+    return function(newValue)
+        value = newValue
+        if setter then setter(newValue) end
+    end
+end
+
+tbl24.MakeTab = function(_, tabName, iconName, order)
+    local tabLabel = tostring(tabName or "Features")
+    local baseTab = Window:CreateTab(tabLabel)
+    local adapter = {}
+
+    function adapter:AddSection(name, first)
+        return baseTab:CreateSection(tostring(name or ""))
+    end
+    function adapter:AddParagraph(title, body)
+        return baseTab:CreateParagraph(tostring(title or ""), tostring(body or ""))
+    end
+    function adapter:AddNote(note)
+        return baseTab:CreateLabel(tostring(note or ""))
+    end
+    function adapter:AddButton(name, callback, description)
+        return baseTab:CreateButton(tostring(name or "Button"), tostring(description or ""), nil, callback)
+    end
+    function adapter:AddToggle(config)
+        config = config or {}
+        local current, callback = config.Default == true, config.Callback
+        local setValue = registerSpectreControl(tabLabel, config.Name, current, function(value)
+            if callback then callback(value == true) end
+        end)
+        baseTab:CreateToggle(tostring(config.Name or "Toggle"), tostring(config.Description or config.Desc or ""),
+            current, function(value) setValue(value == true) end)
+        return {Get = function() return current end, Set = setValue}
+    end
+    function adapter:AddSlider(config)
+        config = config or {}
+        local minimum, maximum = tonumber(config.Min) or 0, tonumber(config.Max) or 100
+        if maximum <= minimum then maximum = minimum + 1 end
+        local current = math.clamp(tonumber(config.Default) or minimum, minimum, maximum)
+        local callback = config.Callback
+        local setValue = registerSpectreControl(tabLabel, config.Name, current, function(value)
+            current = math.clamp(tonumber(value) or minimum, minimum, maximum)
+            if callback then callback(current) end
+        end)
+        baseTab:CreateSlider(tostring(config.Name or "Slider"), minimum, maximum, current,
+            function(value) setValue(value) end)
+        return {Get = function() return current end, Set = setValue}
+    end
+    function adapter:AddTextBox(config)
+        config = config or {}
+        local current, callback = "", config.Callback
+        local setValue = registerSpectreControl(tabLabel, config.Name, current, function(value)
+            current = tostring(value or "")
+            if callback then callback(current) end
+        end)
+        baseTab:CreateInput(tostring(config.Name or "Input"),
+            tostring(config.Description or config.Desc or ""),
+            tostring(config.PlaceholderText or config.Placeholder or ""), nil, nil,
+            function(value) setValue(value) end)
+        return {Get = function() return current end, Set = setValue}
+    end
+    function adapter:AddKeybind(config)
+        config = config or {}
+        local current = config.Default or Enum.KeyCode.Unknown
+        local callback = config.ChangedCallback or config.Callback
+        local function toKey(value)
+            if typeof(value) == "EnumItem" then return value end
+            if type(value) == "string" then return Enum.KeyCode[value] or Enum.KeyCode.Unknown end
+            return Enum.KeyCode.Unknown
+        end
+        local control
+        local setValue = registerSpectreControl(tabLabel, config.Name, current.Name, function(value)
+            current = toKey(value)
+            if control and control.Set then pcall(control.Set, control, current) end
+            if callback then callback(current) end
+        end)
+        control = baseTab:CreateKeybind(tostring(config.Name or "Keybind"),
+            tostring(config.Description or config.Desc or ""), current, function(value)
+                setValue(value.Name)
+            end)
+        return {Get = function() return current.Name end, Set = setValue}
+    end
+    function adapter:AddList(config)
+        config = config or {}
+        local current = config.Default
+        local callback = config.OnSelect or config.Callback
+        local setValue = registerSpectreControl(tabLabel, config.Name, current, function(value)
+            current = value
+            if callback then callback(value) end
+        end)
+        local control = baseTab:CreateSelect(tostring(config.Name or "List"),
+            tostring(config.Description or config.Desc or ""),
+            config.Items or config.Options or {}, current,
+            function(selected)
+                local value = type(selected) == "table" and selected[1] or selected
+                setValue(value)
+            end)
+        return {
+            SetItems = function(_, items)
+                if control and control.Refresh then pcall(control.Refresh, control, items or {}, true) end
+            end,
+            Select = function(_, value)
+                if control and control.Set then pcall(control.Set, control, value)
+                else setValue(value) end
+            end,
+            Get = function() return current end
+        }
+    end
+    function adapter:AddColorpicker(config)
+        config = config or {}
+        local current, callback = config.Default, config.Callback
+        local function toHex(color)
+            if typeof(color) ~= "Color3" then return tostring(color or "FFFFFF") end
+            return string.format("%02X%02X%02X", math.floor(color.R*255+0.5),
+                math.floor(color.G*255+0.5), math.floor(color.B*255+0.5))
+        end
+        local setValue = registerSpectreControl(tabLabel, config.Name, toHex(current), function(value)
+            local hex = tostring(value or ""):gsub("#", "")
+            if #hex == 6 and hex:match("^[%x]+$") then
+                current = Color3.fromRGB(tonumber(hex:sub(1,2),16), tonumber(hex:sub(3,4),16), tonumber(hex:sub(5,6),16))
+                if callback then callback(current) end
+            end
+        end)
+        baseTab:CreateInput(tostring(config.Name or "Color"), "Color input (hex RGB)",
+            "Enter hex color, e.g. FFFFFF", nil, nil, function(value) setValue(value) end)
+        return {Get = function() return toHex(current) end, Set = setValue}
+    end
+    function adapter:AddStepper(config)
+        config = config or {}
+        local minimum, maximum = tonumber(config.Min) or 0, tonumber(config.Max) or 100
+        if maximum <= minimum then maximum = minimum + 1 end
+        local current, callback = tonumber(config.Default) or minimum, config.Callback
+        local setValue = registerSpectreControl(tabLabel, config.Name, current, function(value)
+            current = math.clamp(tonumber(value) or minimum, minimum, maximum)
+            if callback then callback(current) end
+        end)
+        baseTab:CreateSlider(tostring(config.Name or "Value"), minimum, maximum, current,
+            function(value) setValue(value) end)
+        return {Get = function() return current end, Set = setValue}
+    end
+    return adapter
+end
+
+	game:GetService("HttpService")
+	InsertService = game:GetService("InsertService")
+	Lighting = game:GetService("Lighting")
+	VirtualInputManager = game:GetService("VirtualInputManager")
+	local function func23()
+		local Footballs = workspace:FindFirstChild("Footballs")
+		local Character = LocalPlayer.Character
+		local v1 = Character and Character:FindFirstChild("HumanoidRootPart")
+		if not Footballs or not v1 then
+			return nil
+		end
+		local v3
+		local huge = math.huge
+		for _, v2 in ipairs(Footballs:GetChildren()) do
+			if v2:IsA("BasePart") and v2.Name == "Ball" and v2.Parent then
+				local Magnitude = (v1.Position - v2.Position).Magnitude
+				if Magnitude < huge then
+					v3 = v2
+					huge = Magnitude
+				end
+			end
+		end
+		return v3
+	end
+	function func24()
+		local Footballs = workspace:FindFirstChild("Footballs")
+		if Footballs then
+			local Character = LocalPlayer.Character
+			local v1 = Character and Character:FindFirstChild("HumanoidRootPart")
+			local v3
+			local huge = math.huge
+			for _, v2 in ipairs(Footballs:GetChildren()) do
+				if v2:IsA("BasePart") and v2.Name == "Ball" then
+					if not v1 then
+						return v2
+					end
+					local Magnitude = (v1.Position - v2.Position).Magnitude
+					if Magnitude < huge then
+						v3 = v2
+						huge = Magnitude
+					end
+				end
+			end
+			if v3 then
+				return v3
+			end
+		end
+		local TPSSystem = workspace:FindFirstChild("TPSSystem")
+		return TPSSystem and TPSSystem:FindFirstChild("TPS")
+	end
+	local F6 = Enum.KeyCode.F6
+	local F8 = Enum.KeyCode.F8
+	local F = Enum.KeyCode.F
+	C = Enum.KeyCode.C
+	v40 = F6
+	v41 = F8
+	v42 = F
+	local v43 = tbl24:MakeTab("Home")
+	v43:AddSection("Update")
+	v43:AddParagraph("Spectre v7.0  -  What's inside", "Ball Reach  -  Resizable ball hitbox + collision clone\nLeg Reach  -  Bigger touch box around your character\nGoalkeeper  -  Auto GK (auto click when the ball is close)\nAir Helper  -  Platform under the ball for air dribbles\nBall Predict  -  Trajectory line\nMisc  -  Avatar Stealer, Clumsy Lag, No Cooldown, No Collision\nSkies  -  12 custom skyboxes\nSettings  -  Configs, Auto Load, Themes, Hide UI toggle")
+	v43:AddSection("Controls")
+	v43:AddParagraph("Shortcuts", "RightShift / End  -  show or hide the menu\nDrag the title bar to move the window\nWhen hidden, tap the floating button to bring it back\nKeybinds: C = Ball Reach, F6 = Leg Reach, F8 = Auto GK, F = Air Helper (rebind in each tab)")
+	v43:AddButton("Hide UI", func13)
+	local v44 = tbl24:MakeTab("Ball Reach")
+	v44:AddSection("Ball Reach")
+	local tbl33 = {
+		enabled = false,
+		reach = 4.5,
+		transparency = 0,
+		color = Color3.fromRGB(150, 175, 255),
+		material = Enum.Material.ForceField,
+		collision = true,
+	}
+	local v45 = workspace:FindFirstChild("HawkStorage") or Instance.new("Folder")
+	v45.Name = "HawkStorage"
+	v45.Parent = workspace
+	local v67
+	local v68
+	local v69
+	local function func25()
+		if v68 then
+			pcall(function()
+				v68:Destroy()
+			end)
+			v68 = nil
+		end
+		if v66 then
+			pcall(function()
+				v66:Destroy()
+			end)
+			v66 = nil
+		end
+		if v67 then
+			local v1 = v67
+			pcall(function()
+				v1.Size = Vector3.new(2.25, 2.25, 2.25)
+				v1.Transparency = 1
+				v1.CanCollide = true
+			end)
+			v67 = nil
+		end
+	end
+	local function func26(arg1)
+		if not arg1 or not arg1.Parent then
+			return
+		end
+		func25()
+		local Clone = arg1.Clone
+		v67 = arg1
+		local v1 = Clone(arg1)
+		for _, v2 in ipairs(v1:GetChildren()) do
+			v2:Destroy()
+		end
+		v1.Parent = v45
+		v1.Anchored = true
+		v1.CanCollide = tbl33.collision
+		v1.CanTouch = true
+		v1.Transparency = 1
+		v1.Massless = true
+		v1.CustomPhysicalProperties = PhysicalProperties.new(0.001, 0, 0, 0, 0)
+		v1.AssemblyLinearVelocity = Vector3.new(0, 0, 0)
+		v1.AssemblyAngularVelocity = Vector3.new(0, 0, 0)
+		v66 = v1
+		local part = Instance.new("Part")
+		part.Name = "_Query"
+		part.Anchored = true
+		part.CanCollide = false
+		part.CanTouch = false
+		part.CanQuery = true
+		part.Transparency = 1
+		part.Massless = true
+		part.Size = v1.Size
+		part.Parent = v45
+		v68 = part
+		arg1.CanCollide = false
+		arg1.Size = Vector3.new(tbl33.reach, tbl33.reach, tbl33.reach)
+		arg1.Transparency = tbl33.transparency
+		arg1.Color = tbl33.color
+		arg1.Material = tbl33.material
+	end
+	local function func27()
+		if not tbl33.enabled then
+			func25()
+			return
+		end
+		local v1 = func23()
+		if not v1 then
+			if v67 then
+				func25()
+			end
+			return
+		end
+		if v1 ~= v67 then
+			func26(v1)
+			if not v66 then
+				return
+			end
+		end
+		if v67 and v66 and v68 and v67.Parent then
+			local v2 = v67
+			v66.CollisionGroup = v67.CollisionGroup
+			v2.CanCollide = false
+			v2.Size = Vector3.new(tbl33.reach, tbl33.reach, tbl33.reach)
+			v66.CFrame = v67.CFrame
+			v68.CFrame = v66.CFrame
+			v68.Size = v66.Size
+			return
+		end
+		func25()
+	end
+	v46 = v44:AddToggle({
+		Name = "Enable Ball Reach",
+		Default = false,
+		Callback = function(arg1)
+			tbl33.enabled = arg1
+			if v69 then
+				v69:Disconnect()
+				v69 = nil
+			end
+			if arg1 then
+				v69 = RunService.Stepped:Connect(func27)
+				local v1 = func23()
+				if v1 then
+					func26(v1)
+				end
+			else
+				func25()
+			end
+		end,
+	})
+	v44:AddKeybind({
+		Name = "Ball Reach Keybind",
+		Default = Enum.KeyCode.C,
+		ChangedCallback = function(arg1)
+			C = arg1
+		end,
+	})
+	v44:AddSlider({
+		Name = "Reach Size",
+		Min = 2.25,
+		Max = 35,
+		Increase = 0.25,
+		Default = tbl33.reach,
+		Callback = function(arg1)
+			tbl33.reach = arg1
+			if v67 then
+				v67.Size = Vector3.new(arg1, arg1, arg1)
+			end
+		end,
+	})
+	v44:AddToggle({
+		Name = "Ball Collision",
+		Default = tbl33.collision,
+		Callback = function(arg1)
+			tbl33.collision = arg1
+			if v66 then
+				v66.CanCollide = arg1
+			end
+		end,
+	})
+	v44:AddSection("Customization")
+	v44:AddSlider({
+		Name = "Reach Transparency",
+		Min = 0,
+		Max = 1,
+		Increase = 0.01,
+		Default = tbl33.transparency,
+		Callback = function(arg1)
+			tbl33.transparency = arg1
+			if v67 then
+				v67.Transparency = arg1
+			end
+		end,
+	})
+	v44:AddColorpicker({
+		Name = "Reach Color",
+		Default = tbl33.color,
+		Callback = function(arg1)
+			tbl33.color = arg1
+			if v67 then
+				v67.Color = arg1
+			end
+		end,
+	})
+	v44:AddSection("Extras")
+	v44:AddParagraph("Anti Ball Fling", "Prevents you from being thrown 100km from the ball. Loads an external script from GitHub when you press the button.")
+	v44:AddButton("Anti Ball Fling", function()
+		local str = "https://raw.githubusercontent.com/Skinny-yz/Hawk/refs/heads/main/Functions/02.lua"
+		if not pcall(function()
+			loadstring(game:HttpGet(str))()
+		end) then
+			func5("Anti Ball Fling", "Failed to load", 3)
+		end
+	end)
+	local v47 = tbl24:MakeTab("Leg Reach")
+	v47:AddSection("Leg Reach [Don't use on Xeno/Solara]")
+	local tbl34 = {
+		Enabled = false,
+		Size = 10,
+		ShowHitbox = true,
+		HitboxTransparency = 0.5,
+		HitboxColor = Color3.fromRGB(255, 255, 255),
+	}
+	local v70
+	local v71
+	local v72
+	local v73
+	local function func28()
+		if v70 then
+			return
+		end
+		local part = Instance.new("Part")
+		part.Name = "LegReachHitbox"
+		part.Anchored = true
+		part.CanCollide = false
+		part.CanTouch = false
+		part.CanQuery = false
+		part.CastShadow = false
+		part.Massless = true
+		part.Transparency = tbl34.HitboxTransparency
+		part.Color = tbl34.HitboxColor
+		part.Shape = Enum.PartType.Block
+		part.Parent = workspace
+		v70 = part
+		if not v72 then
+			pcall(function()
+				v72 = hookmetamethod(game, "__namecall", newcclosure(function(arg1, ...)
+					local tbl = {...}
+					local v1 = getnamecallmethod()
+					if tbl34.Enabled and arg1 == workspace and v1 == "GetPartBoundsInBox" then
+						tbl[2] = Vector3.new(tbl34.Size, tbl34.Size, tbl34.Size)
+						return v72(arg1, unpack(tbl))
+					end
+					return v72(arg1, ...)
+				end))
+			end)
+		end
+		if not v73 then
+			pcall(function()
+				v73 = hookfunction(workspace.GetPartBoundsInBox, function(...)
+					local tbl = {...}
+					if tbl34.Enabled then
+						tbl[3] = Vector3.new(tbl34.Size, tbl34.Size, tbl34.Size)
+						return v73(unpack(tbl))
+					end
+					return v73(...)
+				end)
+			end)
+		end
+		v71 = v71 or RunService.Stepped:Connect(function()
+			local Character = LocalPlayer.Character
+			local v1 = Character and Character:FindFirstChild("HumanoidRootPart")
+			if v1 and v70 then
+				local v2 = v70
+				v2.CFrame = v1.CFrame
+				v2.Size = Vector3.new(tbl34.Size, tbl34.Size, tbl34.Size)
+				if tbl34.Enabled and tbl34.ShowHitbox then
+					v70.Transparency = tbl34.HitboxTransparency
+					v70.Color = tbl34.HitboxColor
+				else
+					v70.Transparency = 1
+				end
+			end
+		end)
+	end
+	local function func29()
+		if v71 then
+			v71:Disconnect()
+			v71 = nil
+		end
+		if v70 then
+			v70:Destroy()
+			v70 = nil
+		end
+		if v72 then
+			local v1 = v72
+			v72 = nil
+			pcall(function()
+				hookmetamethod(game, "__namecall", v1)
+			end)
+		end
+		if v73 then
+			local v2 = v73
+			v73 = nil
+			pcall(function()
+				hookfunction(workspace.GetPartBoundsInBox, v2)
+			end)
+		end
+	end
+	v48 = v47:AddToggle({
+		Name = "Enable Leg Reach",
+		Default = false,
+		Callback = function(arg1)
+			tbl34.Enabled = arg1
+			if arg1 then
+				func28()
+				func5("Leg Reach", "Enabled - may cause lag!", 2)
+			else
+				func29()
+			end
+		end,
+	})
+	v47:AddKeybind({
+		Name = "Leg Reach Keybind",
+		Default = Enum.KeyCode.F6,
+		ChangedCallback = function(arg1)
+			v40 = arg1
+		end,
+	})
+	v47:AddSection("Customization")
+	v47:AddSlider({
+		Name = "Reach Size",
+		Min = 1,
+		Max = 35,
+		Increase = 1,
+		Default = tbl34.Size,
+		Callback = function(arg1)
+			tbl34.Size = arg1
+		end,
+	})
+	v47:AddToggle({
+		Name = "Show Hitbox",
+		Default = tbl34.ShowHitbox,
+		Callback = function(arg1)
+			tbl34.ShowHitbox = arg1
+			if v70 then
+				v70.Transparency = arg1 and tbl34.HitboxTransparency or 1
+			end
+		end,
+	})
+	v47:AddSlider({
+		Name = "Hitbox Transparency",
+		Min = 0,
+		Max = 1,
+		Increase = 0.01,
+		Default = tbl34.HitboxTransparency,
+		Callback = function(arg1)
+			tbl34.HitboxTransparency = arg1
+			if v70 and tbl34.ShowHitbox then
+				v70.Transparency = arg1
+			end
+		end,
+	})
+	v47:AddColorpicker({
+		Name = "Hitbox Color",
+		Default = tbl34.HitboxColor,
+		Callback = function(arg1)
+			tbl34.HitboxColor = arg1
+			if v70 then
+				v70.Color = arg1
+			end
+		end,
+	})
+end
+local v52, v54, v56
+do
+	local v49 = tbl24:MakeTab("Head Reach", "smile")
+	v49:AddSection("Moss settings")
+	local flag5 = false
+	local num9 = 15
+	local num10 = 10
+	local v74
+	local v75
+	local v76
+	local flag6 = false
+	local tbl35 = {
+		[15] = {tt_idle = "13", tt_hit = "9", interp = "90"},
+		[25] = {tt_idle = "12", tt_hit = "8", interp = "85"},
+		[50] = {tt_idle = "10", tt_hit = "6", interp = "75"},
+		[75] = {tt_idle = "8", tt_hit = "3", interp = "67"},
+		[100] = {tt_idle = "6", tt_hit = "0", interp = "60"},
+	}
+	local function func30()
+		local Footballs = workspace:FindFirstChild("Footballs")
+		local Character = LocalPlayer.Character
+		local v1 = Character and Character:FindFirstChild("HumanoidRootPart")
+		if Footballs then
+			local v3
+			local huge = math.huge
+			for _, v2 in ipairs(Footballs:GetChildren()) do
+				if v2:IsA("BasePart") and v2.Name == "Ball" and v2.Parent then
+					if not v1 then
+						return v2
+					end
+					local Magnitude = (v1.Position - v2.Position).Magnitude
+					if Magnitude < huge then
+						v3 = v2
+						huge = Magnitude
+					end
+				end
+			end
+			if v3 then
+				return v3
+			end
+		end
+		local TPSSystem = workspace:FindFirstChild("TPSSystem")
+		return TPSSystem and TPSSystem:FindFirstChild("TPS") or nil
+	end
+	local function func31()
+		flag5 = false
+		flag6 = false
+		v76 = nil
+		if v74 then
+			v74:Disconnect()
+			v74 = nil
+		end
+		if v75 then
+			task.cancel(v75)
+			v75 = nil
+		end
+		local str = "TargetTimeDelayFacctorTenths"
+		local str1 = "20"
+		pcall(function()
+			if type(getfflag) == "function" and type(setfflag) == "function" then
+				if getfflag(str) ~= nil then
+					setfflag(str, tostring(str1))
+				end
+			end
+		end)
+		func5("Mossing", "Disabled", 2)
+	end
+	local function func32()
+		if type(setfflag) ~= "function" or type(getfflag) ~= "function" then
+			func5("Mossing", "FFlag functions are not supported", 3)
+			return
+		end
+		if v74 then
+			v74:Disconnect()
+			v74 = nil
+		end
+		if v75 then
+			task.cancel(v75)
+			v75 = nil
+		end
+		local v1 = tbl35[num9] or tbl35[15]
+		flag5 = true
+		flag6 = false
+		v76 = nil
+		v75 = task.spawn(function()
+			while flag5 do
+				local tt_idle = v1.tt_idle
+				local str = "TargetTimeDelayFacctorTenths"
+				pcall(function()
+					if type(getfflag) == "function" and type(setfflag) == "function" then
+						if getfflag(str) ~= nil then
+							setfflag(str, tostring(tt_idle))
+						end
+					end
+				end)
+				local interp = v1.interp
+				local str1 = "InterpolationMaxDelayMSec"
+				pcall(function()
+					if type(getfflag) == "function" and type(setfflag) == "function" then
+						if getfflag(str1) ~= nil then
+							setfflag(str1, tostring(interp))
+						end
+					end
+				end)
+				task.wait(20)
+			end
+		end)
+		v74 = RunService.PreSimulation:Connect(function()
+			if not flag5 then
+				return
+			end
+			local Character = LocalPlayer.Character
+			if not Character then
+				return
+			end
+			local Humanoid = Character:FindFirstChildOfClass("Humanoid")
+			if not Humanoid then
+				return
+			end
+			if not v76 or not v76.Parent then
+				v76 = Character:FindFirstChild("Head")
+			end
+			if not v76 then
+				return
+			end
+			local State = Humanoid:GetState()
+			if State ~= Enum.HumanoidStateType.Jumping and State ~= Enum.HumanoidStateType.Freefall then
+				if flag6 then
+					flag6 = false
+					local tt_idle = v1.tt_idle
+					local str = "TargetTimeDelayFacctorTenths"
+					pcall(function()
+						if type(getfflag) == "function" and type(setfflag) == "function" then
+							if getfflag(str) ~= nil then
+								setfflag(str, tostring(tt_idle))
+							end
+						end
+					end)
+				end
+				return
+			end
+			local v2 = func30()
+			if not v2 or not v2:IsA("BasePart") then
+				return
+			end
+			local v3 = math.clamp(LocalPlayer:GetNetworkPing(), 0.016, 0.15) + 0.016666666666666666
+			local v4 = v2.Position + v2.AssemblyLinearVelocity * v3
+			local Position = v76.Position
+			local Y = v4.Y
+			local v5 = v4.X - Position.X
+			local Z = Position.Z
+			local v6 = Y - Position.Y
+			local v7 = v4.Z - Z
+			local v8 = math.abs(v5) <= 4 and math.abs(v7) <= 4 and v6 >= 1 and v6 <= 8
+			if (v2.Position - Position).Magnitude > num10 then
+				if flag6 then
+					flag6 = false
+					local tt_idle1 = v1.tt_idle
+					local str1 = "TargetTimeDelayFacctorTenths"
+					pcall(function()
+						if type(getfflag) == "function" and type(setfflag) == "function" then
+							if getfflag(str1) ~= nil then
+								setfflag(str1, tostring(tt_idle1))
+							end
+						end
+					end)
+				end
+				return
+			end
+			if v8 then
+				pcall(function()
+					local v1 = v76
+					firetouchinterest(v2, v1, 0)
+					firetouchinterest(v2, v1, 1)
+				end)
+				if not flag6 then
+					flag6 = true
+					local tt_hit = v1.tt_hit
+					local str2 = "TargetTimeDelayFacctorTenths"
+					pcall(function()
+						if type(getfflag) == "function" and type(setfflag) == "function" then
+							if getfflag(str2) ~= nil then
+								setfflag(str2, tostring(tt_hit))
+							end
+						end
+					end)
+				end
+			elseif flag6 then
+				flag6 = false
+				local tt_idle2 = v1.tt_idle
+				local str3 = "TargetTimeDelayFacctorTenths"
+				pcall(function()
+					if type(getfflag) == "function" and type(setfflag) == "function" then
+						if getfflag(str3) ~= nil then
+							setfflag(str3, tostring(tt_idle2))
+						end
+					end
+				end)
+			end
+		end)
+		func5("Mossing", tostring(num9) .. "% activated", 2)
+	end
+	v49:AddToggle({
+		Name = "Enable / Disable Moss",
+		Default = false,
+		Callback = function(arg1)
+			if arg1 then
+				func32()
+			else
+				func31()
+			end
+		end,
+	})
+	v49:AddSlider({
+		Name = "Moss Size",
+		Min = 5,
+		Max = 50,
+		Increase = 1,
+		Default = num10,
+		Callback = function(arg1)
+			num10 = tonumber(arg1) or 10
+		end,
+	})
+	v49:AddSection("Moss Presets")
+	v49:AddButton("15% Moss", function()
+		num9 = 15
+		if flag5 then
+			func32()
+		else
+			func5("Mossing", "15% selected", 2)
+		end
+	end)
+	v49:AddButton("25% Moss", function()
+		num9 = 25
+		if flag5 then
+			func32()
+		else
+			func5("Mossing", "25% selected", 2)
+		end
+	end)
+	v49:AddButton("50% Moss", function()
+		num9 = 50
+		if flag5 then
+			func32()
+		else
+			func5("Mossing", "50% selected", 2)
+		end
+	end)
+	v49:AddButton("75% Moss", function()
+		num9 = 75
+		if flag5 then
+			func32()
+		else
+			func5("Mossing", "75% selected", 2)
+		end
+	end)
+	v49:AddButton("100% Moss", function()
+		num9 = 100
+		if flag5 then
+			func32()
+		else
+			func5("Mossing", "100% selected", 2)
+		end
+	end)
+	v49:AddButton("Stop Moss", func31)
+	LocalPlayer.CharacterAdded:Connect(function()
+		v76 = nil
+	end)
+	local v50 = tbl24:MakeTab("React", "zap")
+	local function func33(arg1, arg2)
+		local v1, v2 = pcall(function()
+			assert(type(setfflag) == "function", "setfflag is not supported by this executor")
+			setfflag("InterpolationMaxDelayMSec", tostring(arg1))
+			setfflag("TargetTimeDelayFacctorTenths", tostring(arg2))
+		end)
+		if v1 then
+			func5("React", "Preset applied: " .. tostring(arg1) .. " / " .. tostring(arg2), 2)
+		else
+			func5("React", "Could not apply FFlags: " .. tostring(v2), 3)
+		end
+	end
+	v50:AddButton("React 15%", function()
+		func33("90", "13")
+	end, "Interpolation 90 / Target delay 13")
+	v50:AddButton("React 25%", function()
+		func33("85", "12")
+	end, "Interpolation 85 / Target delay 12")
+	v50:AddButton("React 75%", function()
+		func33("75", "10")
+	end, "Interpolation 75 / Target delay 10")
+	v50:AddButton("React 100%", function()
+		func5("React 100%", "Original callback is incomplete; placeholder only.", 3)
+	end, "Placeholder - source callback was incomplete")
+	v50:AddSection("Reacts 2")
+	local function func34(arg1, arg2, arg3, arg4)
+		local v1, v2 = pcall(function()
+			settings():GetService("NetworkSettings").IncomingReplicationLag = arg1
+			local Footballs = workspace:FindFirstChild("Footballs")
+			local v1 = Footballs and (Footballs:FindFirstChild("Ball") or Footballs:FindFirstChildWhichIsA("BasePart"))
+			if v1 then
+				v1.Velocity = arg2
+				if arg4 then
+					task.delay(arg4, function()
+						if v1 and v1.Parent then
+							v1.Velocity = Vector3.new(10, 20, 30)
+						end
+					end)
+				end
+			end
+		end)
+		if not v1 then
+			func5(arg3, "Could not apply: " .. tostring(v2), 3)
+		else
+			func5(arg3, "Applied", 2)
+		end
+	end
+	v50:AddButton("Dribble React", function()
+		func34(0.04, Vector3.new(90, 98, 24), "Dribble React")
+	end)
+	v50:AddButton("Tricks React", function()
+		func34(0.07, Vector3.new(65, 35, 23), "Tricks React")
+	end)
+	v50:AddButton("Shoot React", function()
+		func34(0.035, Vector3.new(23, 86, 35), "Shoot React")
+	end)
+	v50:AddButton("PEAK REACT", function()
+		func34(0.02, Vector3.new(43, 32, 11), "PEAK REACT", 2)
+	end)
+	local v51 = tbl24:MakeTab("Goalkeeper")
+	v51:AddSection("Auto Goalkeeper")
+	local tbl36 = {
+		enabled = false,
+		detectionDistance = 5,
+		clickInterval = 0.05,
+		showHitbox = true,
+		hitboxTransparency = 0.6,
+		hitboxColor = Color3.fromRGB(0, 170, 255),
+	}
+	local v77
+	local v78
+	local num11 = 0
+	local num12 = 0
+	local function func35()
+		if v77 then
+			return
+		end
+		local part = Instance.new("Part")
+		part.Name = "GK_Hitbox"
+		part.Anchored = true
+		part.CanCollide = false
+		part.CanTouch = false
+		part.CanQuery = false
+		part.CastShadow = false
+		part.Massless = true
+		part.Transparency = 1
+		part.Shape = Enum.PartType.Block
+		part.Parent = workspace
+		v77 = part
+	end
+	local function func36(arg1)
+		local Stadium = workspace:FindFirstChild("Stadium")
+		local v1 = Stadium and Stadium:FindFirstChild("Fields")
+		if not v1 then
+			return false
+		end
+		for _, v2 in ipairs(v1:GetChildren()) do
+			local Hitboxes = v2:FindFirstChild("Hitboxes")
+			local v3 = Hitboxes and Hitboxes:FindFirstChild("Keeper")
+			if v3 then
+				for _, v4 in ipairs(v3:GetChildren()) do
+					for _, v5 in ipairs(v4:GetChildren()) do
+						if v5:IsA("BasePart") then
+							local v6 = v5.Size / 2
+							local v7 = v5.CFrame:PointToObjectSpace(arg1)
+							if math.abs(v7.X) <= v6.X and math.abs(v7.Y) <= v6.Y and math.abs(v7.Z) <= v6.Z then
+								return true
+							end
+						end
+					end
+				end
+			end
+		end
+		return false
+	end
+	local function func37()
+		num11 = num11 + 1
+		if num11 % 3 ~= 0 then
+			return
+		end
+		local Character = LocalPlayer.Character
+		local v1 = Character and Character:FindFirstChild("HumanoidRootPart")
+		if tbl36.enabled and tbl36.showHitbox and v1 and v77 then
+			local v2 = tbl36.detectionDistance * 2
+			local v3 = v77
+			v3.Size = Vector3.new(v2, v2, v2)
+			v3.CFrame = v1.CFrame
+			v3.Transparency = tbl36.hitboxTransparency
+			v3.Color = tbl36.hitboxColor
+		elseif v77 then
+			v77.Transparency = 1
+		end
+		if not tbl36.enabled or not v1 then
+			return
+		end
+		local PlayerGui = LocalPlayer:FindFirstChild("PlayerGui")
+		local v4 = PlayerGui and PlayerGui:FindFirstChild("Main")
+		local v5 = v4 and v4:FindFirstChild("Values")
+		if not v5 or not v5:FindFirstChild("Goalie") or not v5.Goalie.Value then
+			return
+		end
+		if not func36(v1.Position) then
+			return
+		end
+		local Footballs = workspace:FindFirstChild("Footballs")
+		if not Footballs then
+			return
+		end
+		for _, v6 in ipairs(Footballs:GetChildren()) do
+			if v6:IsA("BasePart") and (v6.Position - v1.Position).Magnitude <= tbl36.detectionDistance then
+				if not (tick() - num12 >= tbl36.clickInterval) then
+					return
+				end
+				num12 = tick()
+				local v7 = v4 and v4.AbsoluteSize / 2 or Vector2.new(960, 540)
+				VirtualInputManager:SendMouseButtonEvent(v7.X, v7.Y, 0, true, game, 0)
+				VirtualInputManager:SendMouseButtonEvent(v7.X, v7.Y, 0, false, game, 0)
+				return
+			end
+		end
+	end
+	v52 = v51:AddToggle({
+		Name = "Enable Auto GK",
+		Default = false,
+		Callback = function(arg1)
+			tbl36.enabled = arg1
+			if arg1 then
+				func35()
+				v78 = v78 or RunService.Stepped:Connect(func37)
+			else
+				if v78 then
+					v78:Disconnect()
+					v78 = nil
+				end
+				if v77 then
+					v77:Destroy()
+					v77 = nil
+				end
+			end
+		end,
+	})
+	v51:AddKeybind({
+		Name = "Auto GK Keybind",
+		Default = Enum.KeyCode.F8,
+		ChangedCallback = function(arg1)
+			v41 = arg1
+		end,
+	})
+	v51:AddSlider({
+		Name = "Detection Distance",
+		Min = 2,
+		Max = 35,
+		Increase = 1,
+		Default = tbl36.detectionDistance,
+		Callback = function(arg1)
+			tbl36.detectionDistance = arg1
+		end,
+	})
+	v51:AddSlider({
+		Name = "Click Interval (s)",
+		Min = 0.01,
+		Max = 0.9,
+		Increase = 0.01,
+		Default = tbl36.clickInterval,
+		Callback = function(arg1)
+			tbl36.clickInterval = arg1
+		end,
+	})
+	v51:AddSection("Customization")
+	v51:AddToggle({
+		Name = "Show Detection Hitbox",
+		Default = tbl36.showHitbox,
+		Callback = function(arg1)
+			tbl36.showHitbox = arg1
+			if not arg1 and v77 then
+				v77.Transparency = 1
+			end
+		end,
+	})
+	v51:AddSlider({
+		Name = "Hitbox Transparency",
+		Min = 0,
+		Max = 1,
+		Increase = 0.01,
+		Default = tbl36.hitboxTransparency,
+		Callback = function(arg1)
+			tbl36.hitboxTransparency = arg1
+		end,
+	})
+	v51:AddColorpicker({
+		Name = "Hitbox Color",
+		Default = tbl36.hitboxColor,
+		Callback = function(arg1)
+			tbl36.hitboxColor = arg1
+		end,
+	})
+	local v53 = tbl24:MakeTab("Air Dribble")
+	v54 = tbl24:MakeTab("FastFlags", "flag")
+	v53:AddSection("Air Dribble Helper")
+	v53:AddParagraph("Heads up", "The platform follows the Ball Reach clone, so turn on Ball Reach first. Use size 5-6 to stay legit.")
+	local tbl37 = {
+		Enabled = false,
+		Size = 5,
+		Transparency = 1,
+		Color = Color3.fromRGB(75, 75, 255),
+		Material = Enum.Material.ForceField,
+		Thickness = 0.05,
+		Offset = 0,
+	}
+	local v55 = workspace:FindFirstChild("TPSPlatforms") or Instance.new("Folder")
+	v55.Name = "TPSPlatforms"
+	v55.Parent = workspace
+	local tbl38 = {}
+	local v79
+	local function func38(arg1)
+		for _, v1 in pairs(tbl38) do
+			if v1 and v1.Parent then
+				v1.CanCollide = arg1
+				if not arg1 then
+					v1.Transparency = 1
+				end
+			end
+		end
+	end
+	local tbl39 = {}
+	local function func39(arg1)
+		if tbl38[arg1] then
+			return tbl38[arg1]
+		end
+		local part = Instance.new("Part")
+		part.Name = "_Platform"
+		part.Parent = v55
+		part.Anchored = true
+		part.CanCollide = tbl37.Enabled
+		part.CanTouch = false
+		part.CanQuery = false
+		part.CastShadow = false
+		part.Massless = true
+		part.Transparency = tbl37.Transparency
+		part.Color = tbl37.Color
+		part.Material = tbl37.Material
+		tbl38[arg1] = part
+		local connection
+		connection = RunService.Stepped:Connect(function()
+			if not arg1.Parent or not part.Parent then
+				connection:Disconnect()
+				tbl38[arg1] = nil
+				if part.Parent then
+					part:Destroy()
+				end
+				return
+			end
+			part.Size = Vector3.new(tbl37.Size, tbl37.Thickness, tbl37.Size)
+			part.Transparency = tbl37.Transparency
+			part.Color = tbl37.Color
+			part.Material = tbl37.Material
+			local new = CFrame.new
+			local X = arg1.Position.X
+			local v1 = arg1.Position.Y - arg1.Size.Y / 2 - tbl37.Thickness / 2
+			part.CFrame = new(X, v1 - tbl37.Offset, arg1.Position.Z)
+			part.CanCollide = tbl37.Enabled
+			if not tbl37.Enabled then
+				part.Transparency = 1
+			end
+		end)
+		return part
+	end
+	tbl39.Name = "Enable Air Helper"
+	tbl39.Default = false
+	tbl39.Callback = function(arg1)
+		tbl37.Enabled = arg1
+		func38(arg1)
+		if arg1 then
+			v79 = v79 or task.spawn(function()
+				while tbl37.Enabled do
+					task.wait(0.5)
+					if v66 and v66.Parent and not tbl38[v66] then
+						func39(v66)
+					end
+				end
+			end)
+		else
+			if v79 then
+				pcall(task.cancel, v79)
+				v79 = nil
+			end
+			for _, v1 in pairs(tbl38) do
+				if v1 and v1.Parent then
+					v1:Destroy()
+				end
+			end
+			tbl38 = {}
+		end
+	end
+	v56 = v53:AddToggle(tbl39)
+	v53:AddKeybind({
+		Name = "Air Helper Keybind",
+		Default = Enum.KeyCode.F,
+		ChangedCallback = function(arg1)
+			v42 = arg1
+		end,
+	})
+	v53:AddSlider({
+		Name = "Air Dribble Helper Size",
+		Min = 1,
+		Max = 100,
+		Increase = 0.5,
+		Default = tbl37.Size,
+		Callback = function(arg1)
+			tbl37.Size = arg1
+		end,
+	})
+	v53:AddSlider({
+		Name = "Air Helper Transparency",
+		Min = 0,
+		Max = 1,
+		Increase = 0.01,
+		Default = tbl37.Transparency,
+		Callback = function(arg1)
+			tbl37.Transparency = arg1
+			for _, v1 in pairs(tbl38) do
+				if v1 and v1.Parent then
+					v1.Transparency = arg1
+				end
+			end
+		end,
+	})
+	v53:AddSection("Ball Prediction")
+	local tbl40 = {
+		enabled = false,
+		steps = 40,
+		thickness = 0.2,
+		color = Color3.fromRGB(255, 100, 0),
+		stepTime = 0.03,
+		gravity = Vector3.new(0, -196.2, 0),
+	}
+	local v57 = workspace:FindFirstChild("HawkPredictionLine") or Instance.new("Folder")
+	v57.Name = "HawkPredictionLine"
+	v57.Parent = workspace
+	local tbl41 = {}
+	local v58 = table.create(100)
+	local num13 = 0
+	local num14 = 0
+	local raycastParams = RaycastParams.new()
+	raycastParams.FilterType = Enum.RaycastFilterType.Exclude
+	local function func40(arg1)
+		local v1 = tbl41[arg1]
+		if not v1 then
+			local part = Instance.new("Part")
+			v1 = part
+			part.Anchored = true
+			part.CanCollide = false
+			part.CanTouch = false
+			part.CanQuery = false
+			part.CastShadow = false
+			part.Material = Enum.Material.Neon
+			tbl41[arg1] = part
+		end
+		return v1
+	end
+	local function func41()
+		if num13 > 0 then
+			for i = 1, num13 do
+				local v1 = tbl41[i]
+				if v1 then
+					v1.Parent = nil
+				end
+			end
+			num13 = 0
+		end
+	end
+	local function func42()
+		local tbl = {}
+		for _, v1 in ipairs(Players:GetPlayers()) do
+			if v1.Character then
+				table.insert(tbl, v1.Character)
+			end
+		end
+		raycastParams.FilterDescendantsInstances = tbl
+	end
+	func42()
+	Players.PlayerAdded:Connect(function(arg1)
+		arg1.CharacterAdded:Connect(func42)
+	end)
+	Players.PlayerRemoving:Connect(func42)
+	for _, v59 in ipairs(Players:GetPlayers()) do
+		v59.CharacterAdded:Connect(func42)
+	end
+	local Heartbeat = RunService.Heartbeat
+	local function func43()
+		if not tbl40.enabled then
+			func41()
+			return
+		end
+		local v1 = func24()
+		if not v1 or not v1.Parent then
+			func41()
+			return
+		end
+		local v2 = v1.AssemblyLinearVelocity or v1.Velocity
+		if not v2 or v2.Magnitude < 0.2 then
+			func41()
+			return
+		end
+		local Position = v1.Position
+		v58[1] = Position
+		local num = 1
+		local v3 = tbl40.gravity * tbl40.stepTime
+		local num1 = 1
+		local steps = tbl40.steps
+		if steps == steps then
+			if not (1 > steps) then
+				while true do
+					v2 = v2 + v3
+					local v4 = Position + v2 * tbl40.stepTime
+					local v5 = workspace:Raycast(Position, v4 - Position, raycastParams)
+					if v5 then
+						v4 = v5.Position
+						local Normal = v5.Normal
+						v2 = (v2 - 2 * v2:Dot(Normal) * Normal) * 0.7
+					end
+					if math.abs(v2.Y) < 1 then
+						v4 = Vector3.new(v4.X, Position.Y, v4.Z)
+						v2 = Vector3.new(v2.X, 0, v2.Z)
+					end
+					num = num + 1
+					v58[num] = v4
+					Position = v4
+					local X = v2.X
+					local X1 = v2.X
+					local Z = v2.Z
+					if not (X * X1 + v2.Z * Z < 0.01 and v2.Y == 0) then
+						num1 = num1 + 1
+						if not (num1 > steps) then
+							continue
+						end
+					end
+					break
+				end
+			end
+		end
+		local v6 = num - 1
+		for i = 1, v6 do
+			local v7 = v58[i]
+			local v8 = v58[i + 1]
+			local Magnitude = (v8 - v7).Magnitude
+			if Magnitude > 0.001 then
+				local v9 = func40(i)
+				v9.Color = tbl40.color
+				v9.Size = Vector3.new(tbl40.thickness, tbl40.thickness, Magnitude)
+				local v10 = v7 + v8
+				v9.CFrame = CFrame.lookAt(v10 * 0.5, v8)
+				if v9.Parent ~= v57 then
+					v9.Parent = v57
+				end
+			end
+		end
+		if v6 < num13 then
+			local v11 = num13
+			local v12 = v6 + 1
+			if v11 == v11 then
+				if not (v12 > v11) then
+					repeat
+						local v13 = tbl41[v12]
+						if v13 then
+							v13.Parent = nil
+						end
+						v12 = v12 + 1
+					until v12 > v11
+				end
+			end
+		end
+		num13 = v6
+	end
+	Heartbeat:Connect(function(arg1)
+		if tbl40.enabled then
+			num14 = num14 + arg1
+			if num14 >= 0.016 then
+				num14 = 0
+				func43()
+			end
+		end
+	end)
+	v53:AddToggle({
+		Name = "Enable Ball Prediction",
+		Default = false,
+		Callback = function(arg1)
+			tbl40.enabled = arg1
+			if not arg1 then
+				func41()
+			end
+		end,
+	})
+	v53:AddSlider({
+		Name = "Prediction Steps",
+		Min = 10,
+		Max = 80,
+		Increase = 1,
+		Default = tbl40.steps,
+		Callback = function(arg1)
+			tbl40.steps = arg1
+		end,
+	})
+	v53:AddColorpicker({
+		Name = "Prediction Line Color",
+		Default = tbl40.color,
+		Callback = function(arg1)
+			tbl40.color = arg1
+			for i = 1, num13 do
+				local v1 = tbl41[i]
+				if v1 then
+					v1.Color = arg1
+				end
+			end
+		end,
+	})
+end
+do
+	local v60 = tbl24:MakeTab("Misc")
+	v60:AddSection("Avatar Stealer")
+	local function func44(arg1)
+		if arg1 == nil then
+			return ""
+		end
+		return (tostring(arg1):gsub("^%s+", ""):gsub("%s+$", ""))
+	end
+	local function func45(arg1)
+		if type(arg1) == "number" then
+			return arg1
+		end
+		if type(arg1) ~= "string" then
+			return nil
+		end
+		local v1 = string.match(arg1, "^%s*(%-?%d+)%s*$")
+		return v1 and tonumber(v1) or nil
+	end
+	local function func46(arg1, arg2)
+		local v1 = os.clock() + (arg2 or 3)
+		while v1 > os.clock() do
+			local Character = arg1.Character
+			local v2 = Character
+			if Character then
+				if not Character then
+					v2 = nil
+				else
+					v2 = Character:FindFirstChildOfClass("Humanoid")
+				end
+			end
+			if v2 then
+				return Character
+			end
+			task.wait(0.05)
+		end
+		return arg1.Character
+	end
+	local function func47(arg1)
+		local v1, v2 = pcall(function()
+			return arg1:Clone()
+		end)
+		if v1 and v2 and v2:IsA("HumanoidDescription") then
+			return v2
+		end
+		return nil
+	end
+	local function func48(arg1)
+		local v1 = func44(arg1)
+		if v1 == "" then
+			return nil
+		end
+		if v1:sub(1, 1) == "@" then
+			v1 = func44(v1:sub(2))
+		end
+		local v2 = v1:lower()
+		for _, v3 in ipairs(Players:GetPlayers()) do
+			if v3.Name:lower() == v2 then
+				return v3.Name, v3.UserId, v3
+			end
+		end
+		local v4, v5 = pcall(function()
+			return Players:GetUserIdFromNameAsync(v1)
+		end)
+		if v4 and type(v5) == "number" and v5 > 0 then
+			return v1, v5, nil
+		end
+		return nil
+	end
+	local function func49(arg1)
+		local v1 = func46(arg1, 1.5)
+		local v2
+		if not v1 then
+			v2 = nil
+		else
+			v2 = v1:FindFirstChildOfClass("Humanoid")
+		end
+		local v3 = v2
+		if not v3 then
+			return nil
+		end
+		local v4, v5 = pcall(function()
+			return v3:GetAppliedDescription()
+		end)
+		if v4 and v5 and v5:IsA("HumanoidDescription") then
+			return v5
+		end
+		return nil
+	end
+	local function func50(arg1)
+		local v1, v2 = pcall(function()
+			return Players:GetHumanoidDescriptionFromUserId(arg1)
+		end)
+		if v1 and v2 and v2:IsA("HumanoidDescription") then
+			return v2
+		end
+		return nil
+	end
+	local function func51(arg1)
+		local v1 = "rbxassetid://" .. tostring(arg1)
+		local tbl = {}
+		local v2, v3 = pcall(function()
+			return game:GetObjects(v1)
+		end)
+		if v2 and type(v3) == "table" then
+			for _, v4 in ipairs(v3) do
+				if typeof(v4) == "Instance" then
+					table.insert(tbl, v4)
+				end
+			end
+			if #tbl > 0 then
+				return tbl
+			end
+		end
+		local v5, v6 = pcall(function()
+			return InsertService:LoadLocalAsset(v1)
+		end)
+		if v5 and typeof(v6) == "Instance" then
+			table.insert(tbl, v6)
+		end
+		return tbl
+	end
+	local function func52(arg1)
+		local tbl = {}
+		local tbl1 = {}
+		for k in string.gmatch(tostring(arg1 or ""), "[^%,]+") do
+			local v1 = func45(k)
+			if v1 and v1 > 0 then
+				local v2 = math.floor(v1)
+				if not tbl1[v2] then
+					tbl1[v2] = true
+					table.insert(tbl, v2)
+				end
+			end
+		end
+		return tbl
+	end
+	local function func53(arg1)
+		local tbl = {}
+		local tbl1 = {}
+		pcall(function()
+			local Accessories = arg1:GetAccessories(true)
+			if type(Accessories) == "table" then
+				for _, v1 in ipairs(Accessories) do
+					if type(v1) == "table" then
+						local v2 = func45(v1.AssetId or v1.assetId)
+						if v2 then
+							local v3 = math.floor(v2)
+							if v3 and v3 > 0 and not tbl[v3] then
+								tbl[v3] = true
+								table.insert(tbl1, v3)
+							end
+						end
+					elseif typeof(v1) == "Instance" then
+						local v4 = func45(v1.AssetId)
+						if v4 then
+							local v5 = math.floor(v4)
+							if v5 and v5 > 0 and not tbl[v5] then
+								tbl[v5] = true
+								table.insert(tbl1, v5)
+							end
+						end
+					end
+				end
+			end
+		end)
+		local tbl2 = {}
+		tbl2[1], tbl2[3], tbl2[2], tbl2[7], tbl2[5], tbl2[6], tbl2[8], tbl2[4] = arg1.HatAccessory, arg1.FaceAccessory, arg1.HairAccessory, arg1.BackAccessory, arg1.ShouldersAccessory, arg1.FrontAccessory, arg1.WaistAccessory, arg1.NeckAccessory
+		for _, v1 in ipairs(tbl2) do
+			for _, v2 in ipairs((func52(v1))) do
+				if v2 and v2 > 0 and not tbl[v2] then
+					tbl[v2] = true
+					table.insert(tbl1, v2)
+				end
+			end
+		end
+		return tbl1
+	end
+	local function func54(arg1)
+		arg1.Anchored = false
+		arg1.CanCollide = false
+		arg1.CanTouch = false
+		arg1.CanQuery = false
+		arg1.Massless = true
+		for _, v1 in ipairs(arg1:GetChildren()) do
+			if v1:IsA("Weld") or v1:IsA("WeldConstraint") or v1.Name == "AccessoryWeld" then
+				v1:Destroy()
+			end
+		end
+	end
+	local function func55(arg1, arg2)
+		local Handle = arg2:FindFirstChild("Handle")
+		if not Handle or not Handle:IsA("BasePart") then
+			arg2.Parent = arg1
+			return arg1 == arg2.Parent
+		end
+		func54(Handle)
+		local v1
+		if not arg1 then
+			v1 = nil
+		else
+			v1 = arg1:FindFirstChildOfClass("Humanoid")
+		end
+		local v2 = v1
+		if v2 then
+			arg2.Parent = game
+			if pcall(function()
+				v2:AddAccessory(arg2)
+			end) and arg1 == arg2.Parent and (Handle:FindFirstChild("AccessoryWeld") or Handle:FindFirstChildOfClass("Weld")) then
+				return true
+			end
+		end
+		arg2.Parent = arg1
+		local v4
+		for _, v3 in ipairs(Handle:GetChildren()) do
+			if v3:IsA("Attachment") then
+				v4 = v3
+				break
+			end
+		end
+		local v5 = v4 and arg1:FindFirstChild(v4.Name, true)
+		if v5 and v5.Parent and v5.Parent:IsA("BasePart") then
+			local weld = Instance.new("Weld")
+			weld.Name = "AccessoryWeld"
+			weld.Part0 = v5.Parent
+			weld.Part1 = Handle
+			weld.C0 = v5.CFrame
+			weld.C1 = v4.CFrame
+			weld.Parent = Handle
+			return true
+		end
+		local Head = arg1:FindFirstChild("Head")
+		if Head and Head:IsA("BasePart") then
+			local weld1 = Instance.new("Weld")
+			weld1.Name = "AccessoryWeld"
+			weld1.Part0 = Head
+			weld1.Part1 = Handle
+			weld1.C0 = CFrame.new(0, 0.6, 0)
+			weld1.C1 = CFrame.new()
+			weld1.Parent = Handle
+			return true
+		end
+		return arg1 == arg2.Parent
+	end
+	local function func56(arg1)
+		local tbl = {}
+		if arg1:IsA("Accessory") or arg1:IsA("Hat") then
+			table.insert(tbl, arg1)
+			return tbl
+		end
+		for _, v1 in ipairs(arg1:GetChildren()) do
+			if v1:IsA("Accessory") or v1:IsA("Hat") then
+				table.insert(tbl, v1)
+			end
+		end
+		return tbl
+	end
+	local function func57(arg1, arg2, arg3)
+		local Name = arg2.Name
+		if arg3[Name] then
+			local num = 2
+			while arg3[Name .. "_" .. num] do
+				num = num + 1
+			end
+			Name = Name .. "_" .. num
+		end
+		local v1 = arg2:Clone()
+		v1.Name = Name
+		local v2 = func55(arg1, v1)
+		if v2 then
+			arg3[Name] = true
+			return v2
+		end
+		pcall(function()
+			v1:Destroy()
+		end)
+		return v2
+	end
+	local function func58(arg1)
+		for _, v1 in ipairs(arg1:GetChildren()) do
+			if v1:IsA("Accessory") or v1:IsA("Hat") or v1:IsA("Shirt") or v1:IsA("Pants") or v1:IsA("ShirtGraphic") or v1:IsA("BodyColors") or v1:IsA("CharacterMesh") then
+				v1:Destroy()
+			end
+		end
+		local Head = arg1:FindFirstChild("Head")
+		if Head then
+			for _, v2 in ipairs(Head:GetChildren()) do
+				if v2:IsA("Decal") or v2:IsA("Texture") then
+					v2:Destroy()
+				end
+			end
+		end
+	end
+	local function func59(arg1, arg2)
+		if not arg1 or not arg2 then
+			return false
+		end
+		local Head = arg1:FindFirstChild("Head")
+		local Head1 = arg2:FindFirstChild("Head")
+		if not Head or not Head1 then
+			return false
+		end
+		for _, v1 in ipairs(Head:GetChildren()) do
+			if v1:IsA("Decal") or v1:IsA("Texture") or v1:IsA("SpecialMesh") then
+				v1:Destroy()
+			end
+		end
+		Head.Color = Head1.Color
+		Head.Material = Head1.Material
+		Head.Transparency = Head1.Transparency
+		Head.Reflectance = Head1.Reflectance
+		local SpecialMesh = Head1:FindFirstChildOfClass("SpecialMesh")
+		if SpecialMesh then
+			SpecialMesh:Clone().Parent = Head
+		end
+		for _, v2 in ipairs(Head1:GetChildren()) do
+			if v2:IsA("Attachment") then
+				v2:Clone().Parent = Head
+			end
+		end
+		for _, v3 in ipairs(Head1:GetChildren()) do
+			if v3:IsA("Decal") or v3:IsA("Texture") then
+				v3:Clone().Parent = Head
+			end
+		end
+		local HeadScale = Head1:FindFirstChild("HeadScale")
+		if HeadScale then
+			local v4 = Head:FindFirstChild("HeadScale") or Instance.new("ObjectValue")
+			v4.Name = "HeadScale"
+			v4.Value = HeadScale.Value
+			v4.Parent = Head
+		end
+		return true
+	end
+	local v80
+	local function func60(arg1, arg2)
+		local v1 = func46(LocalPlayer, 3)
+		if not v1 then
+			return false, "No local character found"
+		end
+		local v2
+		if not v1 then
+			v2 = nil
+		else
+			v2 = v1:FindFirstChildOfClass("Humanoid")
+		end
+		local v3 = v2
+		if not v3 then
+			return false, "No humanoid found"
+		end
+		local v4 = func47(arg1) or arg1
+		local tbl = {}
+		local v7
+		local v5, v6 = pcall(function()
+			return Players:CreateHumanoidModelFromDescription(v4, v3.RigType)
+		end)
+		if v5 and typeof(v6) == "Instance" and v6:IsA("Model") then
+			v7 = v6
+		end
+		func58(v1)
+		if v7 then
+			for _, v8 in ipairs(v7:GetChildren()) do
+				if v8:IsA("Shirt") or v8:IsA("Pants") or v8:IsA("ShirtGraphic") or v8:IsA("BodyColors") or v8:IsA("CharacterMesh") then
+					v8:Clone().Parent = v1
+				end
+			end
+		end
+		if not v1:FindFirstChildOfClass("BodyColors") then
+			local bodyColors = Instance.new("BodyColors")
+			bodyColors.HeadColor3 = v4.HeadColor
+			bodyColors.TorsoColor3 = v4.TorsoColor
+			bodyColors.LeftArmColor3 = v4.LeftArmColor
+			bodyColors.RightArmColor3 = v4.RightArmColor
+			bodyColors.LeftLegColor3 = v4.LeftLegColor
+			bodyColors.RightLegColor3 = v4.RightLegColor
+			bodyColors.Parent = v1
+		end
+		local v9 = arg2 or v7
+		if v9 and not func59(v1, v9) and v7 then
+			func59(v1, v7)
+		end
+		if not v1:FindFirstChild("Head") then
+			local part = Instance.new("Part")
+			part.Name = "Head"
+			part.Size = Vector3.new(2, 2, 1.25)
+			part.Parent = v1
+		end
+		if arg2 then
+			for _, v10 in ipairs((func56(arg2))) do
+				func57(v1, v10, tbl)
+			end
+		end
+		if v7 then
+			for _, v11 in ipairs((func56(v7))) do
+				func57(v1, v11, tbl)
+			end
+		end
+		for _, v12 in ipairs((func53(v4))) do
+			for _, v13 in ipairs((func51(v12))) do
+				for _, v14 in ipairs((func56(v13))) do
+					func57(v1, v14, tbl)
+				end
+			end
+		end
+		if v7 then
+			pcall(function()
+				v7:Destroy()
+			end)
+		end
+		return true, "Avatar successfully swapped"
+	end
+	local function func61()
+		local v1 = func46(LocalPlayer, 3)
+		local v2
+		if not v1 then
+			v2 = nil
+		else
+			v2 = v1:FindFirstChildOfClass("Humanoid")
+		end
+		local v3 = v2
+		if v3 then
+			local v4, v5 = pcall(function()
+				return v3:GetAppliedDescription()
+			end)
+			if v4 and v5 and v5:IsA("HumanoidDescription") then
+				v80 = func47(v5) or v5
+				return true
+			end
+		end
+		local v6 = func50(LocalPlayer.UserId)
+		if v6 then
+			v80 = func47(v6) or v6
+			return true
+		end
+		return false
+	end
+	local function func62(arg1)
+		if not v80 then
+			func61()
+		end
+		local _, v1, v2 = func48(arg1)
+		if not v1 then
+			return false, "User not found!"
+		end
+		local v3
+		local v4
+		if v2 then
+			v3 = func46(v2, 1.5)
+			v4 = func49(v2)
+		end
+		v4 = v4 or func50(v1)
+		if not v4 then
+			return false, "Could not load avatar"
+		end
+		return func60(v4, v3)
+	end
+	local function func63()
+		if not v80 then
+			func61()
+		end
+		if not v80 then
+			return false, "No backup avatar saved"
+		end
+		return func60(func47(v80) or v80, nil)
+	end
+	local str1 = ""
+	v60:AddTextBox({
+		Name = "Steal Username",
+		PlaceholderText = "Username",
+		NoSave = true,
+		Callback = function(arg1)
+			str1 = func44(arg1)
+		end,
+	})
+	v60:AddButton("Steal (change avatar by username)", function()
+		if str1 == "" then
+			func5("Avatar Stealer", "Enter a username!", 1.5)
+			return
+		end
+		func5("Avatar Stealer", "Swapping avatar...", 1)
+		task.spawn(function()
+			local v1, v2 = func62(str1)
+			func5("Avatar Stealer", v2 or (v1 and "Swapped!" or "Failed"), 2)
+		end)
+	end)
+	v60:AddButton("Restore My Avatar", function()
+		func5("Avatar Stealer", "Restoring...", 1)
+		task.spawn(function()
+			local v1, v2 = func63()
+			func5("Avatar Stealer", v2 or (v1 and "Restored!" or "Failed"), 2)
+		end)
+	end)
+	v60:AddSection("Network & Physics")
+	v60:AddParagraph("Clumsy Lag", "Replication lag: 0.01 (+10ms) or 0.02 (+20ms). Type 0 to turn it off.")
+	v60:AddTextBox({
+		Name = "Clumsy Lag",
+		PlaceholderText = "Number",
+		Callback = function(arg1)
+			pcall(function()
+				settings():GetService("NetworkSettings").IncomingReplicationLag = tonumber(arg1) or 0
+			end)
+		end,
+	})
+	v60:AddParagraph("No Collision Characters", "Passes through other player characters. Loads an external script from GitHub when you press the button.")
+	v60:AddButton("No Collision Characters", function()
+		local str = "https://raw.githubusercontent.com/Skinny-yz/Hawk/refs/heads/main/Functions/01.lua"
+		if not pcall(function()
+			loadstring(game:HttpGet(str))()
+		end) then
+			func5("No Collision", "Failed to load", 3)
+		end
+	end)
+	v60:AddSection("No Cooldown")
+	v60:AddParagraph("Warning", "Removes the dive/tackle cooldown. Use it legitimately.")
+	local v81
+	v60:AddToggle({
+		Name = "No Tackle/Dive Cooldown",
+		Default = false,
+		Callback = function(arg1)
+			if v81 then
+				v81:Disconnect()
+				v81 = nil
+			end
+			if not arg1 then
+				return
+			end
+			local v1, v2 = pcall(function()
+				return require(game:GetService("ReplicatedStorage").Modules.Touch)
+			end)
+			if v1 and v2 and v2.Tackle then
+				v81 = RunService.Heartbeat:Connect(function()
+					pcall(function()
+						debug.setupvalue(v2.Tackle, 3, false)
+						debug.setupvalue(v2.Tackle, 4, false)
+					end)
+				end)
+			else
+				func5("Tackle Cooldown", "Touch module not found!", 2)
+			end
+		end,
+	})
+
+	v60:AddSection("Player")
+	local flag11 = false
+	local num14 = 22
+	v60:AddToggle({
+		Name = "Enable WalkSpeed",
+		Default = false,
+		Callback = function(arg1)
+			flag11 = arg1
+			local Character = LocalPlayer.Character
+			local Humanoid = Character and Character:FindFirstChildOfClass("Humanoid")
+			if Humanoid then
+				Humanoid.WalkSpeed = arg1 and num14 or 22
+			end
+		end,
+	})
+	v60:AddSlider({
+		Name = "WalkSpeed Value",
+		Min = 16,
+		Max = 200,
+		Increase = 1,
+		Default = 16,
+		Callback = function(arg1)
+			num14 = arg1
+			if flag11 then
+				local Character = LocalPlayer.Character
+				local Humanoid = Character and Character:FindFirstChildOfClass("Humanoid")
+				if Humanoid then
+					Humanoid.WalkSpeed = arg1
+				end
+			end
+		end,
+	})
+
+	local flag12 = true
+	local num15 = 120
+	local jumpPowerDefaults = setmetatable({}, {__mode = "k"})
+
+	local function applyJumpPower()
+		local Character = LocalPlayer.Character
+		local Humanoid = Character and Character:FindFirstChildOfClass("Humanoid")
+		if not Humanoid then
+			return false
+		end
+
+		if not jumpPowerDefaults[Humanoid] then
+			jumpPowerDefaults[Humanoid] = {
+				UseJumpPower = Humanoid.UseJumpPower,
+				JumpPower = Humanoid.JumpPower,
+			}
+		end
+
+		local defaults = jumpPowerDefaults[Humanoid]
+		if flag12 then
+			Humanoid.UseJumpPower = true
+			Humanoid.JumpPower = num15
+		else
+			Humanoid.UseJumpPower = defaults.UseJumpPower
+			if defaults.UseJumpPower then
+				Humanoid.JumpPower = defaults.JumpPower
+			end
+		end
+		return true
+	end
+
+	LocalPlayer.CharacterAdded:Connect(function(Character)
+		local Humanoid = Character:WaitForChild("Humanoid", 10)
+		if Humanoid then
+			task.wait()
+			applyJumpPower()
+		end
+	end)
+
+	v60:AddToggle({
+		Name = "Enable Jump Power",
+		Default = true,
+		Callback = function(arg1)
+			flag12 = arg1
+			applyJumpPower()
+		end,
+	})
+	v60:AddSlider({
+		Name = "Jump Power",
+		Min = 50,
+		Max = 300,
+		Increase = 1,
+		Default = 120,
+		Callback = function(arg1)
+			num15 = arg1
+			if flag12 then
+				applyJumpPower()
+			end
+		end,
+	})
+
+	local flag13 = false
+	local num16 = 196
+	v60:AddToggle({
+		Name = "Enable Custom Gravity",
+		Default = false,
+		Callback = function(arg1)
+			flag13 = arg1
+			workspace.Gravity = arg1 and num16 or 196
+		end,
+	})
+	v60:AddSlider({
+		Name = "Gravity Level",
+		Min = 0,
+		Max = 196,
+		Increase = 1,
+		Default = 196,
+		Callback = function(arg1)
+			num16 = arg1
+			if flag13 then
+				workspace.Gravity = arg1
+			end
+		end,
+	})
+
+	local v61 = tbl24:MakeTab("Skies")
+	v61:AddSection("Skyboxes")
+	local tbl42 = {}
+	local tbl43 = {}
+	local function func64(arg1)
+		local SpectreSky = Lighting:FindFirstChild("SpectreSky")
+		if SpectreSky then
+			SpectreSky:Destroy()
+		end
+		local sky = Instance.new("Sky")
+		sky.Name = "SpectreSky"
+		sky.SkyboxBk = "rbxassetid://" .. arg1.Bk
+		sky.SkyboxDn = "rbxassetid://" .. arg1.Dn
+		sky.SkyboxFt = "rbxassetid://" .. arg1.Ft
+		sky.SkyboxLf = "rbxassetid://" .. arg1.Lf
+		sky.SkyboxRt = "rbxassetid://" .. arg1.Rt
+		sky.SkyboxUp = "rbxassetid://" .. arg1.Up
+		sky.StarCount = arg1.StarCount or 0
+		sky.Parent = Lighting
+	end
+	local tbl44 = {}
+	tbl43.Bk = "12064107"
+	tbl43.Dn = "12064152"
+	tbl43.Ft = "12064121"
+	tbl43.Lf = "12063984"
+	tbl43.Rt = "12064115"
+	tbl43.Up = "12064131"
+	tbl43.StarCount = 0
+	tbl42[1], tbl42[2] = "Night Sky", tbl43
+	local tbl45 = {}
+	tbl45[1], tbl45[2] = "Scary Night", {
+		Bk = "48020371",
+		Dn = "48020144",
+		Ft = "48020234",
+		Lf = "48020211",
+		Rt = "48020254",
+		Up = "48020383",
+		StarCount = 3000,
+	}
+	local tbl46 = {}
+	tbl46[2], tbl46[1] = {
+		Bk = "271042516",
+		Dn = "271077243",
+		Ft = "271042556",
+		Lf = "271042310",
+		Rt = "271042467",
+		Up = "271077958",
+		StarCount = 1334,
+	}, "Sakura Sky"
+	local tbl47 = {
+		"Cake Up Night Sky Galaxy Planets",
+		{
+			Bk = "15983968922",
+			Dn = "15983966825",
+			Ft = "15983965025",
+			Lf = "15983967420",
+			Rt = "15983966246",
+			Up = "15983964246",
+			StarCount = 3000,
+		},
+	}
+	local tbl48 = {}
+	tbl48[2], tbl48[1] = {
+		Bk = "5084575798",
+		Dn = "5084575916",
+		Ft = "5103949679",
+		Lf = "5103948542",
+		Rt = "5103948784",
+		Up = "5084576400",
+		StarCount = 3000,
+	}, "Purple Night Sky"
+	local tbl49 = {}
+	tbl49[2], tbl49[1] = {
+		Bk = "458016711",
+		Dn = "458016826",
+		Ft = "458016532",
+		Lf = "458016655",
+		Rt = "458016782",
+		Up = "458016792",
+		StarCount = 3000,
+	}, "Sunset Orange"
+	local tbl50 = {}
+	tbl50[2], tbl50[1] = {
+		Bk = "570557514",
+		Dn = "570557775",
+		Ft = "570557559",
+		Lf = "570557620",
+		Rt = "570557672",
+		Up = "570557727",
+		StarCount = 3000,
+	}, "Purple Sky"
+	local tbl51 = {}
+	tbl51[1], tbl51[2] = "Gray Sky", {
+		Bk = "18703245834",
+		Dn = "18703243349",
+		Ft = "18703240532",
+		Lf = "18703240532",
+		Rt = "18703235430",
+		Up = "18703232671",
+		StarCount = 3500,
+	}
+	local tbl52 = {
+		"Mountain Sky",
+		{
+			Bk = "160188495",
+			Dn = "160188614",
+			Ft = "160188609",
+			Lf = "160188589",
+			Rt = "160188597",
+			Up = "160188588",
+			StarCount = 3000,
+		},
+	}
+	local tbl53 = {
+		"Pinkie Preppy Sky",
+		{
+			Bk = "11555017034",
+			Dn = "11555013415",
+			Ft = "11555010145",
+			Lf = "11555006545",
+			Rt = "11555000712",
+			Up = "11554996247",
+			StarCount = 3000,
+		},
+	}
+	local tbl54 = {
+		"Mountain Sky 2",
+		{
+			Bk = "368385273",
+			Dn = "48015300",
+			Ft = "368388290",
+			Lf = "368390615",
+			Rt = "368390615",
+			Up = "48015387",
+			StarCount = 3000,
+		},
+	}
+	local tbl55 = {}
+	tbl55[1], tbl55[2] = "Sunset Mountain Sky", {
+		Bk = "17901353811",
+		Dn = "17901366771",
+		Ft = "17901356262",
+		Lf = "17901359687",
+		Rt = "17901362326",
+		Up = "17901365106",
+		StarCount = 3000,
+	}
+	tbl44[2], tbl44[6], tbl44[9], tbl44[8], tbl44[5], tbl44[7], tbl44[1], tbl44[12], tbl44[11], tbl44[10], tbl44[4], tbl44[3] = tbl45, tbl49, tbl52, tbl51, tbl48, tbl50, tbl42, tbl55, tbl54, tbl53, tbl47, tbl46
+	for _, v62 in ipairs(tbl44) do
+		v61:AddButton(v62[1], function()
+			func64(v62[2])
+		end)
+	end
+end
+UserInputService.InputBegan:Connect(function(arg1, arg2)
+	if arg2 or tbl24.Listening then
+		return
+	end
+	local KeyCode = arg1.KeyCode
+	if KeyCode == Enum.KeyCode.Unknown then
+		return
+	end
+	if KeyCode == C then
+		v46.Set(not v46.Get())
+		func5("Ball Reach", v46.Get() and "Enabled" or "Disabled", 1.5)
+	end
+	if KeyCode == v42 then
+		v56.Set(not v56.Get())
+		func5("Air Helper", v56.Get() and "Enabled" or "Disabled", 1.5)
+	end
+	if KeyCode == v40 then
+		v48.Set(not v48.Get())
+		func5("Leg Reach", v48.Get() and "Enabled" or "Disabled", 1.5)
+	end
+	if KeyCode == v41 then
+		v52.Set(not v52.Get())
+		func5("Auto GK", v52.Get() and "Enabled" or "Disabled", 1.5)
+	end
+end)
+local function func65(arg1)
+	return {
+		CreateSection = function(_, arg2)
+			arg1:AddSection(arg2)
+		end,
+		CreateButton = function(_, arg2)
+			arg1:AddButton(arg2.Name, arg2.Callback or function() end, arg2.Desc)
+		end,
+		CreateToggle = function(_, arg2)
+			arg1:AddToggle({Name = arg2.Name, Default = arg2.CurrentValue == true, Callback = arg2.Callback})
+		end,
+		CreateSlider = function(_, arg2)
+			local v1 = arg2.Range or {0, 100}
+			arg1:AddSlider({
+				Name = arg2.Name,
+				Min = v1[1],
+				Max = v1[2],
+				Increase = arg2.Increment or 1,
+				Default = arg2.CurrentValue or v1[1],
+				Callback = arg2.Callback,
+			})
+		end,
+		CreateInput = function(_, arg2)
+			arg1:AddTextBox({Name = arg2.Name, PlaceholderText = arg2.PlaceholderText or "", Callback = arg2.Callback})
+		end,
+	}
+end
+local Lighting1 = game:GetService("Lighting")
+game:GetService("CoreGui")
+game:GetService("ReplicatedStorage")
+local v63 = func65(v54)
+v63:CreateSection("FFlags Simple")
+v63:CreateInput({
+	Name = "TargetTimeDelayFacctorTenths",
+	Desc = "e.g: 4",
+	PlaceholderText = "Value...",
+	Flag = "SpectreInput2",
+	Callback = function(arg1)
+		pcall(function()
+			setfflag("TargetTimeDelayFacctorTenths", tostring(arg1))
+		end)
+	end,
+})
+v63:CreateInput({
+	Name = "InterpolationMaxDelayMSec",
+	Desc = "e.g: 60",
+	PlaceholderText = "Value...",
+	Flag = "SpectreInput3",
+	Callback = function(arg1)
+		pcall(function()
+			setfflag("InterpolationMaxDelayMSec", tostring(arg1))
+		end)
+	end,
+})
+v63:CreateInput({
+	Name = "S2PhysicsSenderRate",
+	Desc = "e.g: 38720",
+	PlaceholderText = "Value...",
+	Flag = "SpectreInput4",
+	Callback = function(arg1)
+		pcall(function()
+			setfflag("S2PhysicsSenderRate", tostring(arg1))
+		end)
+	end,
+})
+local function func66(arg1)
+	return (arg1:gsub("^DFInt", ""):gsub("^DFFlag", ""):gsub("FString", ""):gsub("FLog", ""):gsub("^FFlag", ""):gsub("^DFint", ""):gsub("^FInt", ""))
+end
+v63:CreateSection("FFlag Injector")
+local connection
+local tbl56 = {}
+v63:CreateInput({
+	Name = "FFlag JSON",
+	Desc = "Paste Your FFlags",
+	PlaceholderText = "FFlag JSON...",
+	Flag = "SpectreInput5",
+	Callback = function(arg1)
+		if not arg1 or arg1 == "" then
+			return
+		end
+		pcall(function()
+			tbl56 = game:GetService("HttpService"):JSONDecode(arg1)
+		end)
+	end,
+})
+v63:CreateButton({
+	Name = "Inject & Lock",
+	Desc = "Xeno/Solara not supported",
+	Callback = function()
+		if connection then
+			connection:Disconnect()
+		end
+		local v1 = tick()
+		connection = RunService.Heartbeat:Connect(function()
+			if tick() - v1 >= 10 then
+				local v2 = tick()
+				v1 = v2
+				if setfflag then
+					for k, v3 in pairs(tbl56) do
+						local v4 = func66(k)
+						pcall(function()
+							if getfflag(v4) == nil then
+								if getfflag(k) ~= nil then
+									setfflag(k, tostring(v3))
+								end
+							else
+								setfflag(v4, tostring(v3))
+							end
+						end)
+					end
+				end
+			end
+		end)
+	end,
+})
+v63:CreateButton({
+	Name = "Stop Injecting FFlags",
+	Desc = "Stop applying FFlags from the JSON box",
+	Callback = function()
+		if connection then
+			connection:Disconnect()
+			connection = nil
+		end
+	end,
+})
+v63:CreateSection("FFlag Main")
+v63:CreateButton({
+	Name = "Ping Optimizer",
+	Desc = "Reduces effects to improve performance",
+	Callback = function()
+		task.spawn(function()
+			local Descendants = workspace:GetDescendants()
+			local v1 = #Descendants
+			if not (v1 < 1) then
+				repeat
+					local v2 = Descendants[v1]
+					if v2.ClassName == "ParticleEmitter" or v2.ClassName == "Smoke" or v2.ClassName == "Fire" then
+						v2:Destroy()
+					end
+					v1 = v1 + -1
+				until v1 < 1
+			end
+		end)
+	end,
+})
+v63:CreateSection("FFlag Dark Abyss FPS + Texture")
+v63:CreateButton({
+	Name = "FFlagDarkAbyss",
+	Desc = "Darkens the game and improves FPS",
+	Callback = function()
+		for _, v1 in ipairs(Lighting1:GetChildren()) do
+			if v1:IsA("Sky") then
+				v1:Destroy()
+			end
+		end
+		local sky = Instance.new("Sky")
+		sky.Name = "DarkAbyssSky"
+		sky.SkyboxBk = "rbxassetid://0"
+		sky.SkyboxDn = "rbxassetid://0"
+		sky.SkyboxFt = "rbxassetid://0"
+		sky.SkyboxLf = "rbxassetid://0"
+		sky.SkyboxRt = "rbxassetid://0"
+		sky.SkyboxUp = "rbxassetid://0"
+		sky.Parent = Lighting1
+		Lighting1.Ambient = Color3.fromRGB(128, 128, 128)
+		Lighting1.OutdoorAmbient = Color3.fromRGB(100, 100, 100)
+		Lighting1.FogColor = Color3.fromRGB(120, 120, 120)
+		Lighting1.FogEnd = 1000
+	end,
+})
+v63:CreateSection("Visual Quality")
+v63:CreateInput({
+	Name = "Anti-Aliasing (MSAA)",
+	Desc = "1x, 2x, 4x, 8x",
+	PlaceholderText = "MSAA level...",
+	Flag = "SpectreInput7",
+	Callback = function(arg1)
+		local num = tonumber(arg1)
+		if num then
+			pcall(function()
+				setfflag("FIntDebugForceMSAASamples", tostring(num))
+			end)
+		end
+	end,
+})
+v63:CreateInput({
+	Name = "Texture Quality",
+	Desc = "0 Lowest / 3 High / -1 Auto",
+	PlaceholderText = "0 - 4 or -1...",
+	Flag = "SpectreInput8",
+	Callback = function(arg1)
+		local num = tonumber(arg1)
+		if not num then
+			return
+		end
+		if num ~= -1 then
+			pcall(function()
+				setfflag("DFFlagTextureQualityOverrideEnabled", "true")
+			end)
+			pcall(function()
+				setfflag("DFIntTextureQualityOverride", tostring(num))
+			end)
+			pcall(function()
+				setfflag("FIntDebugTextureManagerSkipMips", num == 0 and "2" or "0")
+			end)
+		else
+			pcall(function()
+				setfflag("DFFlagTextureQualityOverrideEnabled", "false")
+			end)
+			pcall(function()
+				setfflag("DFIntTextureQualityOverride", "0")
+			end)
+			pcall(function()
+				setfflag("FIntDebugTextureManagerSkipMips", "0")
+			end)
+		end
+	end,
+})
+v63:CreateSection("Gameplay Tweaks")
+v63:CreateToggle({
+	Name = "Disable Player Shadows",
+	Desc = "Remove player shadows",
+	CurrentValue = false,
+	Flag = "SpectreToggle13",
+	Callback = function(arg1)
+		pcall(function()
+			setfflag("FIntRenderShadowIntensity", arg1 and "0" or "1")
+		end)
+	end,
+})
+v63:CreateToggle({
+	Name = "Disable PostFX",
+	Desc = "Disable post-processing effects",
+	CurrentValue = false,
+	Flag = "SpectreToggle14",
+	Callback = function(arg1)
+		pcall(function()
+			setfflag("FFlagDisablePostFx", arg1 and "true" or "false")
+		end)
+	end,
+})
+v63:CreateToggle({
+	Name = "Disable Terrain Textures",
+	Desc = "Remove terrain textures",
+	CurrentValue = false,
+	Flag = "SpectreToggle15",
+	Callback = function(arg1)
+		pcall(function()
+			setfflag("FIntTerrainArraySliceSize", arg1 and "0" or "2")
+		end)
+	end,
+})
+-- SETTINGS TAB - CONFIG SYSTEM + 20 THEMES ONLY
+-- ============================================================
+do
+    local HttpService2 = game:GetService("HttpService")
+    local settingsTab = Window:CreateTab("Settings")
+
+    local function notify(title, message)
+        func5(title, message, 3)
+    end
+
+    local hasFS = type(writefile) == "function"
+        and type(readfile) == "function"
+        and type(isfile) == "function"
+        and type(isfolder) == "function"
+        and type(makefolder) == "function"
+        and type(listfiles) == "function"
+        and type(delfile) == "function"
+
+    local memConfigs, autoLoadName = {}, nil
+    local folder = "SpectreTouchline"
+    local configFolder = folder .. "/configs"
+
+    local function sanitize(name)
+        return tostring(name or "")
+            :gsub("[^%w%-_ ]", "")
+            :gsub("^%s+", "")
+            :gsub("%s+$", "")
+            :sub(1, 32)
+    end
+
+    if hasFS then
+        pcall(function()
+            if not isfolder(folder) then makefolder(folder) end
+            if not isfolder(configFolder) then makefolder(configFolder) end
+        end)
+    end
+
+    local function configPath(name)
+        return configFolder .. "/" .. sanitize(name) .. ".json"
+    end
+
+    local function collectValues()
+        local values = {}
+        for key, element in pairs(tbl24.Elements or {}) do
+            if element and type(element.get) == "function" then
+                local ok, value = pcall(element.get)
+                if ok then values[key] = value end
+            end
+        end
+        return {
+            version = 4,
+            theme = Library.CurrentTheme or "Spectre",
+            values = values
+        }
+    end
+
+    local function listConfigs()
+        local names = {}
+        if hasFS then
+            local ok, files = pcall(listfiles, configFolder)
+            if ok and type(files) == "table" then
+                for _, file in ipairs(files) do
+                    local name = tostring(file):match("([^/\\]+)%.json$")
+                    if name then names[#names + 1] = name end
+                end
+            end
+        else
+            for name in pairs(memConfigs) do
+                names[#names + 1] = name
+            end
+        end
+        table.sort(names, function(a, b)
+            return a:lower() < b:lower()
+        end)
+        return names
+    end
+
+    local function saveConfig(name)
+        name = sanitize(name)
+        if name == "" then
+            return false, "Type a config name first"
+        end
+
+        local ok, json = pcall(function()
+            return HttpService2:JSONEncode(collectValues())
+        end)
+        if not ok then
+            return false, "Could not encode config values"
+        end
+
+        if hasFS then
+            local saved, err = pcall(writefile, configPath(name), json)
+            if not saved then return false, tostring(err) end
+        else
+            memConfigs[name] = json
+        end
+        return true, name
+    end
+
+    local function loadConfig(name)
+        name = sanitize(name)
+        if name == "" then
+            return false, "Select or enter a config name"
+        end
+
+        local raw
+        if hasFS then
+            local existsOk, exists = pcall(isfile, configPath(name))
+            if not (existsOk and exists) then
+                return false, "Config not found"
+            end
+            local readOk, data = pcall(readfile, configPath(name))
+            if not readOk then
+                return false, "Could not read config file"
+            end
+            raw = data
+        else
+            raw = memConfigs[name]
+        end
+
+        if type(raw) ~= "string" then
+            return false, "Config not found"
+        end
+
+        local decodedOk, decoded = pcall(function()
+            return HttpService2:JSONDecode(raw)
+        end)
+        if not decodedOk or type(decoded) ~= "table" then
+            return false, "Config is corrupted"
+        end
+
+        if decoded.theme and Library.Themes and Library.Themes[decoded.theme] then
+            pcall(function()
+                Library:ChangeTheme(decoded.theme)
+            end)
+        end
+
+        local count = 0
+        for key, value in pairs(decoded.values or {}) do
+            local element = tbl24.Elements and tbl24.Elements[key]
+            if element and type(element.set) == "function" then
+                if pcall(element.set, value) then
+                    count = count + 1
+                end
+            end
+        end
+        return true, count
+    end
+
+    local function deleteConfig(name)
+        name = sanitize(name)
+        if name == "" then
+            return false, "Enter a config name"
+        end
+
+        if hasFS then
+            local existsOk, exists = pcall(isfile, configPath(name))
+            if not (existsOk and exists) then
+                return false, "Config not found"
+            end
+            local ok, err = pcall(delfile, configPath(name))
+            if not ok then return false, tostring(err) end
+        else
+            if not memConfigs[name] then
+                return false, "Config not found"
+            end
+            memConfigs[name] = nil
+        end
+        return true
+    end
+
+    local function getAutoLoad()
+        if hasFS then
+            local ok, exists = pcall(isfile, folder .. "/autoload.txt")
+            if ok and exists then
+                local readOk, value = pcall(readfile, folder .. "/autoload.txt")
+                if readOk then return sanitize(value) end
+            end
+            return nil
+        end
+        return autoLoadName
+    end
+
+    local function setAutoLoad(name)
+        if hasFS then
+            if name then
+                local ok, err = pcall(writefile, folder .. "/autoload.txt", sanitize(name))
+                if not ok then return false, tostring(err) end
+            else
+                pcall(function()
+                    local path = folder .. "/autoload.txt"
+                    if isfile(path) then delfile(path) end
+                end)
+            end
+        else
+            autoLoadName = name and sanitize(name) or nil
+        end
+        return true
+    end
+
+    -- CONFIG SYSTEM
+    settingsTab:CreateSection("Config System")
+    if not hasFS then
+        settingsTab:CreateLabel("File APIs unavailable: configs are session-only.")
+    end
+
+    local configName, selectedConfig = "", ""
+    local configList
+
+    settingsTab:CreateInput(
+        "Config Name",
+        "Enter a name before saving.",
+        "MyConfig",
+        nil,
+        nil,
+        function(value)
+            configName = tostring(value or "")
+        end
+    )
+
+    configList = settingsTab:CreateSelect(
+        "Saved Configs",
+        "Select a saved config.",
+        listConfigs(),
+        "",
+        function(values)
+            local value = type(values) == "table" and values[1] or values
+            selectedConfig = tostring(value or "")
+            configName = selectedConfig
+        end
+    )
+
+    local function refreshList(selectName)
+        if configList and configList.Refresh then
+            pcall(configList.Refresh, configList, listConfigs(), false)
+        end
+        if selectName and configList and configList.Set then
+            pcall(configList.Set, configList, selectName)
+        end
+    end
+
+    settingsTab:CreateButton("Save Config", "Save all registered feature values and the selected theme.", nil, function()
+        local name = configName ~= "" and configName or selectedConfig
+        local ok, result = saveConfig(name)
+        if ok then
+            selectedConfig = result
+            configName = result
+            refreshList(result)
+            notify("Config", "Saved " .. result)
+        else
+            notify("Config", tostring(result))
+        end
+    end)
+
+    settingsTab:CreateButton("Load Config", "Restore the selected config and theme.", nil, function()
+        local name = configName ~= "" and configName or selectedConfig
+        local ok, result = loadConfig(name)
+        if ok then
+            notify("Config", "Loaded " .. name .. " (" .. result .. " controls)")
+        else
+            notify("Config", tostring(result))
+        end
+    end)
+
+    settingsTab:CreateButton("Delete Config", "Delete the selected config.", nil, function()
+        local name = configName ~= "" and configName or selectedConfig
+        local ok, result = deleteConfig(name)
+        if ok then
+            configName, selectedConfig = "", ""
+            refreshList()
+            notify("Config", "Deleted " .. name)
+        else
+            notify("Config", tostring(result))
+        end
+    end)
+
+    settingsTab:CreateButton("Refresh Config List", "Refresh saved config names.", nil, function()
+        refreshList()
+        notify("Config", "List refreshed")
+    end)
+
+    settingsTab:CreateSection("Auto Load")
+    settingsTab:CreateButton("Set Selected As Auto-Load", "Load this config automatically next execution.", nil, function()
+        local name = configName ~= "" and configName or selectedConfig
+        if name == "" then
+            notify("Auto Load", "Select a config first")
+            return
+        end
+        local ok, err = setAutoLoad(name)
+        if ok then
+            notify("Auto Load", name .. " will load next time")
+        else
+            notify("Auto Load", tostring(err))
+        end
+    end)
+
+    settingsTab:CreateButton("Clear Auto-Load", "Disable automatic config loading.", nil, function()
+        local ok, err = setAutoLoad(nil)
+        if ok then
+            notify("Auto Load", "Cleared")
+        else
+            notify("Auto Load", tostring(err))
+        end
+    end)
+
+    -- 20 THEMES
+    local function palette(bg, stroke, accent, text, muted, off, toggle, section)
+        return {
+            MainBg = Color3.fromRGB(bg[1], bg[2], bg[3]),
+            Stroke = Color3.fromRGB(stroke[1], stroke[2], stroke[3]),
+            Accent = Color3.fromRGB(accent[1], accent[2], accent[3]),
+            Accentpunish = Color3.fromRGB(accent[1], accent[2], accent[3]),
+            Text = Color3.fromRGB(text[1], text[2], text[3]),
+            TextInactive = Color3.fromRGB(muted[1], muted[2], muted[3]),
+            ToggleBgOff = Color3.fromRGB(off[1], off[2], off[3]),
+            ToggleBtnBg = Color3.fromRGB(toggle[1], toggle[2], toggle[3]),
+            ToggleDot = Color3.fromRGB(255, 255, 255),
+            SectionTitle = Color3.fromRGB(section[1], section[2], section[3])
+        }
+    end
+
+    local themes = {
+        Spectre  = palette({13,13,13}, {70,70,70}, {235,235,235}, {245,245,245}, {185,185,185}, {55,55,55}, {28,28,28}, {185,185,185}),
+        Graphite = palette({25,27,30}, {75,80,88}, {130,140,155}, {245,245,245}, {180,185,195}, {60,64,70}, {38,41,46}, {190,195,205}),
+        Ocean    = palette({9,22,30}, {35,80,100}, {60,180,220}, {235,248,255}, {155,190,205}, {35,65,78}, {15,38,50}, {165,210,225}),
+        Crimson  = palette({28,12,16}, {95,40,48}, {220,65,80}, {255,240,242}, {210,165,170}, {75,35,40}, {42,20,24}, {220,175,180}),
+        Forest   = palette({12,24,18}, {45,85,60}, {85,190,120}, {240,255,245}, {165,200,175}, {38,68,48}, {20,42,28}, {180,220,190}),
+        Purple   = palette({20,13,30}, {75,55,105}, {160,110,230}, {248,242,255}, {190,175,215}, {65,48,85}, {35,25,48}, {205,185,230}),
+        Midnight = palette({8,12,28}, {35,48,90}, {95,125,255}, {240,244,255}, {160,175,210}, {35,42,75}, {18,24,48}, {170,185,235}),
+        Sakura   = palette({35,18,28}, {105,55,80}, {245,125,180}, {255,242,249}, {220,175,200}, {85,48,68}, {48,25,40}, {235,180,210}),
+        Sunset   = palette({35,20,14}, {110,65,40}, {255,145,65}, {255,246,235}, {220,185,155}, {85,55,35}, {48,30,18}, {235,185,145}),
+        Neon     = palette({12,12,18}, {55,65,75}, {0,255,190}, {240,255,250}, {155,195,185}, {35,55,55}, {18,28,30}, {130,255,220}),
+        Ice      = palette({18,28,38}, {65,105,130}, {120,220,255}, {245,252,255}, {175,210,225}, {50,80,95}, {25,45,58}, {190,230,245}),
+        Gold     = palette({30,25,12}, {100,82,35}, {230,185,65}, {255,250,230}, {210,195,150}, {78,65,32}, {42,35,18}, {225,200,135}),
+        Ruby     = palette({30,10,14}, {105,35,48}, {235,45,75}, {255,240,243}, {210,155,165}, {78,30,40}, {42,15,22}, {225,160,175}),
+        Emerald  = palette({8,28,22}, {35,100,75}, {35,220,150}, {235,255,248}, {155,210,190}, {30,75,58}, {14,40,30}, {155,230,195}),
+        Lavender = palette({27,20,38}, {85,65,115}, {190,150,255}, {250,245,255}, {195,180,220}, {65,50,85}, {35,25,48}, {215,195,240}),
+        Cyber    = palette({8,18,24}, {30,90,105}, {0,220,255}, {235,252,255}, {150,195,205}, {25,65,75}, {10,35,45}, {145,225,240}),
+        Rose     = palette({32,18,22}, {105,65,75}, {225,120,145}, {255,245,247}, {210,175,185}, {80,50,58}, {42,28,32}, {230,185,195}),
+        Monochrome = palette({18,18,18}, {90,90,90}, {205,205,205}, {250,250,250}, {175,175,175}, {65,65,65}, {35,35,35}, {205,205,205}),
+        Lava     = palette({30,13,8}, {110,45,25}, {255,95,35}, {255,245,235}, {220,170,145}, {85,40,25}, {45,20,12}, {240,165,125}),
+        Arctic   = palette({12,25,32}, {55,95,115}, {100,205,220}, {242,252,255}, {170,205,215}, {40,75,88}, {20,42,52}, {175,225,235})
+    }
+
+    for name, colors in pairs(themes) do
+        Library.Themes[name] = colors
+    end
+
+    pcall(function()
+        Library:ChangeTheme("Spectre")
+    end)
+
+    local themeNames = {
+        "Spectre", "Graphite", "Ocean", "Crimson", "Forest",
+        "Purple", "Midnight", "Sakura", "Sunset", "Neon",
+        "Ice", "Gold", "Ruby", "Emerald", "Lavender",
+        "Cyber", "Rose", "Monochrome", "Lava", "Arctic"
+    }
+
+    settingsTab:CreateSection("Themes")
+    settingsTab:CreateSelect(
+        "Choose Theme",
+        "Choose one of the 20 available themes.",
+        themeNames,
+        "Spectre",
+        function(values)
+            local name = type(values) == "table" and values[1] or values
+            if themes[name] then
+                local ok = pcall(function()
+                    Library:ChangeTheme(name)
+                end)
+                if ok then
+                    notify("Theme", name .. " applied")
+                else
+                    notify("Theme", "Could not apply " .. tostring(name))
+                end
+            end
+        end
+    )
+
+    task.delay(2, function()
+        local autoName = getAutoLoad()
+        if autoName and autoName ~= "" then
+            local ok, count = loadConfig(autoName)
+            if ok then
+                notify("Auto Load", "Loaded " .. autoName .. " (" .. count .. " controls)")
+            end
+        end
+    end)
+end
+
+-- ============================================================
+-- SPECTRE FLOATING TOGGLE (separate ScreenGui; controls the real Spectre GUI)
+-- ============================================================
+task.spawn(function()
+    local UIS = game:GetService("UserInputService")
+    local Tween = game:GetService("TweenService")
+    local Players = game:GetService("Players")
+    local player = Players.LocalPlayer
+
+    local parent
+    local ok = pcall(function()
+        if gethui then parent = gethui() end
+    end)
+    if not parent then
+        parent = game:GetService("CoreGui")
+    end
+
+    local old = parent:FindFirstChild("Spectre_FloatingToggle")
+    if old then old:Destroy() end
+
+    local toggleGui = Instance.new("ScreenGui")
+    toggleGui.Name = "Spectre_FloatingToggle"
+    toggleGui.ResetOnSpawn = false
+    toggleGui.IgnoreGuiInset = true
+    toggleGui.DisplayOrder = 100000
+    toggleGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+    toggleGui.Parent = parent
+
+    local button = Instance.new("TextButton")
+    button.Name = "SpectreToggle"
+    button.AnchorPoint = Vector2.new(0, 0.5)
+    button.Size = UDim2.fromOffset(48, 48)
+    button.Position = UDim2.new(0, 16, 0.5, 0)
+    button.BackgroundColor3 = Color3.fromRGB(8, 8, 8)
+    button.BorderSizePixel = 0
+    button.Text = "S"
+    button.TextColor3 = Color3.fromRGB(255, 255, 255)
+    button.TextSize = 21
+    button.Font = Enum.Font.GothamBold
+    button.AutoButtonColor = false
+    button.Active = true
+    button.ZIndex = 10
+    button.Parent = toggleGui
+
+    local round = Instance.new("UICorner")
+    round.CornerRadius = UDim.new(1, 0)
+    round.Parent = button
+
+    local outline = Instance.new("UIStroke")
+    outline.Color = Color3.fromRGB(235, 235, 235)
+    outline.Thickness = 1.4
+    outline.Transparency = 0.12
+    outline.Parent = button
+
+    local scale = Instance.new("UIScale")
+    scale.Scale = 1
+    scale.Parent = button
+
+    local dragging = false
+    local moved = false
+    local pressPosition
+    local startPosition
+    local activeInput
+
+    local function clampPosition(x, y)
+        local camera = workspace.CurrentCamera
+        local viewport = camera and camera.ViewportSize or Vector2.new(800, 600)
+        local maxX = math.max(0, viewport.X - button.AbsoluteSize.X)
+        local maxY = math.max(0, viewport.Y - button.AbsoluteSize.Y)
+        return UDim2.fromOffset(
+            math.clamp(x, 0, maxX),
+            math.clamp(y, 0, maxY)
+        )
+    end
+
+    local function setMainVisible(visible)
+        -- v4 is the ScreenGui created by this Spectre script.
+        if v4 and v4.Parent then
+            v4.Enabled = visible
+        end
+        Tween:Create(button, TweenInfo.new(0.14), {
+            TextColor3 = visible and Color3.fromRGB(255, 255, 255)
+                or Color3.fromRGB(145, 145, 145)
+        }):Play()
+    end
+
+    button.InputBegan:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1
+        or input.UserInputType == Enum.UserInputType.Touch then
+            dragging = true
+            moved = false
+            activeInput = input
+            pressPosition = input.Position
+            startPosition = button.AbsolutePosition
+        end
+    end)
+
+    UIS.InputChanged:Connect(function(input)
+        if not dragging then return end
+        if input.UserInputType == Enum.UserInputType.MouseMovement
+        or input.UserInputType == Enum.UserInputType.Touch then
+            local delta = input.Position - pressPosition
+            if delta.Magnitude > 7 then moved = true end
+            if moved then
+                button.Position = clampPosition(
+                    startPosition.X + delta.X,
+                    startPosition.Y + delta.Y
+                )
+            end
+        end
+    end)
+
+    UIS.InputEnded:Connect(function(input)
+        if not dragging then return end
+        if input.UserInputType == Enum.UserInputType.MouseButton1
+        or input.UserInputType == Enum.UserInputType.Touch then
+            local wasClick = not moved
+            dragging = false
+            activeInput = nil
+            if wasClick then
+                local currentlyVisible = v4 and v4.Parent and v4.Enabled
+                setMainVisible(not currentlyVisible)
+                Tween:Create(scale, TweenInfo.new(0.09), {Scale = 0.86}):Play()
+                task.delay(0.09, function()
+                    if scale.Parent then
+                        Tween:Create(scale, TweenInfo.new(0.16, Enum.EasingStyle.Back), {Scale = 1}):Play()
+                    end
+                end)
+            end
+        end
+    end)
+
+    -- Keep the button inside the visible screen after rotation/resizing.
+    local camera = workspace.CurrentCamera
+    if camera then
+        camera:GetPropertyChangedSignal("ViewportSize"):Connect(function()
+            local pos = button.AbsolutePosition
+            button.Position = clampPosition(pos.X, pos.Y)
+        end)
+    end
+end)
