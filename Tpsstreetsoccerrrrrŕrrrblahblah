@@ -2996,67 +2996,190 @@ v34:CreateSlider({
 		abRad = v
 	end,
 })
-local tbl20 = {
-	disguiseOn = false,
-	username = "",
+-- ═══ AVATAR STEALER ═══
+v34:CreateSection("Avatar Stealer")
+
+local avUser = ""
+local avSaved = nil
+local avLastId = nil
+local avAuto = true
+
+local function avSave()
+	local ch = LocalPlayer.Character; if not ch then return end
+	local snap = {items={}}
+	for _,v in ipairs(ch:GetChildren()) do
+		if v:IsA("Accessory") or v:IsA("Hat") or v:IsA("Shirt") or v:IsA("Pants") or v:IsA("ShirtGraphic") or v:IsA("CharacterMesh") or v:IsA("BodyColors") or (v:IsA("Decal") and v.Name=="face") then
+			pcall(function() table.insert(snap.items, v:Clone()) end)
+		end
+	end
+	avSaved = snap
+end
+
+task.spawn(function() task.wait(3); avSave() end)
+LocalPlayer.CharacterAdded:Connect(function() task.wait(3); avSave() end)
+
+local function avClear(ch)
+	for _,v in ipairs(ch:GetChildren()) do
+		if v:IsA("Accessory") or v:IsA("Hat") or v:IsA("Shirt") or v:IsA("Pants") or v:IsA("ShirtGraphic") or v:IsA("CharacterMesh") or v:IsA("BodyColors") or (v:IsA("Decal") and v.Name=="face") then
+			v:Destroy()
+		end
+	end
+end
+
+local avAttMap = {
+	HatAttachment=CFrame.new(0,0.6,0), HairAttachment=CFrame.new(0,0.6,0),
+	FaceFrontAttachment=CFrame.new(0,0,-0.6), FaceCenterAttachment=CFrame.new(0,0,-0.5),
+	HeadFrontAttachment=CFrame.new(0,0,-0.5), HeadTopAttachment=CFrame.new(0,0.5,0),
+	HeadBackAttachment=CFrame.new(0,0,0.5), LeftEarAttachment=CFrame.new(-0.5,0,0),
+	RightEarAttachment=CFrame.new(0.5,0,0), HatFrontAttachment=CFrame.new(0,0.6,-0.5),
+	NeckAttachment=CFrame.new(0,-0.5,0)
 }
-tbl20.description = nil
-v34:CreateSection("Avatar Stolen")
-v34:CreateToggle({
-	Name = "Enable Avatar Stolen",
-	CurrentValue = false,
-	Callback = function(arg1)
-		tbl20.disguiseOn = arg1
-		local Character = LocalPlayer.Character
-		local v1 = Character and Character:FindFirstChildOfClass("Humanoid")
-		if arg1 and Character and tbl20.username ~= "" then
-			task.spawn(function()
-				local v1, v2 = pcall(function()
-					return Players:GetUserIdFromNameAsync(tbl20.username)
-				end)
-				if v1 then
-					local v3, v4 = pcall(function()
-						return Players:GetHumanoidDescriptionFromUserId(v2)
-					end)
-					if v3 then
-						tbl20.description = v4
-						local Character = LocalPlayer.Character
-						if Character and Character:FindFirstChildOfClass("Humanoid") then
-							pcall(function()
-								local Character = LocalPlayer.Character;
-								(Character and Character:FindFirstChildOfClass("Humanoid")):ApplyDescriptionClientServer(v4)
-							end)
-						end
+
+local function avEnsureHead(ch)
+	local head = ch:FindFirstChild("Head"); if not head then return end
+	for nm,cf in pairs(avAttMap) do
+		if not head:FindFirstChild(nm) then
+			local a = Instance.new("Attachment"); a.Name=nm; a.CFrame=cf; a.Parent=head
+		end
+	end
+end
+
+local function avWeld(acc, ch)
+	local head = ch:FindFirstChild("Head"); if not head then return false end
+	local h = acc:FindFirstChild("Handle"); if not h then return false end
+	local att = h:FindFirstChild("HatAttachment") or h:FindFirstChild("HairAttachment") or h:FindFirstChild("FaceFrontAttachment") or h:FindFirstChild("FaceCenterAttachment") or h:FindFirstChildOfClass("Attachment")
+	if not att then return false end
+	local ha = head:FindFirstChild(att.Name)
+	if not ha then
+		ha = Instance.new("Attachment"); ha.Name=att.Name; ha.CFrame=avAttMap[att.Name] or CFrame.new(0,0.6,0); ha.Parent=head
+	end
+	h.Anchored=false; h.CanCollide=false; h.Massless=true
+	local osz = h:FindFirstChild("OriginalSize"); local osv = osz and osz.Value or h.Size
+	acc.Parent = ch
+	for _,c in ipairs(h:GetChildren()) do
+		if c:IsA("Weld") or c:IsA("Motor6D") or c:IsA("WeldConstraint") then c:Destroy() end
+	end
+	local w = Instance.new("Motor6D"); w.Name="AccessoryWeld"; w.Part0=head; w.Part1=h
+	w.C0=ha.CFrame; w.C1=att.CFrame; w.Parent=h
+	if osv then task.defer(function() if h and h.Parent then pcall(function() h.Size=osv*0.85 end) end end) end
+	return true
+end
+
+local function avApply(item, ch, hum)
+	if item:IsA("Accessory") or item:IsA("Hat") then
+		local c = item:Clone()
+		local osz = c:FindFirstChild("OriginalSize"); local osv = osz and osz.Value
+		if osz then osz:Destroy() end
+		local ok = pcall(function() hum:AddAccessory(c) end)
+		if ok then
+			task.defer(function()
+				if c and c.Parent then
+					local h = c:FindFirstChild("Handle")
+					if h and not h:FindFirstChildOfClass("Weld") and not h:FindFirstChildOfClass("Motor6D") then
+						if osv then pcall(function() h.Size = osv*0.85 end) end
+						avWeld(c, ch)
 					end
 				end
 			end)
-		elseif not arg1 and v1 then
-			pcall(function()
-				v1:ApplyDescriptionClientServer(Players:GetHumanoidDescriptionAsync(LocalPlayer.UserId))
-			end)
+			return 1
 		end
-	end,
-})
-v34:CreateInput({
-	Name = "Avatar Username",
-	PlaceholderText = "Enter username",
-	Callback = function(arg1)
-		tbl20.username = arg1
-	end,
-})
-local connection6 = LocalPlayer.CharacterAdded:Connect(function(arg1)
-	task.defer(function()
-		local v1 = arg1 and arg1:FindFirstChildOfClass("Humanoid")
-		if tbl20.disguiseOn and tbl20.description and v1 then
-			func(function()
-				v1:ApplyDescriptionClientServer(tbl20.description)
-			end)
-		end
-	end)
-end)
-if connection6 then
-	table.insert(tbl10, connection6)
+		if avWeld(c, ch) then return 1 end
+	elseif item:IsA("Shirt") or item:IsA("Pants") or item:IsA("ShirtGraphic") then
+		item:Clone().Parent = ch; return 1
+	elseif item:IsA("BodyColors") then
+		local o = ch:FindFirstChildOfClass("BodyColors"); if o then o:Destroy() end
+		item:Clone().Parent = ch; return 1
+	elseif item:IsA("CharacterMesh") then
+		item:Clone().Parent = ch; return 1
+	elseif item:IsA("Decal") and item.Name=="face" then
+		local o = ch:FindFirstChild("face"); if o then o:Destroy() end
+		item:Clone().Parent = ch; return 1
+	end
+	return 0
 end
+
+local function avApplyId(uid, ch, hum)
+	local ok, model = pcall(function() return Players:GetCharacterAppearanceAsync(uid) end)
+	if not ok or not model then return 0,0 end
+	avEnsureHead(ch); avClear(ch); task.wait(0.1)
+	local ac, cc, seen = 0, 0, {}
+	for _, item in ipairs(model:GetDescendants()) do
+		if not item:IsA("Attachment") and not item:IsA("Motor6D") and item.Name~="Handle" and item.Name~="OriginalSize" then
+			if item:IsA("Accessory") or item:IsA("Hat") then
+				local h = item:FindFirstChild("Handle")
+				if not (h and seen[h]) then
+					if h then seen[h]=true end
+					if avApply(item, ch, hum) > 0 then ac = ac + 1 end
+				end
+			elseif item:IsA("Shirt") or item:IsA("Pants") or item:IsA("ShirtGraphic") or item:IsA("BodyColors") or item:IsA("CharacterMesh") or (item:IsA("Decal") and item.Name=="face") then
+				if avApply(item, ch, hum) > 0 then cc = cc + 1 end
+			end
+		end
+	end
+	model:Destroy()
+	return ac, cc
+end
+
+local function avSteal(name)
+	if not name or name=="" then v1:Notify({Title="Avatar", Content="Enter username", Duration=2}); return end
+	local uid
+	if tonumber(name) then uid = tonumber(name)
+	else
+		local ok, id = pcall(function() return Players:GetUserIdFromNameAsync(name) end)
+		if ok then uid = id end
+	end
+	if not uid then v1:Notify({Title="Avatar", Content="User not found", Duration=3}); return end
+	v1:Notify({Title="Avatar", Content="Loading "..name.."...", Duration=2})
+	local ch = LocalPlayer.Character; if not ch then return end
+	local hum = ch:FindFirstChildOfClass("Humanoid"); if not hum then return end
+	if not avSaved then avSave() end
+	local a, c = avApplyId(uid, ch, hum)
+	avLastId = uid
+	v1:Notify({Title="Avatar", Content="Done: "..a.." accs, "..c.." clothes", Duration=3})
+end
+
+local avAutoConn = LocalPlayer.CharacterAdded:Connect(function(ch)
+	if not avAuto or not avLastId then return end
+	ch:WaitForChild("Humanoid",10); ch:WaitForChild("Head",10); task.wait(1.5)
+	local hum = ch:FindFirstChildOfClass("Humanoid"); if not hum then return end
+	avApplyId(avLastId, ch, hum)
+end)
+if avAutoConn then table.insert(tbl10, avAutoConn) end
+
+v34:CreateInput({
+	Name = "Username or ID",
+	PlaceholderText = "e.g. Roblox",
+	Callback = function(v) avUser = v end,
+})
+v34:CreateButton({
+	Name = "Apply Avatar",
+	Callback = function() avSteal(avUser) end,
+})
+v34:CreateButton({
+	Name = "Apply Roblox (Test)",
+	Callback = function() avSteal("Roblox") end,
+})
+v34:CreateToggle({
+	Name = "Keep Skin on Respawn",
+	CurrentValue = true,
+	Callback = function(v) avAuto = v end,
+})
+v34:CreateButton({
+	Name = "Restore Original",
+	Callback = function()
+		if not avSaved then return end
+		local ch = LocalPlayer.Character; if not ch then return end
+		local hum = ch:FindFirstChildOfClass("Humanoid"); if not hum then return end
+		avEnsureHead(ch); avClear(ch); task.wait(0.1)
+		for _,item in ipairs(avSaved.items) do avApply(item, ch, hum) end
+		avLastId = nil
+		v1:Notify({Title="Avatar", Content="Restored", Duration=2})
+	end,
+})
+v34:CreateButton({
+	Name = "Save Current",
+	Callback = function() avSave(); v1:Notify({Title="Avatar", Content="Saved", Duration=2}) end,
+})
 
 v34:CreateSection("Aimbot")
 local tbl26 = {enabled = false, mode = "Holding", key = Enum.KeyCode.Z, aiming = false}
