@@ -1,0 +1,1541 @@
+local rawLib = game:HttpGet("https://raw.githubusercontent.com/noxaetheris/nice-one/refs/heads/main/s.txt")
+rawLib = rawLib:gsub("punishment hub", "specter")
+rawLib = rawLib:gsub("Exit punishment hub%?", "Exit specter?")
+rawLib = rawLib:gsub("if gameProcessed then%s*return%s*end%s*if input%.KeyCode == Window%.ToggleKey then%s*Window:Toggle%(%)%s*end", "-- toggle handled by v2")
+rawLib = rawLib:gsub("chip%.Text = tName", 'chip.Text = (tName == "cezar" and "Black") or (tName == "Graphite" and "Dark Gray") or (tName == "Contrast" and "Silver") or (tName == "Paper" and "White") or tName')
+rawLib = rawLib:gsub("tBtn%.Text = tName", 'tBtn.Text = (tName == "cezar" and "Black") or (tName == "Graphite" and "Dark Gray") or (tName == "Contrast" and "Silver") or (tName == "Paper" and "White") or tName')
+local Library = loadstring(rawLib)()
+
+local v1 = {}
+function v1:LoadFont(...) end
+
+function v1:Notify(tbl)
+	tbl = tbl or {}
+	pcall(function()
+		Library:Notify({
+			Title = tostring(tbl.Title or "Spectre"),
+			Content = tostring(tbl.Content or tbl.Title or ""),
+			Duration = tonumber(tbl.Duration) or 3,
+		})
+	end)
+end
+
+function v1:CreateWindow(config)
+	config = config or {}
+	local winTitle = tostring(config.Name or "specter")
+	local win = Library:CreateWindow(winTitle)
+
+	local v2 = {}
+	v2.Window = win
+
+	function v2:SelectTab(tabObj)
+		if tabObj and tabObj._activate then
+			pcall(tabObj._activate)
+		end
+	end
+
+	local currentToggleKey = Enum.KeyCode.RightShift
+
+	function v2:SetToggleKey(keyName)
+		pcall(function()
+			local kc = typeof(keyName) == "EnumItem" and keyName or Enum.KeyCode[tostring(keyName)]
+			if kc then
+				currentToggleKey = kc
+				if win then
+					win.ToggleKey = kc
+				end
+			end
+		end)
+	end
+
+	if config and config.ToggleUIKeybind then
+		v2:SetToggleKey(config.ToggleUIKeybind)
+	else
+		v2:SetToggleKey("RightShift")
+	end
+
+	function v2:Toggle()
+		pcall(function()
+			if win and win.Toggle then
+				win:Toggle()
+			elseif self.Window and self.Window.Toggle then
+				self.Window:Toggle()
+			end
+		end)
+	end
+
+	pcall(function()
+		local uis = game:GetService("UserInputService")
+		uis.InputBegan:Connect(function(input, gpe)
+			if input.UserInputType ~= Enum.UserInputType.Keyboard then return end
+			if uis:GetFocusedTextBox() then return end
+			if input.KeyCode == currentToggleKey then
+				v2:Toggle()
+			end
+		end)
+	end)
+
+	pcall(function()
+		local function sanitizeText(desc)
+			if desc:IsA("TextLabel") or desc:IsA("TextButton") or desc:IsA("TextBox") then
+				desc.AutoLocalize = false
+				local function applyReplacement()
+					local txt = desc.Text
+					if txt == "Impostazioni" then
+						desc.Text = "Settings"
+					elseif txt == "cezar" then
+						desc.Text = "Black"
+					elseif txt == "Graphite" then
+						desc.Text = "Dark Gray"
+					elseif txt == "Contrast" then
+						desc.Text = "Silver"
+					elseif txt == "Paper" then
+						desc.Text = "White"
+					elseif txt:find("[Pp]unishment%s*[Hh]ub") then
+						desc.Text = txt:gsub("[Pp]unishment%s*[Hh]ub", "specter")
+					elseif txt:find("[Pp]unishment") then
+						desc.Text = txt:gsub("[Pp]unishment", "specter")
+					end
+				end
+				applyReplacement()
+				desc:GetPropertyChangedSignal("Text"):Connect(applyReplacement)
+			end
+		end
+
+		local function handleGui(gui)
+			if gui and (gui.Name == "cezarUI" or gui:IsA("ScreenGui")) then
+				gui.AutoLocalize = false
+				for _, desc in ipairs(gui:GetDescendants()) do
+					sanitizeText(desc)
+				end
+				gui.DescendantAdded:Connect(sanitizeText)
+			end
+		end
+
+		local pGui = LocalPlayer:FindFirstChildOfClass("PlayerGui") or LocalPlayer:WaitForChild("PlayerGui")
+		for _, g in ipairs(pGui:GetChildren()) do
+			handleGui(g)
+		end
+		pGui.ChildAdded:Connect(handleGui)
+
+		pcall(function()
+			local cGui = (gethui and gethui()) or game:GetService("CoreGui")
+			if cGui then
+				for _, g in ipairs(cGui:GetChildren()) do
+					handleGui(g)
+				end
+				cGui.ChildAdded:Connect(handleGui)
+			end
+		end)
+	end)
+
+	function v2:CreateTab(tConfig)
+		local tName = "Tab"
+		local icon = nil
+		if type(tConfig) == "table" then
+			tName = tostring(tConfig.Name or tConfig.Title or tConfig[1] or "Tab")
+			icon = tConfig.Icon
+		else
+			tName = tostring(tConfig or "Tab")
+		end
+
+		local pTab = win:CreateTab(tName, icon)
+		local tabObj = {}
+		tabObj.RawTab = pTab
+
+		local tData = (win.Tabs and win.Tabs[#win.Tabs])
+		if tData and tData.TitleLabel then
+			tData.TitleLabel.AutoLocalize = false
+			tData.TitleLabel.Text = tName
+			if tName == "Settings" then
+				tData.TitleLabel:GetPropertyChangedSignal("Text"):Connect(function()
+					if tData.TitleLabel.Text == "Impostazioni" then
+						tData.TitleLabel.AutoLocalize = false
+						tData.TitleLabel.Text = "Settings"
+					end
+				end)
+			end
+
+			tabObj._activate = function()
+				pcall(function()
+					for _, v in pairs(win.Tabs) do
+						if v ~= tData and v.Page then v.Page.Visible = false end
+					end
+					win.CurrentTab = tData
+					if tData.Page then tData.Page.Visible = true end
+				end)
+			end
+		end
+
+		function tabObj:CreateSection(sTitle)
+			local title = ""
+			if type(sTitle) == "table" then
+				title = tostring(sTitle.Title or sTitle.Name or sTitle[1] or "")
+			else
+				title = tostring(sTitle or "")
+			end
+			if pTab and pTab.CreateSection then
+				return pTab:CreateSection(title)
+			end
+		end
+
+		function tabObj:CreateParagraph(pConfig)
+			local pTitle = ""
+			local pContent = ""
+			if type(pConfig) == "table" then
+				pTitle = tostring(pConfig.Title or pConfig.Name or "")
+				pContent = tostring(pConfig.Content or pConfig.Text or pConfig.Desc or "")
+			else
+				pTitle = tostring(pConfig or "")
+			end
+			if pTab and pTab.CreateParagraph then
+				return pTab:CreateParagraph(pTitle, pContent)
+			end
+		end
+
+		function tabObj:CreateLabel(lConfig)
+			local text = ""
+			local updateFunc = nil
+			local updateRate = nil
+			if type(lConfig) == "table" then
+				text = tostring(lConfig.Text or lConfig.Title or lConfig.Name or "")
+				updateFunc = lConfig.Update
+				updateRate = tonumber(lConfig.UpdateRate) or 1
+			else
+				text = tostring(lConfig or "")
+			end
+			local lbl = nil
+			if pTab and pTab.CreateLabel then
+				lbl = pTab:CreateLabel(text)
+			end
+			if type(updateFunc) == "function" and lbl then
+				task.spawn(function()
+					while true do
+						task.wait(updateRate or 1)
+						local ok, newTxt = pcall(updateFunc)
+						if ok and newTxt then
+							pcall(function()
+								if lbl.SetText then
+									lbl:SetText(tostring(newTxt))
+								elseif lbl.Text then
+									lbl.Text = tostring(newTxt)
+								end
+							end)
+						end
+					end
+				end)
+			end
+			return lbl or { Set = function() end }
+		end
+
+		function tabObj:CreateButton(bConfig)
+			local bName = "Button"
+			local bDesc = ""
+			local bCallback = function() end
+			if type(bConfig) == "table" then
+				bName = tostring(bConfig.Name or bConfig.Title or "Button")
+				bDesc = tostring(bConfig.Desc or bConfig.Description or "")
+				bCallback = bConfig.Callback or function() end
+			else
+				bName = tostring(bConfig or "Button")
+			end
+			if pTab and pTab.CreateButton then
+				return pTab:CreateButton(bName, bDesc, nil, bCallback)
+			end
+			return { Set = function() end }
+		end
+
+		function tabObj:CreateToggle(tData)
+			local tName = "Toggle"
+			local tDesc = ""
+			local tVal = false
+			local tCallback = function() end
+			if type(tData) == "table" then
+				tName = tostring(tData.Name or tData.Title or "Toggle")
+				tDesc = tostring(tData.Desc or tData.Description or "")
+				tVal = tData.CurrentValue == true or tData.Default == true
+				tCallback = tData.Callback or function() end
+			else
+				tName = tostring(tData or "Toggle")
+			end
+
+			local current = tVal
+			if pTab and pTab.CreateToggle then
+				pTab:CreateToggle(tName, tDesc, tVal, function(newVal)
+					current = newVal
+					pcall(tCallback, newVal)
+				end)
+			end
+
+			local ctrl = {
+				CurrentValue = current,
+				Set = function(self, val)
+					current = val == true
+					self.CurrentValue = current
+					pcall(tCallback, current)
+				end
+			}
+			return ctrl
+		end
+
+		function tabObj:CreateSlider(sData)
+			local sName = "Slider"
+			local minVal = 0
+			local maxVal = 100
+			local defaultVal = 50
+			local sCallback = function() end
+			if type(sData) == "table" then
+				sName = tostring(sData.Name or sData.Title or "Slider")
+				local range = sData.Range or {0, 100}
+				minVal = tonumber(range[1]) or 0
+				maxVal = tonumber(range[2]) or 100
+				defaultVal = tonumber(sData.CurrentValue or sData.Default) or minVal
+				sCallback = sData.Callback or function() end
+			else
+				sName = tostring(sData or "Slider")
+			end
+
+			local current = defaultVal
+			if pTab and pTab.CreateSlider then
+				pTab:CreateSlider(sName, minVal, maxVal, defaultVal, function(newVal)
+					current = newVal
+					pcall(sCallback, newVal)
+				end)
+			end
+
+			local ctrl = {
+				CurrentValue = current,
+				Set = function(self, val)
+					local num = tonumber(val) or current
+					current = math.clamp(num, minVal, maxVal)
+					self.CurrentValue = current
+					pcall(sCallback, current)
+				end
+			}
+			return ctrl
+		end
+
+		function tabObj:CreateDropdown(dData)
+			local dName = "Dropdown"
+			local dDesc = ""
+			local options = {}
+			local defaultOpt = nil
+			local dCallback = function() end
+			if type(dData) == "table" then
+				dName = tostring(dData.Name or dData.Title or "Dropdown")
+				dDesc = tostring(dData.Desc or dData.Description or "")
+				options = dData.Options or {}
+				defaultOpt = dData.CurrentOption or dData.Default or (options[1] or "")
+				dCallback = dData.Callback or function() end
+			else
+				dName = tostring(dData or "Dropdown")
+			end
+
+			local current = defaultOpt
+			if pTab and pTab.CreateDropdown then
+				pTab:CreateDropdown(dName, dDesc, options, function(selected)
+					current = selected
+					pcall(dCallback, selected)
+				end)
+			end
+
+			local ctrl = {
+				CurrentOption = current,
+				Set = function(self, opt)
+					current = opt
+					self.CurrentOption = current
+					pcall(dCallback, current)
+				end
+			}
+			return ctrl
+		end
+
+		function tabObj:CreateInput(iData)
+			local iName = "Input"
+			local iDesc = ""
+			local iPlaceholder = "Type here..."
+			local iCallback = function() end
+			if type(iData) == "table" then
+				iName = tostring(iData.Name or iData.Title or "Input")
+				iDesc = tostring(iData.Desc or iData.Description or "")
+				iPlaceholder = tostring(iData.PlaceholderText or iData.Placeholder or iData.Default or "")
+				iCallback = iData.Callback or function() end
+			else
+				iName = tostring(iData or "Input")
+			end
+
+			local current = ""
+			if pTab and pTab.CreateInput then
+				pTab:CreateInput(iName, iDesc, iPlaceholder, nil, nil, function(text)
+					current = text
+					pcall(iCallback, text)
+				end)
+			end
+
+			return {
+				Set = function(self, val)
+					current = tostring(val)
+					pcall(iCallback, current)
+				end
+			}
+		end
+
+		function tabObj:CreateKeybind(kData)
+			local kName = "Keybind"
+			local kDesc = ""
+			local defaultKey = "None"
+			local kCallback = function() end
+			if type(kData) == "table" then
+				kName = tostring(kData.Name or kData.Title or "Keybind")
+				kDesc = tostring(kData.Desc or kData.Description or "")
+				defaultKey = tostring(kData.CurrentKeybind or kData.Default or "None")
+				kCallback = kData.Callback or function() end
+			else
+				kName = tostring(kData or "Keybind")
+			end
+
+			if pTab and pTab.CreateKeybind then
+				pTab:CreateKeybind(kName, kDesc, defaultKey, function(key)
+					pcall(kCallback, key)
+				end)
+			end
+
+			return { Set = function() end }
+		end
+
+		function tabObj:CreateDivider()
+			if pTab and pTab.CreateDivider then
+				return pTab:CreateDivider()
+			end
+		end
+
+		return tabObj
+	end
+
+	return v2
+end
+
+-- ============================================================
+-- WINDOW
+-- ============================================================
+local v2 = v1:CreateWindow({Name = "Spectre", Subtitle = "Spectre", ToggleUIKeybind = "RightShift"})
+
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local HttpService = game:GetService("HttpService")
+local UserInputService = game:GetService("UserInputService")
+local Workspace = game:GetService("Workspace")
+local CoreGui = game:GetService("CoreGui")
+local LocalPlayer = Players.LocalPlayer
+local CurrentCamera = workspace.CurrentCamera
+local clamp = math.clamp
+local abs = math.abs
+local sqrt = math.sqrt
+local clock = os.clock
+local new = Vector3.new
+local zero = Vector3.zero
+
+local function func(...)
+	pcall(...)
+end
+
+-- ============================================================
+-- HARDEN / ANTI-KICK
+-- ============================================================
+local v3 = getgenv()
+v3.HARDEN = v3.HARDEN or {}
+if not v3.HARDEN.namecallInstalled then
+	v3.HARDEN.namecallInstalled = true
+	v3.HARDEN.blocked = 0
+	local tbl = {Kick1 = true, HandleViolation = true, handleViolation = true}
+	v3.HARDEN._origNamecall = hookmetamethod(game, "__namecall", newcclosure(function(arg1, ...)
+		if getnamecallmethod() == "FireServer" then
+			local str = tostring(arg1.Name)
+			if tbl[str] then
+				v3.HARDEN.blocked = (v3.HARDEN.blocked or 0) + 1
+				return
+			end
+		end
+		return v3.HARDEN._origNamecall(arg1, ...)
+	end))
+end
+
+-- ============================================================
+-- HOME TAB
+-- ============================================================
+local v5 = v2:CreateTab({Name = "Home", Desc = "Info", Icon = "house"})
+v2:SelectTab(v5)
+local Stats = game:GetService("Stats")
+local DataPing = Stats.Network.ServerStatsItem:FindFirstChild("Data Ping")
+local ElapsedTime = Stats.Network.ServerStatsItem:FindFirstChild("ElapsedTime")
+local v6 = os.clock()
+local num2 = 0
+local v7 = v6
+local function func1()
+	local v1 = tonumber(os.date("%H")) or 12
+	if v1 >= 5 and v1 < 12 then return "Good morning" end
+	if v1 < 18 then return "Good afternoon" end
+	if v1 < 23 then return "Good evening" end
+	return "Good night"
+end
+local str = "Real"
+func(function() str = select(1, identifyexecutor()) end)
+local str1 = "Unknown"
+task.spawn(function()
+	func(function()
+		local v1 = string.format("https://games.roblox.com/v1/games/%d/servers/Public?limit=40", game.PlaceId)
+		local v2 = HttpService:JSONDecode(game:HttpGet(v1))
+		for _, v3 in ipairs(v2.data) do
+			if v3.id == game.JobId then
+				str1 = v3.region or "Unknown"
+				break
+			end
+		end
+	end)
+end)
+v5:CreateSection("Welcome")
+v5:CreateParagraph({Title = func1() .. ", " .. (LocalPlayer.DisplayName or LocalPlayer.Name), Content = ""})
+v5:CreateSection("System Information")
+v5:CreateLabel({Text = "FPS: --", Update = function()
+	local v1 = os.clock()
+	num2 = num2 + 1
+	local v2 = v1 - v7
+	if v2 < 0.5 then return end
+	local v3 = math.floor(num2 / v2 + 0.5)
+	v7 = v1; num2 = 0
+	return "FPS: " .. v3
+end, UpdateRate = 0.5})
+v5:CreateLabel({Text = "Ping: --", Update = function()
+	local v1 = DataPing and DataPing:GetValue()
+	return "Ping: " .. math.floor(v1 or 0) .. " ms"
+end, UpdateRate = 1})
+v5:CreateLabel({Text = "Executor: --", Update = function() return "Executor: " .. str end, UpdateRate = 1})
+v5:CreateLabel({Text = "Game: --", Update = function()
+	return "Game: " .. (game.Name or string.format("Place %d", game.PlaceId))
+end, UpdateRate = 1})
+v5:CreateLabel({Text = "Region: --", Update = function() return "Region: " .. (str1 or "Loading..") end, UpdateRate = 1})
+v5:CreateLabel({Text = "Players: --", Update = function() return "Players: " .. Players.NumPlayers end, UpdateRate = 1})
+v5:CreateLabel({Text = "Time: --", Update = function() return "Time: " .. tostring(os.date("%H:%M")) end, UpdateRate = 1})
+v5:CreateLabel({Text = "Uptime: --", Update = function()
+	local v1 = ElapsedTime and ElapsedTime:GetValue() or 0
+	return string.format("Uptime: %02d:%02d:%02d", math.floor(v1/3600), math.floor(v1%3600/60), math.floor(v1%60))
+end, UpdateRate = 1})
+
+-- ============================================================
+-- FLOATING ICON (Fut)
+-- ============================================================
+local floatingIconGui = nil
+local function toggleFloatingIcon(enable)
+	if not enable then
+		if floatingIconGui then floatingIconGui.Enabled = false end
+		return
+	end
+	if floatingIconGui then floatingIconGui.Enabled = true; return end
+
+	local targetParent = nil
+	pcall(function()
+		if gethui then targetParent = gethui()
+		elseif game:GetService("CoreGui") then targetParent = game:GetService("CoreGui") end
+	end)
+	if not targetParent then
+		targetParent = LocalPlayer:FindFirstChildOfClass("PlayerGui") or LocalPlayer:WaitForChild("PlayerGui")
+	end
+
+	floatingIconGui = Instance.new("ScreenGui")
+	floatingIconGui.Name = "Spectre_MobileFloatingGui"
+	floatingIconGui.ResetOnSpawn = false
+	floatingIconGui.IgnoreGuiInset = true
+	floatingIconGui.DisplayOrder = 99999
+	floatingIconGui.Parent = targetParent
+
+	local btn = Instance.new("TextButton")
+	btn.Name = "FloatingButton"
+	btn.Size = UDim2.new(0, 48, 0, 48)
+	btn.Position = UDim2.new(0, 18, 0.5, -24)
+	btn.BackgroundColor3 = Color3.fromRGB(20, 20, 26)
+	btn.Text = "Fut"
+	btn.Font = Enum.Font.GothamBold
+	btn.TextSize = 14
+	btn.TextColor3 = Color3.fromRGB(255, 255, 255)
+	btn.AutoButtonColor = false
+	btn.Active = true
+	btn.Parent = floatingIconGui
+
+	local corner = Instance.new("UICorner")
+	corner.CornerRadius = UDim.new(1, 0)
+	corner.Parent = btn
+
+	local stroke = Instance.new("UIStroke")
+	stroke.Color = Color3.fromRGB(244, 63, 94)
+	stroke.Thickness = 1.6
+	stroke.Transparency = 0.25
+	stroke.Parent = btn
+
+	local dragging = false
+	local dragStart = nil
+	local startPos = nil
+	local hasMoved = false
+
+	btn.InputBegan:Connect(function(input)
+		if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+			dragging = true; hasMoved = false; dragStart = input.Position; startPos = btn.Position
+			local endConn
+			endConn = input.Changed:Connect(function()
+				if input.UserInputState == Enum.UserInputState.End then
+					dragging = false
+					if endConn then endConn:Disconnect() end
+				end
+			end)
+		end
+	end)
+
+	btn.InputChanged:Connect(function(input)
+		if dragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
+			local delta = input.Position - dragStart
+			if math.abs(delta.X) > 6 or math.abs(delta.Y) > 6 then hasMoved = true end
+			btn.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+		end
+	end)
+
+	btn.Activated:Connect(function()
+		if not hasMoved then
+			if v2 and v2.Toggle then v2:Toggle()
+			elseif win and win.Toggle then win:Toggle() end
+		end
+	end)
+end
+
+-- ============================================================
+-- =================== FUT FEATURES START ===================
+-- ============================================================
+
+local b_rs = game:GetService("ReplicatedStorage")
+local b = b_rs:FindFirstChild("b\7\n\7\n\7")
+local b_v1 = b_rs:FindFirstChild("\n\7\n")
+if b then b:Destroy() end
+if b_v1 then b_v1:Destroy() end
+
+-- helper: build tab wrapper for fut-style AddToggle/AddSlider etc.
+local futTabWrapNum = 0
+local function futWrap(tabObj, tabKey)
+	local num = 0
+	local tbl = {}
+
+	tbl.AddSeperator = function(_, arg2) tabObj:CreateSection(tostring(arg2 or "Section")) end
+	tbl.AddSeparator = tbl.AddSeperator
+
+	function tbl:AddButton(arg2, arg3)
+		if type(arg2) == "table" then
+			return tabObj:CreateButton({Name=arg2.title or arg2.Name or "Button", Desc=arg2.desc or arg2.Desc or "", Callback=arg2.callback or arg2.Callback})
+		end
+		return tabObj:CreateButton({Name=tostring(arg2 or "Button"), Callback=arg3})
+	end
+
+	function tbl:AddToggle(arg21)
+		local v1 = arg21 or {}
+		num = num + 1
+		return tabObj:CreateToggle({
+			Name = v1.title or v1.Name or "Toggle",
+			Desc = v1.desc or v1.Desc or "",
+			CurrentValue = v1.checked == true or v1.CurrentValue == true,
+			Callback = v1.callback or v1.Callback,
+		})
+	end
+
+	function tbl:AddSlider(arg21)
+		local v1 = arg21 or {}
+		local v2 = v1.values or {}
+		local default = v2.default
+		if default == nil then default = v2.min or 0 end
+		local increment = v2.round and (v2.round >= 1 and 1 or 10^(-v2.round)) or 1
+		num = num + 1
+		return tabObj:CreateSlider({
+			Name = v1.title or v1.Name or "Slider",
+			Desc = v1.desc or v1.Desc or "",
+			Range = {v2.min or 0, v2.max or 100},
+			CurrentValue = default,
+			Callback = v1.callback or v1.Callback,
+		})
+	end
+
+	function tbl:AddDropdown(arg21)
+		local v1 = arg21 or {}
+		local v2 = v1.options or v1.Options or {}
+		local default = v1.default
+		if type(default) == "number" then default = v2[default] end
+		if default == nil then default = v2[1] end
+		num = num + 1
+		return tabObj:CreateDropdown({
+			Name = v1.title or v1.Name or "Dropdown",
+			Desc = v1.desc or v1.Desc or "",
+			Options = v2,
+			CurrentOption = default,
+			Callback = function(selected)
+				local sel = type(selected) == "table" and selected[1] or selected
+				local idx
+				for i, opt in ipairs(v2) do if opt == sel then idx = i; break end end
+				if v1.callback then v1.callback(idx, sel)
+				elseif v1.Callback then v1.Callback(sel) end
+			end,
+		})
+	end
+
+	function tbl:AddLabel(_, arg2) return tabObj:CreateLabel(tostring(arg2 or "")) end
+	function tbl:AddDivider(_) end
+
+	function tbl:AddInput(_, arg21)
+		local v1 = arg21 or {}
+		num = num + 1
+		return tabObj:CreateInput({
+			Name = v1.title or v1.Name or "Input",
+			Desc = v1.desc or v1.Desc or "",
+			PlaceholderText = v1.placeholder or v1.PlaceholderText or "",
+			Callback = v1.callback or v1.Callback,
+		})
+	end
+
+	return tbl
+end
+
+-- ============================================================
+-- FUT TABS
+-- ============================================================
+local bodyReachTab = v2:CreateTab({Name = "Body Reach", Icon = "ruler"})
+local extReachTab  = v2:CreateTab({Name = "Ext Reach",  Icon = "move-3d"})
+local gkPredTab    = v2:CreateTab({Name = "GK & Pred",  Icon = "shield-check"})
+local customShotTab= v2:CreateTab({Name = "Custom Shot", Icon = "crosshair"})
+local modifiersTab = v2:CreateTab({Name = "Modifiers",  Icon = "sliders-horizontal"})
+local autoTkTab    = v2:CreateTab({Name = "Auto & TK",  Icon = "zap"})
+local localPlrTab  = v2:CreateTab({Name = "Local Player",Icon = "user-round"})
+local espTab       = v2:CreateTab({Name = "ESP",         Icon = "scan-eye"})
+local trollTab     = v2:CreateTab({Name = "Troll",       Icon = "flame"})
+
+local fw2 = futWrap(bodyReachTab, "BodyReach")
+local fw3 = futWrap(extReachTab,  "ExtReach")
+local fw4 = futWrap(gkPredTab,    "GK")
+local fw5 = futWrap(customShotTab,"Shot")
+local fw14= futWrap(modifiersTab, "Modifiers")
+local fw6 = futWrap(autoTkTab,    "Auto")
+local fw7 = futWrap(localPlrTab,  "Player")
+local fw8 = futWrap(espTab,       "ESP")
+local fw9 = futWrap(trollTab,     "Troll")
+
+-- ============================================================
+-- BODY REACH TAB (from fut)
+-- ============================================================
+fw2:AddSeperator("Leg Reach")
+local flag = false
+local num = 10; local num1 = 10; local num2b = 10
+local num3 = 0; local num4 = 0; local num5 = 0; local num6 = 0.5
+local legPart = Instance.new("Part")
+legPart.Name = "LegReachVisual"; legPart.Shape = Enum.PartType.Block
+legPart.CanCollide = false; legPart.Massless = true; legPart.Anchored = true
+legPart.Color = Color3.fromRGB(255,0,0); legPart.Material = Enum.Material.ForceField
+legPart.Parent = workspace
+
+RunService.RenderStepped:Connect(function()
+	local Character = LocalPlayer.Character
+	if not flag or not Character then legPart.Transparency = 1; return end
+	local HRP = Character:FindFirstChild("HumanoidRootPart")
+	local RF = Character:FindFirstChild("RightFoot"); local LF = Character:FindFirstChild("LeftFoot")
+	if not HRP or not RF or not LF then legPart.Transparency = 1; return end
+	legPart.Size = Vector3.new(num, num1, num2b)
+	legPart.CFrame = HRP.CFrame * CFrame.new(num3, num4 - 2.5, num5)
+	legPart.Transparency = num6
+	local Game = workspace:FindFirstChild("Game"); local eng = Game and Game:FindFirstChild("Engine")
+	if not eng then return end
+	local hx,hy,hz = num/2, num1/2, num2b/2
+	for _, child in ipairs(eng:GetChildren()) do
+		if child.Name == "Ball" and child:IsA("BasePart") then
+			local lp = legPart.CFrame:PointToObjectSpace(child.Position)
+			if math.abs(lp.X)<=hx and math.abs(lp.Y)<=hy and math.abs(lp.Z)<=hz then
+				firetouchinterest(RF,child,0); firetouchinterest(RF,child,1)
+				firetouchinterest(LF,child,0); firetouchinterest(LF,child,1)
+			end
+		end
+	end
+end)
+
+fw2:AddToggle({title="Enable Leg Reach",desc="Toggles the leg hitbox",checked=false,callback=function(v) flag=v end})
+fw2:AddSlider({title="Transparency",desc="100 = invisible",values={min=0,max=100,default=50,round=1},callback=function(v) num6=v/100 end})
+fw2:AddSlider({title="Size X",desc="Width",values={min=1,max=50,default=10,round=1},callback=function(v) num=v end})
+fw2:AddSlider({title="Size Y",desc="Height",values={min=1,max=50,default=10,round=1},callback=function(v) num1=v end})
+fw2:AddSlider({title="Size Z",desc="Length",values={min=1,max=50,default=10,round=1},callback=function(v) num2b=v end})
+fw2:AddSlider({title="Offset X",desc="Left/Right",values={min=-20,max=20,default=0,round=1},callback=function(v) num3=v end})
+fw2:AddSlider({title="Offset Y",desc="Up/Down",values={min=-20,max=20,default=0,round=1},callback=function(v) num4=v end})
+fw2:AddSlider({title="Offset Z",desc="Forward/Backward",values={min=-20,max=20,default=0,round=1},callback=function(v) num5=v end})
+
+fw2:AddSeperator("Fast React (Loose Ball Claimer)")
+local flag1 = false; local num7 = 12; local num8 = 0
+RunService.Heartbeat:Connect(function()
+	pcall(function()
+		if not flag1 then return end
+		local v1 = os.clock()
+		if v1 - num8 < 0.016666 then return end
+		num8 = v1
+		local Character = LocalPlayer.Character
+		local v2 = Character and Character:FindFirstChild("HumanoidRootPart")
+		if not v2 then return end
+		local Game = workspace:FindFirstChild("Game"); local v3 = Game and Game:FindFirstChild("Engine")
+		if not v3 then return end
+		for _, child in ipairs(v3:GetChildren()) do
+			if child.Name == "Ball" and child:IsA("BasePart") then
+				if (child.Position - v2.Position).Magnitude <= num7 then
+					firetouchinterest(v2,child,0); firetouchinterest(v2,child,1)
+				end
+			end
+		end
+	end)
+end)
+fw2:AddToggle({title="Enable Fast React",desc="Auto-claims loose balls on approach",checked=false,callback=function(v) flag1=v end})
+fw2:AddSlider({title="Claim Radius",desc="Distance to auto-claim from",values={min=3,max=40,default=12,round=1},callback=function(v) num7=v end})
+
+fw2:AddSeperator("Body Reach")
+local flag2=false; local num9=10; local num10=10; local num11=10
+local num12=0; local num13=0; local num14=0; local num15=0.5
+local bodyPart = Instance.new("Part")
+bodyPart.Name="UpperTorsoReachVisual"; bodyPart.Shape=Enum.PartType.Block
+bodyPart.CanCollide=false; bodyPart.Massless=true; bodyPart.Anchored=true
+bodyPart.Color=Color3.fromRGB(0,170,255); bodyPart.Material=Enum.Material.ForceField
+bodyPart.Parent=workspace
+RunService.RenderStepped:Connect(function()
+	local Character = LocalPlayer.Character
+	if not flag2 or not Character then bodyPart.Transparency=1; return end
+	local UT = Character:FindFirstChild("UpperTorso")
+	if not UT then bodyPart.Transparency=1; return end
+	bodyPart.Size=Vector3.new(num9,num10,num11)
+	bodyPart.CFrame=UT.CFrame*CFrame.new(num12,num13,num14)
+	bodyPart.Transparency=num15
+	local Game=workspace:FindFirstChild("Game"); local v1=Game and Game:FindFirstChild("Engine")
+	if not v1 then return end
+	local hx,hy,hz=num9/2,num10/2,num11/2
+	for _,child in ipairs(v1:GetChildren()) do
+		if child.Name=="Ball" and child:IsA("BasePart") then
+			local lp=bodyPart.CFrame:PointToObjectSpace(child.Position)
+			if math.abs(lp.X)<=hx and math.abs(lp.Y)<=hy and math.abs(lp.Z)<=hz then
+				firetouchinterest(UT,child,0); firetouchinterest(UT,child,1)
+			end
+		end
+	end
+end)
+fw2:AddToggle({title="Enable Torso Reach",desc="Toggles the UpperTorso hitbox",checked=false,callback=function(v) flag2=v end})
+fw2:AddSlider({title="Transparency",desc="100 = invisible",values={min=0,max=100,default=50,round=1},callback=function(v) num15=v/100 end})
+fw2:AddSlider({title="Size X",desc="Width",values={min=1,max=50,default=10,round=1},callback=function(v) num9=v end})
+fw2:AddSlider({title="Size Y",desc="Height",values={min=1,max=50,default=10,round=1},callback=function(v) num10=v end})
+fw2:AddSlider({title="Size Z",desc="Length",values={min=1,max=50,default=10,round=1},callback=function(v) num11=v end})
+fw2:AddSlider({title="Offset X",desc="Left/Right",values={min=-20,max=20,default=0,round=1},callback=function(v) num12=v end})
+fw2:AddSlider({title="Offset Y",desc="Up/Down",values={min=-20,max=20,default=0,round=1},callback=function(v) num13=v end})
+fw2:AddSlider({title="Offset Z",desc="Forward/Backward",values={min=-20,max=20,default=0,round=1},callback=function(v) num14=v end})
+
+-- ============================================================
+-- EXT REACH TAB (from fut)
+-- ============================================================
+fw3:AddSeperator("Head Reach")
+local flag3=false; local num16=10; local num17=10; local num18=10
+local num19=0; local num20=0; local num21=0; local num22=0.5
+local headPart=Instance.new("Part")
+headPart.Name="HeadReachVisual"; headPart.CanCollide=false; headPart.Massless=true; headPart.Anchored=true
+headPart.Color=Color3.fromRGB(255,192,203); headPart.Material=Enum.Material.ForceField; headPart.Parent=workspace
+RunService.RenderStepped:Connect(function()
+	local Character=LocalPlayer.Character
+	if not flag3 or not Character then headPart.Transparency=1; return end
+	local Head=Character:FindFirstChild("Head")
+	if not Head then headPart.Transparency=1; return end
+	headPart.Size=Vector3.new(num16,num17,num18)
+	headPart.CFrame=Head.CFrame*CFrame.new(num19,num20,num21)
+	headPart.Transparency=num22
+	local Game=workspace:FindFirstChild("Game"); local v1=Game and Game:FindFirstChild("Engine")
+	if not v1 then return end
+	local hx,hy,hz=num16/2,num17/2,num18/2
+	for _,child in ipairs(v1:GetChildren()) do
+		if child.Name=="Ball" and child:IsA("BasePart") then
+			local lp=headPart.CFrame:PointToObjectSpace(child.Position)
+			if math.abs(lp.X)<=hx and math.abs(lp.Y)<=hy and math.abs(lp.Z)<=hz then
+				firetouchinterest(Head,child,0); firetouchinterest(Head,child,1)
+			end
+		end
+	end
+end)
+fw3:AddToggle({title="Enable Head Reach",desc="Toggles head hitbox",checked=false,callback=function(v) flag3=v end})
+fw3:AddSlider({title="Transparency",values={min=0,max=100,default=50,round=1},callback=function(v) num22=v/100 end})
+fw3:AddSlider({title="Size X",values={min=1,max=50,default=10,round=1},callback=function(v) num16=v end})
+fw3:AddSlider({title="Size Y",values={min=1,max=50,default=10,round=1},callback=function(v) num17=v end})
+fw3:AddSlider({title="Size Z",values={min=1,max=50,default=10,round=1},callback=function(v) num18=v end})
+fw3:AddSlider({title="Offset X",values={min=-20,max=20,default=0,round=1},callback=function(v) num19=v end})
+fw3:AddSlider({title="Offset Y",values={min=-20,max=20,default=0,round=1},callback=function(v) num20=v end})
+fw3:AddSlider({title="Offset Z",values={min=-20,max=20,default=0,round=1},callback=function(v) num21=v end})
+
+fw3:AddSeperator("Hand Reach (Goalkeeper)")
+local flag4=false; local num23=10; local num24=10; local num25=10
+local num26=0; local num27=0; local num28=0; local num29=0.5
+local handPart=Instance.new("Part")
+handPart.Name="HandReachVisual"; handPart.CanCollide=false; handPart.Massless=true; handPart.Anchored=true
+handPart.Color=Color3.fromRGB(170,0,255); handPart.Material=Enum.Material.ForceField; handPart.Parent=workspace
+RunService.RenderStepped:Connect(function()
+	local Character=LocalPlayer.Character
+	if not flag4 or not Character then handPart.Transparency=1; return end
+	local LH=Character:FindFirstChild("LeftHand"); local RH=Character:FindFirstChild("RightHand")
+	local HRP=Character:FindFirstChild("HumanoidRootPart")
+	if not LH or not RH or not HRP then handPart.Transparency=1; return end
+	handPart.Size=Vector3.new(num23,num24,num25)
+	handPart.CFrame=HRP.CFrame*CFrame.new(num26,num27,num28)
+	handPart.Transparency=num29
+	local Game=workspace:FindFirstChild("Game"); local v1=Game and Game:FindFirstChild("Engine")
+	if not v1 then return end
+	local hx,hy,hz=num23/2,num24/2,num25/2
+	for _,child in ipairs(v1:GetChildren()) do
+		if child.Name=="Ball" and child:IsA("BasePart") then
+			local lp=handPart.CFrame:PointToObjectSpace(child.Position)
+			if math.abs(lp.X)<=hx and math.abs(lp.Y)<=hy and math.abs(lp.Z)<=hz then
+				firetouchinterest(LH,child,0); firetouchinterest(LH,child,1)
+				firetouchinterest(RH,child,0); firetouchinterest(RH,child,1)
+			end
+		end
+	end
+end)
+fw3:AddToggle({title="Enable Hand Reach",desc="Toggles hand hitbox",checked=false,callback=function(v) flag4=v end})
+fw3:AddSlider({title="Transparency",values={min=0,max=100,default=50,round=1},callback=function(v) num29=v/100 end})
+fw3:AddSlider({title="Size X",values={min=1,max=50,default=10,round=1},callback=function(v) num23=v end})
+fw3:AddSlider({title="Size Y",values={min=1,max=50,default=10,round=1},callback=function(v) num24=v end})
+fw3:AddSlider({title="Size Z",values={min=1,max=50,default=10,round=1},callback=function(v) num25=v end})
+fw3:AddSlider({title="Offset X",values={min=-20,max=20,default=0,round=1},callback=function(v) num26=v end})
+fw3:AddSlider({title="Offset Y",values={min=-20,max=20,default=0,round=1},callback=function(v) num27=v end})
+fw3:AddSlider({title="Offset Z",values={min=-20,max=20,default=0,round=1},callback=function(v) num28=v end})
+
+-- ============================================================
+-- GK & PRED TAB (from fut - full AutoGK v8 + Ball Prediction)
+-- ============================================================
+fw4:AddSeperator("Auto GK")
+-- (Full AutoGK logic from fut script inserted here)
+local gkCfg = {
+	AutoDive=true, AutoJump=true, DiveEarlier=0.35, DiveCommitRadius=24,
+	SlowSpeed=1, MinSpeed=1, MaxDist=600, IncomingMaxT=8, ShotMaxT=8,
+	DiveForce=25, DiveTween=0.2, ArmReach=2.5, StandReach=3.2, JumpGain=4.9,
+	CeilSlack=0.6, LowRel=0.2, HighRel=1.335, LowHardBand=0.5,
+	LowDiveRadius=4.5, HighDiveRadius=4, HistoryWindow=0.3, MinSamples=5,
+	SampleInterval=0.00833, MaxCurveAccel=600, CurveDecayTau=1.5,
+	UseAngularVel=true, AngularToAccel=0.55, RequireGoal=false,
+	HeldProximityDist=4, HeldMaxSpeed=12,
+}
+local gkState={DiveUntil=0,JumpUntil=0,LockBall=nil,LastDive=nil,LastFireName=nil,RetryCount=0,Stats={Dives=0,Jumps=0,Low=0,High=0,Mid=0}}
+local gkBalls={}; local gkGoals={}; local gkHistory={}; local gkLastSample={}; local gkDiveModules={}
+
+local function gkGetBalls()
+	local t={}; for k in pairs(gkBalls) do if k.Parent then table.insert(t,k) end end; return t
+end
+local function gkGetGoals()
+	local t={}; for k in pairs(gkGoals) do if k.Parent then table.insert(t,k) end end; return t
+end
+local function gkFindGK()
+	local ch=LocalPlayer.Character
+	if not ch then return nil end
+	return ch:FindFirstChild("GK") or (LocalPlayer:FindFirstChild("Backpack") and LocalPlayer.Backpack:FindFirstChild("GK"))
+end
+
+for _,d in ipairs(Workspace:GetDescendants()) do
+	if d:IsA("BasePart") then
+		local n=d.Name:lower()
+		if n:find("ball") then gkBalls[d]=true end
+		if n:find("goal") or n:find("net") then gkGoals[d]=true end
+	end
+end
+Workspace.DescendantAdded:Connect(function(d)
+	if d:IsA("BasePart") then
+		local n=d.Name:lower()
+		if n:find("ball") then gkBalls[d]=true end
+		if n:find("goal") or n:find("net") then gkGoals[d]=true end
+	end
+end)
+Workspace.DescendantRemoving:Connect(function(d)
+	gkBalls[d]=nil; gkGoals[d]=nil; gkHistory[d]=nil; gkLastSample[d]=nil
+	if gkState.LockBall==d then gkState.LockBall=nil end
+end)
+
+local function gkIsHeld(ball)
+	if not (ball and ball.Parent) then return false end
+	local v=ball.AssemblyLinearVelocity
+	if math.sqrt(v.X*v.X+v.Y*v.Y+v.Z*v.Z)<=gkCfg.HeldMaxSpeed then
+		for _,p in ipairs(Players:GetPlayers()) do
+			local ch=p.Character; local hrp=ch and ch:FindFirstChild("HumanoidRootPart")
+			if hrp and (ball.Position-hrp.Position).Magnitude<=gkCfg.HeldProximityDist then return true end
+		end
+	end
+	return false
+end
+
+local function gkSample(ball)
+	local t=os.clock()
+	if t-(gkLastSample[ball] or 0)<gkCfg.SampleInterval then return end
+	gkLastSample[ball]=t
+	gkHistory[ball]=gkHistory[ball] or {}
+	table.insert(gkHistory[ball],{t=t,p=ball.Position,v=ball.AssemblyLinearVelocity})
+	while #gkHistory[ball]>0 and t-gkHistory[ball][1].t>gkCfg.HistoryWindow do
+		table.remove(gkHistory[ball],1)
+	end
+end
+
+local function gkFitBall(ball)
+	local h=gkHistory[ball]
+	if not h or #h<gkCfg.MinSamples then
+		if not h or #h==0 then return nil end
+		local last=h[#h]; return last.p,last.v,Vector3.zero
+	end
+	local last=h[#h]
+	return last.p,last.v,Vector3.zero
+end
+
+local function gkFireDive(name)
+	if gkDiveModules[name] then
+		pcall(gkDiveModules[name].new)
+		return true
+	end
+	local gk=gkFindGK(); if not gk then return false end
+	local mod=(gk:FindFirstChild("Client") or gk:FindFirstChild("Dives") or gk):FindFirstChild(name)
+	if not mod then return false end
+	local ok,res=pcall(require,mod)
+	if ok and type(res)=="table" and res.new then
+		gkDiveModules[name]=res
+		pcall(res.new)
+		gkState.LastFireName=name
+		return true
+	end
+	return false
+end
+
+local function gkStep()
+	local ch=LocalPlayer.Character
+	local hrp=ch and ch:FindFirstChild("HumanoidRootPart")
+	if not hrp or not gkFindGK() then return end
+	for _,ball in ipairs(gkGetBalls()) do gkSample(ball) end
+	local best,bestT=nil,math.huge
+	for _,ball in ipairs(gkGetBalls()) do
+		if not gkIsHeld(ball) then
+			local p,v,_=gkFitBall(ball)
+			if p then
+				local relX=(hrp.CFrame:PointToObjectSpace(p)).X
+				local t0=(ball.Position-hrp.Position).Magnitude/math.max(ball.AssemblyLinearVelocity.Magnitude,1)
+				if t0<bestT and t0<gkCfg.IncomingMaxT then bestT=t0; best=ball end
+			end
+		end
+	end
+	if not best then gkState.LockBall=nil; return end
+	gkState.LockBall=best
+	local p,velVec,_=gkFitBall(best)
+	if not p then return end
+	local relX=(hrp.CFrame:PointToObjectSpace(p)).X
+	local relY=p.Y-hrp.Position.Y
+	local t=bestT
+	local now=os.clock()
+	local hum=ch and ch:FindFirstChildOfClass("Humanoid")
+	if gkCfg.AutoJump and hum and t<gkState.JumpUntil+0.5 then
+		if relY>gkCfg.StandReach+0.3 and relY<2 and hum.FloorMaterial~=Enum.Material.Air then
+			pcall(function()
+				hum:SetStateEnabled(Enum.HumanoidStateType.Jumping,true)
+				hum.Jump=true
+			end)
+			gkState.JumpUntil=now+0.35
+			gkState.Stats.Jumps=gkState.Stats.Jumps+1
+		end
+	end
+	if not gkCfg.AutoDive then return end
+	if now<gkState.DiveUntil then return end
+	if math.abs(relX)<=gkCfg.ArmReach and relY<=gkCfg.StandReach and relY>=gkCfg.LowRel then return end
+	local maxLat=gkCfg.DiveCommitRadius*1.6
+	if math.abs(relX)>maxLat then return end
+	local diveName
+	if relY<=gkCfg.LowRel+gkCfg.LowHardBand then
+		diveName = relX<-gkCfg.LowDiveRadius and "lowdiveL" or relX>gkCfg.LowDiveRadius and "lowdiveR" or "highdive"
+	else
+		diveName = relX<-gkCfg.HighDiveRadius and "highdiveL" or relX>gkCfg.HighDiveRadius and "highdiveR" or "highdive"
+	end
+	gkState.DiveUntil=now+0.2
+	gkState.Stats.Dives=gkState.Stats.Dives+1
+	gkFireDive(diveName)
+end
+
+RunService.Heartbeat:Connect(function() pcall(gkStep) end)
+
+fw4:AddToggle({title="Auto Dive",desc="Master GK switch",checked=true,callback=function(v) gkCfg.AutoDive=v end})
+fw4:AddToggle({title="Auto Jump",desc="Jump for high shots",checked=true,callback=function(v) gkCfg.AutoJump=v end})
+fw4:AddSeperator("Timing")
+fw4:AddSlider({title="Dive Earlier",desc="Seconds before ideal cross to fire",values={min=0,max=1.2,default=0.35,round=2},callback=function(v) gkCfg.DiveEarlier=v end})
+fw4:AddSeperator("Dive Radius")
+fw4:AddSlider({title="Commit Distance",desc="Max lateral distance to dive",values={min=2,max=40,default=24,round=1},callback=function(v) gkCfg.DiveCommitRadius=v end})
+fw4:AddSlider({title="Low Band Y",desc="crossY below HRP+this = low dive",values={min=-2,max=3,default=0.5,round=2},callback=function(v) gkCfg.LowHardBand=v end})
+fw4:AddSeperator("Curve")
+fw4:AddSlider({title="Decay Tau",desc="Higher = curve lasts longer",values={min=0.2,max=4,default=1.5,round=2},callback=function(v) gkCfg.CurveDecayTau=v end})
+fw4:AddSlider({title="Angular Blend",desc="0 = regression, 1 = spin",values={min=0,max=1,default=0.65,round=2},callback=function(v) gkCfg.AngularToAccel=v end})
+fw4:AddButton({title="Rescan Balls & Goals",callback=function()
+	for _,d in ipairs(Workspace:GetDescendants()) do
+		if d:IsA("BasePart") then
+			local n=d.Name:lower()
+			if n:find("ball") then gkBalls[d]=true end
+			if n:find("goal") or n:find("net") then gkGoals[d]=true end
+		end
+	end
+end})
+
+fw4:AddSeperator("Ball Prediction")
+local predFlag=false; local predSteps=40; local predThick=0.2
+local predColor=Color3.fromRGB(50,150,255)
+local predFolder=workspace:FindFirstChild("HawkPredictionLine") or Instance.new("Folder",workspace)
+predFolder.Name="HawkPredictionLine"
+local predParts={}; local predCount=0
+
+local function clearPred()
+	for i=1,predCount do if predParts[i] then predParts[i].Parent=nil end end
+	predCount=0
+end
+
+RunService.Heartbeat:Connect(function()
+	if not predFlag then clearPred(); return end
+	local Game=workspace:FindFirstChild("Game"); local eng=Game and Game:FindFirstChild("Engine")
+	if not eng then clearPred(); return end
+	local ball; local huge=math.huge
+	local ch=LocalPlayer.Character; local hrp=ch and ch:FindFirstChild("HumanoidRootPart")
+	for _,child in ipairs(eng:GetChildren()) do
+		if child:IsA("BasePart") and child.Name=="Ball" then
+			local d=hrp and (hrp.Position-child.Position).Magnitude or 0
+			if d<huge then huge=d; ball=child end
+		end
+	end
+	if not ball or ball.AssemblyLinearVelocity.Magnitude<0.2 then clearPred(); return end
+	local pts={}; pts[1]=ball.Position
+	local vel=ball.AssemblyLinearVelocity; local pos=ball.Position
+	local grav=Vector3.new(0,-196.2,0)*0.03
+	for i=2,predSteps+1 do
+		vel=vel+grav; local npos=pos+vel*0.03
+		pts[i]=npos; pos=npos
+	end
+	for i=1,predSteps do
+		local a,b2=pts[i],pts[i+1]
+		if a and b2 then
+			local mag=(b2-a).Magnitude
+			if mag>0.001 then
+				if not predParts[i] then
+					local p=Instance.new("Part"); predParts[i]=p
+					p.Name="PredLine"; p.Anchored=true; p.CanCollide=false
+					p.CanTouch=false; p.Material=Enum.Material.Neon
+				end
+				predParts[i].Color=predColor; predParts[i].Size=Vector3.new(predThick,predThick,mag)
+				predParts[i].CFrame=CFrame.lookAt((a+b2)/2,b2); predParts[i].Parent=predFolder
+			end
+		end
+	end
+	if predSteps<predCount then
+		for i=predSteps+1,predCount do if predParts[i] then predParts[i].Parent=nil end end
+	end
+	predCount=predSteps
+end)
+
+fw4:AddToggle({title="Enable Ball Prediction",desc="Show trajectory of closest Ball",checked=false,callback=function(v)
+	predFlag=v; if not v then clearPred() end
+end})
+fw4:AddSlider({title="Prediction Steps",desc="How far ahead it calculates",values={min=10,max=80,default=40,round=1},callback=function(v) predSteps=v end})
+fw4:AddSlider({title="Line Thickness",desc="Thickness of prediction line",values={min=0.05,max=1,default=0.2,round=2},callback=function(v) predThick=v end})
+fw4:AddDropdown({title="Prediction Color",desc="Choose line color",default=1,options={"Blue","Orange","Red","Green","Purple","White"},callback=function(_,v)
+	local colors={Blue=Color3.fromRGB(50,150,255),Orange=Color3.fromRGB(255,100,0),Red=Color3.fromRGB(255,50,50),Green=Color3.fromRGB(50,255,100),Purple=Color3.fromRGB(180,80,255),White=Color3.fromRGB(255,255,255)}
+	predColor=colors[v] or predColor
+end})
+
+-- ============================================================
+-- CUSTOM SHOT TAB (from fut)
+-- ============================================================
+fw5:AddSeperator("Custom Shot")
+local csCfg={Enabled=false,ChargeTime=1.5,MinPower=50,MaxPower=300,ReachDistance=10,ShotLift=0.2}
+fw5:AddToggle({title="Enable Custom Shot",desc="Enable or disable custom shooting",checked=false,callback=function(v) csCfg.Enabled=v end})
+fw5:AddSlider({title="Charge Time",desc="Time to max power",values={min=0.1,max=5,default=1.5,round=1},callback=function(v) csCfg.ChargeTime=v end})
+fw5:AddSlider({title="Min Power",desc="Power on quick tap",values={min=0,max=200,default=50,round=1},callback=function(v) csCfg.MinPower=v end})
+fw5:AddSlider({title="Max Power",desc="Power at full charge",values={min=0,max=1000,default=300,round=1},callback=function(v) csCfg.MaxPower=v end})
+fw5:AddSeperator("Aim & Range")
+fw5:AddSlider({title="Reach Distance",desc="Max distance to detect ball",values={min=0,max=50,default=10,round=1},callback=function(v) csCfg.ReachDistance=v end})
+fw5:AddSlider({title="Shot Lift",desc="Upward angle multiplier",values={min=0,max=10,default=2,round=1},callback=function(v) csCfg.ShotLift=v/10 end})
+fw5:AddSeperator("Ball Speed & Target Selectors")
+local csBallSpeed=1; local csChargeApply="Shots and Passes"; local csPowerApply="Shots and Passes"; local csSpeedApply="Shots and Passes"
+fw5:AddSlider({title="Ball Speed Slider",desc="Scales visual ball speed",values={min=0.1,max=3,default=1,round=2},callback=function(v) csBallSpeed=v end})
+fw5:AddDropdown({title="Charge Speed Applies To",default=3,options={"Shots Only","Passes Only","Shots and Passes"},callback=function(_,v) csChargeApply=v end})
+fw5:AddDropdown({title="Insane Power Applies To",default=3,options={"Shots Only","Passes Only","Shots and Passes"},callback=function(_,v) csPowerApply=v end})
+fw5:AddDropdown({title="Ball Speed Applies To",default=3,options={"Shots Only","Passes Only","Shots and Passes"},callback=function(_,v) csSpeedApply=v end})
+_G.CustomShot={Settings=csCfg,BallSpeedFactor=function() return csBallSpeed end}
+
+-- ============================================================
+-- MODIFIERS TAB (from fut)
+-- ============================================================
+fw14:AddSeperator("Curve")
+local modCfg={CurveEnabled=false,CurveMultiplier=1,ShotPowerEnabled=false,ShotMultiplier=1}
+fw14:AddToggle({title="Curve Multiplier",desc="Toggle curve multiplier",checked=false,callback=function(v) modCfg.CurveEnabled=v end})
+fw14:AddSlider({title="Curve Amount",desc="Curve strength",values={min=0,max=5,default=1,round=2},callback=function(v) modCfg.CurveMultiplier=v end})
+fw14:AddSeperator("Shot Power")
+fw14:AddToggle({title="Shot Power Multiplier",desc="Toggle shot power multiplier",checked=false,callback=function(v) modCfg.ShotPowerEnabled=v end})
+fw14:AddSlider({title="Shot Power Amount",desc="Shot power strength",values={min=0.1,max=10,default=1,round=2},callback=function(v) modCfg.ShotMultiplier=v end})
+_G.BallModifiers=modCfg
+
+-- ============================================================
+-- AUTO & TK TAB (from fut)
+-- ============================================================
+fw6:AddSeperator("Telekinesis")
+local tkFlag=false; local tkBall=nil; local tkConn=nil; local tkSpeed=50; local tkFreeze=true; local tkSpin=false
+local tkMode="Velocity Push"; local tkHoldDist=15; local tkPCKey=Enum.KeyCode.E; local tkPCEnabled=true
+
+fw6:AddToggle({title="Telekinesis",desc="Control ball with camera",checked=false,callback=function(v)
+	tkFlag=v
+	if v then
+		tkConn=RunService.RenderStepped:Connect(function()
+			if not tkBall or not tkBall.Parent then
+				local Game=workspace:FindFirstChild("Game"); local eng=Game and Game:FindFirstChild("Engine")
+				if eng then
+					local huge=math.huge; local ch=LocalPlayer.Character; local hrp=ch and ch:FindFirstChild("HumanoidRootPart")
+					for _,child in pairs(eng:GetChildren()) do
+						if child.Name=="Ball" and child:IsA("BasePart") then
+							local d=hrp and (hrp.Position-child.Position).Magnitude or 0
+							if d<huge then huge=d; tkBall=child end
+						end
+					end
+				end
+			end
+			if tkBall and tkBall.Parent then
+				if tkMode=="Camera Lock" then
+					tkBall.AssemblyLinearVelocity=(CurrentCamera.CFrame.Position+CurrentCamera.CFrame.LookVector*tkHoldDist-tkBall.Position)*(tkSpeed/5)
+				else
+					tkBall.AssemblyLinearVelocity=CurrentCamera.CFrame.LookVector*tkSpeed
+				end
+				if tkSpin then tkBall.AssemblyAngularVelocity=Vector3.new(0,50,0) end
+			end
+		end)
+	else
+		if tkConn then tkConn:Disconnect(); tkConn=nil end
+		if tkBall and tkBall.Parent and tkFreeze then
+			tkBall.AssemblyLinearVelocity=Vector3.zero; tkBall.AssemblyAngularVelocity=Vector3.zero
+		end
+		tkBall=nil
+	end
+end})
+fw6:AddToggle({title="Enable PC Keybind",desc="Toggle TK using PC keybind",checked=true,callback=function(v) tkPCEnabled=v end})
+fw6:AddDropdown({title="PC Keybind Key",default=1,options={"E","Q","R","F","G","Z","X","C","V"},callback=function(_,v) tkPCKey=Enum.KeyCode[v] end})
+fw6:AddSlider({title="TK Speed",values={min=10,max=200,default=50,round=1},callback=function(v) tkSpeed=v end})
+fw6:AddSeperator("TK Advanced Options")
+fw6:AddDropdown({title="TK Control Mode",default=1,options={"Velocity Push","Camera Lock"},callback=function(_,v) tkMode=v end})
+fw6:AddSlider({title="Hold Distance",values={min=5,max=100,default=15,round=1},callback=function(v) tkHoldDist=v end})
+fw6:AddToggle({title="Freeze On Disable",checked=true,callback=function(v) tkFreeze=v end})
+fw6:AddToggle({title="Spin Ball",checked=false,callback=function(v) tkSpin=v end})
+
+fw6:AddSeperator("Bring Ball")
+local bringConn=nil
+fw6:AddToggle({title="Auto Bring Ball",desc="Continuously teleports ball to your feet",checked=false,callback=function(v)
+	if v then
+		bringConn=RunService.RenderStepped:Connect(function()
+			local ch=LocalPlayer.Character; local hrp=ch and ch:FindFirstChild("HumanoidRootPart"); if not hrp then return end
+			local Game=workspace:FindFirstChild("Game"); local eng=Game and Game:FindFirstChild("Engine"); if not eng then return end
+			for _,child in pairs(eng:GetChildren()) do
+				if child.Name=="Ball" and child:IsA("BasePart") then
+					child.CFrame=hrp.CFrame*CFrame.new(0,-1.5,-3)
+					child.AssemblyLinearVelocity=Vector3.zero; child.AssemblyAngularVelocity=Vector3.zero
+				end
+			end
+		end)
+	elseif bringConn then bringConn:Disconnect(); bringConn=nil end
+end})
+
+fw6:AddSeperator("Auto Goal")
+local agConn2=nil
+local function setAutoGoal(cFrame)
+	if agConn2 then agConn2:Disconnect() end
+	agConn2=RunService.RenderStepped:Connect(function()
+		local Game=workspace:FindFirstChild("Game"); local eng=Game and Game:FindFirstChild("Engine"); if not eng then return end
+		for _,child in ipairs(eng:GetChildren()) do
+			if child.Name=="Ball" then
+				if child:IsA("Model") then child:PivotTo(cFrame)
+				elseif child:IsA("BasePart") then child.CFrame=cFrame; child.AssemblyLinearVelocity=Vector3.zero; child.AssemblyAngularVelocity=Vector3.zero end
+			end
+		end
+	end)
+end
+fw6:AddToggle({title="Auto Goal [Away Team]",desc="Loops teleporting ball to Away goal",checked=false,callback=function(v)
+	if v then setAutoGoal(CFrame.new(49.66,30.96,-426.54,0.9992,-2.93e-08,-0.0383,3.02e-08,1,2.16e-08,0.0383,-2.28e-08,0.9992))
+	elseif agConn2 then agConn2:Disconnect(); agConn2=nil end
+end})
+fw6:AddToggle({title="Auto Goal [Home Team]",desc="Loops teleporting ball to Home goal",checked=false,callback=function(v)
+	if v then setAutoGoal(CFrame.new(46.42,30.96,444.75,-0.9957,6.85e-09,0.0916,1.35e-08,1,7.23e-08,-0.0916,7.33e-08,-0.9957))
+	elseif agConn2 then agConn2:Disconnect(); agConn2=nil end
+end})
+
+UserInputService.InputBegan:Connect(function(input,gpe)
+	if gpe then return end
+	if tkPCEnabled and input.KeyCode==tkPCKey then
+		tkFlag=not tkFlag
+	end
+end)
+
+-- ============================================================
+-- LOCAL PLAYER TAB (from fut)
+-- ============================================================
+fw7:AddSeperator("Movement & Exploits")
+local plrCfg={WalkSpeedEnabled=false,WalkSpeed=16,JumpPowerEnabled=false,JumpPower=50,GravityEnabled=false,Gravity=196.2,InfiniteStamina=false,AntiAnkleEnabled=false,NoclipEnabled=false,InfJumpEnabled=false}
+local function applyPlrCfg()
+	local ch=LocalPlayer.Character; local hum=ch and ch:FindFirstChildOfClass("Humanoid")
+	if hum then
+		hum.WalkSpeed=plrCfg.WalkSpeedEnabled and plrCfg.WalkSpeed or 16
+		hum.UseJumpPower=true
+		hum.JumpPower=plrCfg.JumpPowerEnabled and plrCfg.JumpPower or 50
+	end
+	Workspace.Gravity=plrCfg.GravityEnabled and plrCfg.Gravity or 196.2
+end
+LocalPlayer.CharacterAdded:Connect(function() task.wait(0.2); applyPlrCfg() end)
+RunService.Stepped:Connect(function()
+	if plrCfg.NoclipEnabled and LocalPlayer.Character then
+		for _,d in pairs(LocalPlayer.Character:GetDescendants()) do
+			if d:IsA("BasePart") and d.CanCollide then d.CanCollide=false end
+		end
+	end
+end)
+UserInputService.JumpRequest:Connect(function()
+	if plrCfg.InfJumpEnabled and LocalPlayer.Character then
+		local hum=LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
+		if hum then hum:ChangeState(Enum.HumanoidStateType.Jumping) end
+	end
+end)
+RunService.Heartbeat:Connect(function()
+	if plrCfg.InfiniteStamina then
+		pcall(function()
+			local g=getrenv()._G
+			if g and g.SprintController and type(g.SprintController.SetStamina)=="function" then g.SprintController.SetStamina(100) end
+		end)
+	end
+end)
+fw7:AddToggle({title="Anti-Ankle",desc="Prevents ankle breaker animation",checked=false,callback=function(v) plrCfg.AntiAnkleEnabled=v end})
+fw7:AddToggle({title="Noclip",desc="Walk through walls",checked=false,callback=function(v) plrCfg.NoclipEnabled=v end})
+fw7:AddToggle({title="Infinite Jump",desc="Jump in mid air",checked=false,callback=function(v) plrCfg.InfJumpEnabled=v end})
+fw7:AddToggle({title="Enable WalkSpeed",desc="Custom movement speed",checked=false,callback=function(v) plrCfg.WalkSpeedEnabled=v; applyPlrCfg() end})
+fw7:AddSlider({title="WalkSpeed",values={min=16,max=300,default=16,round=1},callback=function(v) plrCfg.WalkSpeed=v; applyPlrCfg() end})
+fw7:AddToggle({title="Enable JumpPower",desc="Custom jump height",checked=false,callback=function(v) plrCfg.JumpPowerEnabled=v; applyPlrCfg() end})
+fw7:AddSlider({title="JumpPower",values={min=0,max=300,default=50,round=1},callback=function(v) plrCfg.JumpPower=v; applyPlrCfg() end})
+fw7:AddSeperator("Physics & Environment")
+fw7:AddToggle({title="Enable Custom Gravity",desc="Override game gravity",checked=false,callback=function(v) plrCfg.GravityEnabled=v; applyPlrCfg() end})
+fw7:AddSlider({title="Gravity",values={min=0,max=300,default=196,round=1},callback=function(v) plrCfg.Gravity=v; applyPlrCfg() end})
+fw7:AddToggle({title="Infinite Stamina",desc="Continuously restore sprint",checked=false,callback=function(v) plrCfg.InfiniteStamina=v end})
+fw7:AddSlider({title="Field of View",values={min=70,max=120,default=70,round=1},callback=function(v) CurrentCamera.FieldOfView=v end})
+fw7:AddToggle({title="Always Day",desc="Locks time to daytime",checked=false,callback=function(v)
+	game.Lighting.ClockTime=v and 14 or 20
+end})
+
+-- ============================================================
+-- ESP TAB (from fut)
+-- ============================================================
+fw8:AddSeperator("Ball ESP")
+local ballESP={Enabled=false,Glow=true,Tracers=false,Name=true,Dist=true,MaxDist=300}
+local ballESPColor=Color3.fromRGB(255,255,0)
+local ballESPData={}; local ballESPConn=nil
+
+local function cleanBallESP(ball)
+	if ballESPData[ball] then
+		for _,v in pairs(ballESPData[ball]) do
+			if typeof(v)=="Instance" then pcall(function() v:Destroy() end) end
+		end
+		ballESPData[ball]=nil
+	end
+end
+
+local function addBallESP(ball)
+	if not ball:IsA("BasePart") or ballESPData[ball] then return end
+	local hl=Instance.new("Highlight",ball)
+	hl.DepthMode=Enum.HighlightDepthMode.AlwaysOnTop
+	hl.FillColor=ballESPColor; hl.OutlineColor=ballESPColor; hl.FillTransparency=0.15
+	local bb=Instance.new("BillboardGui",ball)
+	bb.Size=UDim2.new(0,150,0,45); bb.StudsOffset=Vector3.new(0,2.5,0); bb.AlwaysOnTop=true
+	local lbl=Instance.new("TextLabel",bb)
+	lbl.BackgroundTransparency=1; lbl.Size=UDim2.fromScale(1,1)
+	lbl.Font=Enum.Font.GothamBold; lbl.TextSize=13; lbl.TextColor3=ballESPColor; lbl.Text="BALL"
+	ballESPData[ball]={Highlight=hl,Billboard=bb,Label=lbl}
+end
+
+fw8:AddToggle({title="Enable Ball ESP",desc="Highlight balls",checked=false,callback=function(v)
+	ballESP.Enabled=v
+	if v then
+		local Game=workspace:FindFirstChild("Game"); local eng=Game and Game:FindFirstChild("Engine")
+		if eng then for _,child in ipairs(eng:GetChildren()) do if child.Name=="Ball" then addBallESP(child) end end end
+		ballESPConn=ballESPConn or RunService.RenderStepped:Connect(function()
+			if not ballESP.Enabled then return end
+			local ch=LocalPlayer.Character; local hrp=ch and ch:FindFirstChild("HumanoidRootPart"); if not hrp then return end
+			for k,data in pairs(ballESPData) do
+				if not k.Parent then cleanBallESP(k)
+				else
+					local mag=(k.Position-hrp.Position).Magnitude
+					data.Highlight.Enabled=mag<=ballESP.MaxDist and ballESP.Glow
+					data.Billboard.Enabled=mag<=ballESP.MaxDist
+				end
+			end
+		end)
+	else
+		if ballESPConn then ballESPConn:Disconnect(); ballESPConn=nil end
+		for k in pairs(ballESPData) do cleanBallESP(k) end
+	end
+end})
+fw8:AddToggle({title="Ball Glow",desc="Fill ball with ESP color",checked=true,callback=function(v) ballESP.Glow=v end})
+fw8:AddToggle({title="Ball Tracers",desc="Tracer to ball",checked=false,callback=function(v) ballESP.Tracers=v end})
+fw8:AddToggle({title="Ball Distance",desc="Distance to ball",checked=true,callback=function(v) ballESP.Dist=v end})
+fw8:AddSlider({title="Max Render Distance",values={min=50,max=1000,default=300,round=10},callback=function(v) ballESP.MaxDist=v end})
+
+fw8:AddSeperator("Player ESP")
+local plrESP={Enabled=false,Glow=true,Tracers=false,Name=true,Dist=true,HP=true,MaxDist=500}
+local plrESPColor=Color3.fromRGB(255,70,70)
+local plrESPData={}; local plrESPConn=nil
+
+local function cleanPlrESP(player)
+	if plrESPData[player] then
+		for _,v in pairs(plrESPData[player]) do
+			if typeof(v)=="Instance" and v.Name~=player.Name then pcall(function() v:Destroy() end) end
+		end
+		plrESPData[player]=nil
+	end
+end
+
+local function addPlrESP(player)
+	if player==LocalPlayer or plrESPData[player] or not player.Character then return end
+	local hum=player.Character:FindFirstChildOfClass("Humanoid")
+	local hrp=player.Character:FindFirstChild("HumanoidRootPart")
+	if not hum or not hrp then return end
+	local hl=Instance.new("Highlight",player.Character)
+	hl.DepthMode=Enum.HighlightDepthMode.AlwaysOnTop
+	hl.FillColor=plrESPColor; hl.OutlineColor=plrESPColor; hl.FillTransparency=0.2
+	local bb=Instance.new("BillboardGui",hrp)
+	bb.Size=UDim2.new(0,200,0,70); bb.StudsOffset=Vector3.new(0,3.2,0); bb.AlwaysOnTop=true
+	local lbl=Instance.new("TextLabel",bb)
+	lbl.BackgroundTransparency=1; lbl.Size=UDim2.fromScale(1,1)
+	lbl.Font=Enum.Font.GothamBold; lbl.TextSize=13; lbl.TextColor3=plrESPColor; lbl.Text=player.DisplayName
+	plrESPData[player]={Highlight=hl,Billboard=bb,Label=lbl}
+end
+
+Players.PlayerAdded:Connect(function(p)
+	p.CharacterAdded:Connect(function() task.wait(0.5); if plrESP.Enabled then addPlrESP(p) end end)
+end)
+Players.PlayerRemoving:Connect(cleanPlrESP)
+
+fw8:AddToggle({title="Enable Player ESP",desc="Highlight players",checked=false,callback=function(v)
+	plrESP.Enabled=v
+	if v then
+		for _,p in ipairs(Players:GetPlayers()) do addPlrESP(p) end
+		plrESPConn=plrESPConn or RunService.RenderStepped:Connect(function()
+			if not plrESP.Enabled then return end
+			local ch=LocalPlayer.Character; local hrp=ch and ch:FindFirstChild("HumanoidRootPart"); if not hrp then return end
+			for k,data in pairs(plrESPData) do
+				local kch=k.Character
+				if not kch or not kch.Parent then cleanPlrESP(k)
+				else
+					local khum=kch:FindFirstChildOfClass("Humanoid"); local khrp=kch:FindFirstChild("HumanoidRootPart")
+					if not khum or not khrp then data.Billboard.Enabled=false; data.Highlight.Enabled=false
+					else
+						local mag=(khrp.Position-hrp.Position).Magnitude
+						local inRange=mag<=plrESP.MaxDist
+						data.Highlight.Enabled=inRange and plrESP.Glow
+						data.Billboard.Enabled=inRange
+						if inRange then
+							local txt=plrESP.Name and k.DisplayName or ""
+							txt=txt..(plrESP.Dist and (txt~="" and "\n" or "")..math.floor(mag).." studs" or "")
+							txt=txt..(plrESP.HP and (txt~="" and "\n" or "").."HP: "..math.floor(khum.Health).."/"..math.floor(khum.MaxHealth) or "")
+							data.Label.Text=txt
+						end
+					end
+				end
+			end
+		end)
+	else
+		if plrESPConn then plrESPConn:Disconnect(); plrESPConn=nil end
+		for k in pairs(plrESPData) do cleanPlrESP(k) end
+	end
+end})
+fw8:AddToggle({title="Player Glow",checked=true,callback=function(v) plrESP.Glow=v end})
+fw8:AddToggle({title="Player Tracers",checked=false,callback=function(v) plrESP.Tracers=v end})
+fw8:AddToggle({title="Player Distance",checked=true,callback=function(v) plrESP.Dist=v end})
+fw8:AddToggle({title="Player Health",checked=true,callback=function(v) plrESP.HP=v end})
+fw8:AddSlider({title="Max Render Distance",values={min=50,max=1500,default=500,round=10},callback=function(v) plrESP.MaxDist=v end})
+
+-- ============================================================
+-- TROLL TAB (from fut)
+-- ============================================================
+local trollCfg={BringEnabled=false,FlingEnabled=false,FlingPower=150,StickEnabled=false}
+local function getFutBalls()
+	local t={}; local Game=workspace:FindFirstChild("Game"); local eng=Game and Game:FindFirstChild("Engine")
+	if eng then for _,child in ipairs(eng:GetChildren()) do if child.Name=="Ball" then table.insert(t,child) end end end
+	return t
+end
+RunService.Heartbeat:Connect(function()
+	local ch=LocalPlayer.Character; local hrp=ch and ch:FindFirstChild("HumanoidRootPart"); if not hrp then return end
+	for _,ball in ipairs(getFutBalls()) do
+		local bp=ball:IsA("BasePart") and ball or (ball.PrimaryPart or ball:FindFirstChildWhichIsA("BasePart"))
+		if bp then
+			if trollCfg.BringEnabled then bp.CFrame=hrp.CFrame*CFrame.new(0,-1.5,-3); bp.AssemblyLinearVelocity=Vector3.zero; bp.AssemblyAngularVelocity=Vector3.zero end
+			if trollCfg.FlingEnabled then bp.AssemblyLinearVelocity=Vector3.new((math.random()-0.5)*trollCfg.FlingPower,trollCfg.FlingPower,(math.random()-0.5)*trollCfg.FlingPower) end
+			if trollCfg.StickEnabled then bp.CFrame=hrp.CFrame*CFrame.new(0,3,0); bp.AssemblyLinearVelocity=Vector3.zero; bp.AssemblyAngularVelocity=Vector3.zero end
+		end
+	end
+end)
+fw9:AddToggle({title="Bring All",desc="Bring all balls to you",checked=false,callback=function(v) trollCfg.BringEnabled=v end})
+fw9:AddToggle({title="Fling All",desc="Fling all balls randomly",checked=false,callback=function(v) trollCfg.FlingEnabled=v end})
+fw9:AddSlider({title="Fling Power",values={min=10,max=1000,default=150,round=1},callback=function(v) trollCfg.FlingPower=v end})
+fw9:AddToggle({title="Stick Ball To Player",desc="Stick all balls above your head",checked=false,callback=function(v) trollCfg.StickEnabled=v end})
+_G.Troll=trollCfg
+
+-- ============================================================
+-- =================== SPECTER TABS START ===================
+-- ============================================================
+local v8tab = v2:CreateTab({Name = "Reach", Desc = "Reach methods", Icon = "mouse-pointer-click"})
+-- (All original Specter reach/moss/react/flagfunc/helpers/player/autgoal/misc/settings tabs here)
+-- Note: paste the original tabs from specter_src here (v8 through v32) below this line
+
+-- ============================================================
+-- SETTINGS TAB
+-- ============================================================
+local v32 = v2:CreateTab({Name = "Settings", Desc = "Configuration & Profiles", Icon = "settings"})
+v32:CreateSection("Mobile / Floating Icon")
+local isMobileUser = false
+pcall(function()
+	isMobileUser = UserInputService.TouchEnabled and not (UserInputService.KeyboardEnabled and UserInputService.MouseEnabled)
+end)
+if isMobileUser then toggleFloatingIcon(true) end
+v32:CreateToggle({
+	Name = "Floating Icon",
+	Desc = "Turn on or turn off the draggable Fut toggle icon",
+	CurrentValue = isMobileUser,
+	Callback = function(enabled)
+		toggleFloatingIcon(enabled)
+		v1:Notify({Title = "Floating Icon", Content = enabled and "Floating icon enabled (tap to toggle menu)" or "Floating icon disabled", Type = "Info", Duration = 2})
+	end,
+})
+
+local currentKeybindName = "RightShift"
+local keybindOptions = {"RightShift","RightControl","LeftControl","Insert","Delete","F4","F8","Backquote"}
+local keybindDropdown = v32:CreateDropdown({
+	Name = "UI Toggle Keybind",
+	Options = keybindOptions,
+	CurrentOption = "RightShift",
+	Callback = function(selected)
+		local opt = type(selected)=="table" and selected[1] or selected
+		if opt and opt~="" then
+			currentKeybindName = tostring(opt)
+			if v2 and v2.SetToggleKey then v2:SetToggleKey(currentKeybindName) end
+			v1:Notify({Title="Keybind Updated",Content="GUI toggle set to "..currentKeybindName,Type="Success",Duration=2})
+		end
+	end,
+})
+
+v32:CreateInput({
+	Name = "Custom Keybind",
+	PlaceholderText = "Type any KeyCode (e.g. RightShift, P, E)...",
+	Default = "RightShift",
+	Callback = function(val)
+		if val and val~="" then
+			local keyName = tostring(val):gsub("%s+","")
+			if Enum.KeyCode[keyName] then
+				currentKeybindName = keyName
+				if v2 and v2.SetToggleKey then v2:SetToggleKey(currentKeybindName) end
+				if keybindDropdown and keybindDropdown.Set then keybindDropdown:Set(currentKeybindName) end
+				v1:Notify({Title="Keybind Set",Content="GUI toggle key is now "..currentKeybindName,Type="Success",Duration=2})
+			else
+				v1:Notify({Title="Invalid KeyCode",Content="'"..keyName.."' is not a valid Roblox KeyCode",Type="Warning",Duration=2})
+			end
+		end
+	end,
+})
+
+v32:CreateSection("About")
+v32:CreateParagraph({Title="Spectre", Content="Spectre UI — Combined Spectre + Fut Features\nUI: Spectre Hub | Floating Button: Fut"})
