@@ -3373,6 +3373,22 @@ v38:CreateButton({
 	end,
 })
 v38:CreateButton({
+	Name = "Unlock UCL Card",
+	Callback = function()
+		func(function()
+			local event = workspace.FE
+				and workspace.FE.NameLevel
+				and workspace.FE.NameLevel:FindFirstChild("CardSelection")
+			if event then
+				event:FireServer(517)
+				v1:Notify({Title = "UCL Card", Content = "Unlocked âœ“", Duration = 2})
+			else
+				v1:Notify({Title = "UCL Card", Content = "Event not found!", Duration = 3})
+			end
+		end)
+	end,
+})
+v38:CreateButton({
 	Name = "Remove Map",
 	Callback = function()
 		for _, v1 in ipairs(workspace:GetChildren()) do
