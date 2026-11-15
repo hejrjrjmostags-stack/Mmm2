@@ -1026,6 +1026,220 @@ local v17 = v8:CreateToggle({
 		part.Transparency = tbl2.transparency
 	end,
 })
+-- ============================================================
+-- ARM REACH TAB
+-- ============================================================
+local v_armTab = v2:CreateTab({Name = "Arm Reach", Desc = "Arm reach methods", Icon = "hand"})
+
+local function hb_getArms(ch)
+	local arms = {}
+	for _, name in ipairs({
+		"Right Arm", "Left Arm",
+		"RightUpperArm", "RightLowerArm", "RightHand",
+		"LeftUpperArm", "LeftLowerArm", "LeftHand",
+	}) do
+		local p = ch:FindFirstChild(name)
+		if p then table.insert(arms, p) end
+	end
+	return arms
+end
+
+-- Method 1: Input
+v_armTab:CreateSection("Method 1 — Input Size")
+v_armTab:CreateParagraph({Title = "Method 1", Content = "Type a number (1-50) to set arm reach size."})
+
+local hb1 = {on = false, dist = 10, show = false, conn = nil, parts = {}}
+
+local function hb1_cleanup()
+	if hb1.conn then pcall(function() hb1.conn:Disconnect() end) hb1.conn = nil end
+	for _, p in ipairs(hb1.parts) do pcall(function() p:Destroy() end) end
+	hb1.parts = {}
+end
+
+local function hb1_start()
+	hb1_cleanup()
+	if not hb1.on then return end
+	local ch = LocalPlayer.Character
+	if not ch then return end
+	for _, arm in ipairs(hb_getArms(ch)) do
+		local p = Instance.new("Part")
+		p.Name = "TPS_HB1_" .. arm.Name
+		p.Anchored = false
+		p.CanCollide = false
+		p.Massless = true
+		p.Size = Vector3.new(hb1.dist, hb1.dist, hb1.dist)
+		p.Transparency = hb1.show and 0.5 or 1
+		p.Color = Color3.fromRGB(0, 85, 255)
+		local w = Instance.new("WeldConstraint")
+		w.Part0 = p
+		w.Part1 = arm
+		w.Parent = p
+		p.CFrame = arm.CFrame
+		p.Parent = workspace
+		table.insert(hb1.parts, p)
+	end
+	hb1.conn = RunService.Heartbeat:Connect(function()
+		local ball = func25()
+		if not ball then return end
+		for _, p in ipairs(hb1.parts) do
+			if p and p.Parent then
+				firetouchinterest(p, ball, 0)
+				firetouchinterest(p, ball, 1)
+			end
+		end
+	end)
+	if hb1.conn then table.insert(tbl10, hb1.conn) end
+end
+
+v_armTab:CreateToggle({Name = "Enable Method 1", CurrentValue = false, Callback = function(val)
+	hb1.on = val
+	if val then hb1_start() else hb1_cleanup() end
+end})
+v_armTab:CreateInput({Name = "Reach Size (1-50)", PlaceholderText = "Default: 10", Callback = function(val)
+	hb1.dist = math.clamp(tonumber(val) or hb1.dist, 1, 50)
+	if hb1.on then hb1_start() end
+end})
+v_armTab:CreateToggle({Name = "Show Hitbox M1", CurrentValue = false, Callback = function(val)
+	hb1.show = val
+	for _, p in ipairs(hb1.parts) do
+		if p and p.Parent then p.Transparency = val and 0.5 or 1 end
+	end
+end})
+
+-- Method 2: Slider
+v_armTab:CreateSection("Method 2 — Slider Size")
+v_armTab:CreateParagraph({Title = "Method 2", Content = "Use slider to adjust arm reach size (1-50)."})
+
+local hb2 = {on = false, dist = 10, show = false, conn = nil, parts = {}}
+
+local function hb2_cleanup()
+	if hb2.conn then pcall(function() hb2.conn:Disconnect() end) hb2.conn = nil end
+	for _, p in ipairs(hb2.parts) do pcall(function() p:Destroy() end) end
+	hb2.parts = {}
+end
+
+local function hb2_start()
+	hb2_cleanup()
+	if not hb2.on then return end
+	local ch = LocalPlayer.Character
+	if not ch then return end
+	for _, arm in ipairs(hb_getArms(ch)) do
+		local p = Instance.new("Part")
+		p.Name = "TPS_HB2_" .. arm.Name
+		p.Anchored = false
+		p.CanCollide = false
+		p.Massless = true
+		p.Size = Vector3.new(hb2.dist, hb2.dist, hb2.dist)
+		p.Transparency = hb2.show and 0.5 or 1
+		p.Color = Color3.fromRGB(255, 85, 0)
+		local w = Instance.new("WeldConstraint")
+		w.Part0 = p
+		w.Part1 = arm
+		w.Parent = p
+		p.CFrame = arm.CFrame
+		p.Parent = workspace
+		table.insert(hb2.parts, p)
+	end
+	hb2.conn = RunService.Heartbeat:Connect(function()
+		local ball = func25()
+		if not ball then return end
+		for _, p in ipairs(hb2.parts) do
+			if p and p.Parent then
+				p.Size = Vector3.new(hb2.dist, hb2.dist, hb2.dist)
+				firetouchinterest(p, ball, 0)
+				firetouchinterest(p, ball, 1)
+			end
+		end
+	end)
+	if hb2.conn then table.insert(tbl10, hb2.conn) end
+end
+
+v_armTab:CreateToggle({Name = "Enable Method 2", CurrentValue = false, Callback = function(val)
+	hb2.on = val
+	if val then hb2_start() else hb2_cleanup() end
+end})
+v_armTab:CreateSlider({Name = "Reach Size", Range = {1, 50}, Increment = 1, CurrentValue = 10, Callback = function(val)
+	hb2.dist = val
+	for _, p in ipairs(hb2.parts) do
+		if p and p.Parent then p.Size = Vector3.new(val, val, val) end
+	end
+end})
+v_armTab:CreateToggle({Name = "Show Hitbox M2", CurrentValue = false, Callback = function(val)
+	hb2.show = val
+	for _, p in ipairs(hb2.parts) do
+		if p and p.Parent then p.Transparency = val and 0.5 or 1 end
+	end
+end})
+
+-- Method 3: X/Y/Z
+v_armTab:CreateSection("Method 3 — X / Y / Z")
+v_armTab:CreateParagraph({Title = "Method 3", Content = "Control X, Y and Z arm reach size independently (1-50 each)."})
+
+local hb3 = {on = false, x = 10, y = 10, z = 10, show = false, conn = nil, parts = {}}
+
+local function hb3_cleanup()
+	if hb3.conn then pcall(function() hb3.conn:Disconnect() end) hb3.conn = nil end
+	for _, p in ipairs(hb3.parts) do pcall(function() p:Destroy() end) end
+	hb3.parts = {}
+end
+
+local function hb3_start()
+	hb3_cleanup()
+	if not hb3.on then return end
+	local ch = LocalPlayer.Character
+	if not ch then return end
+	for _, arm in ipairs(hb_getArms(ch)) do
+		local p = Instance.new("Part")
+		p.Name = "TPS_HB3_" .. arm.Name
+		p.Anchored = false
+		p.CanCollide = false
+		p.Massless = true
+		p.Size = Vector3.new(hb3.x, hb3.y, hb3.z)
+		p.Transparency = hb3.show and 0.5 or 1
+		p.Color = Color3.fromRGB(0, 200, 100)
+		local w = Instance.new("WeldConstraint")
+		w.Part0 = p
+		w.Part1 = arm
+		w.Parent = p
+		p.CFrame = arm.CFrame
+		p.Parent = workspace
+		table.insert(hb3.parts, p)
+	end
+	hb3.conn = RunService.Heartbeat:Connect(function()
+		local ball = func25()
+		if not ball then return end
+		for _, p in ipairs(hb3.parts) do
+			if p and p.Parent then
+				p.Size = Vector3.new(hb3.x, hb3.y, hb3.z)
+				firetouchinterest(p, ball, 0)
+				firetouchinterest(p, ball, 1)
+			end
+		end
+	end)
+	if hb3.conn then table.insert(tbl10, hb3.conn) end
+end
+
+v_armTab:CreateToggle({Name = "Enable Method 3", CurrentValue = false, Callback = function(val)
+	hb3.on = val
+	if val then hb3_start() else hb3_cleanup() end
+end})
+v_armTab:CreateSlider({Name = "Reach X", Range = {1, 50}, Increment = 1, CurrentValue = 10, Callback = function(val)
+	hb3.x = val
+end})
+v_armTab:CreateSlider({Name = "Reach Y", Range = {1, 50}, Increment = 1, CurrentValue = 10, Callback = function(val)
+	hb3.y = val
+end})
+v_armTab:CreateSlider({Name = "Reach Z", Range = {1, 50}, Increment = 1, CurrentValue = 10, Callback = function(val)
+	hb3.z = val
+end})
+v_armTab:CreateToggle({Name = "Show Hitbox M3", CurrentValue = false, Callback = function(val)
+	hb3.show = val
+	for _, p in ipairs(hb3.parts) do
+		if p and p.Parent then p.Transparency = val and 0.5 or 1 end
+	end
+end})
+
+-- ============================================================
 local v18 = v2:CreateTab({Name = "Xeno & Solara Reach", Desc = "Leg reach", Icon = "settings-2"})
 v18:CreateSection("Xeno & Solara Reach")
 local tbl4 = {on = false, dist = 16}
