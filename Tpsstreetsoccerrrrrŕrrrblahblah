@@ -475,6 +475,19 @@ if not v3.HARDEN.holder then
 	folder.Name = "Ae" .. math.random(1000, 9999)
 	v3.HARDEN.holder = folder
 end
+-- Hidden FireServer path: goes through __namecall so raw :FireServer never appears in the call site
+if not v3.HARDEN.safeFire then
+	local realNamecall = v3.HARDEN._origNamecall
+	v3.HARDEN.safeFire = newcclosure(function(remote, ...)
+		if not remote or typeof(remote) ~= "Instance" then return end
+		local method = ("Fire" .. "Server")
+		local args = {...}
+		local ok = pcall(function()
+			realNamecall(remote, table.unpack(args))
+		end)
+		return ok
+	end)
+end
 local v5 = v2:CreateTab({Name = "Home", Desc = "Info", Icon = "house"})
 v2:SelectTab(v5)
 local Stats = game:GetService("Stats")
@@ -3317,6 +3330,30 @@ local function ag_doGoal()
 
 	-- Step 3: func27 same as reach, HRP inside ball = guaranteed kick
 	func27(func26(ch, hum), ball)
+
+	-- Step 4: FireServer kick event (Cobalt method)
+	func(function()
+		local kickEvent = workspace.FE
+			and workspace.FE.System
+			and workspace.FE.System:FindFirstChild("Kick")
+		if kickEvent then
+			local ball2 = func25()
+			if ball2 then
+				kickEvent:FireServer(
+					LocalPlayer.UserId,
+					workspace.TPSSystem and workspace.TPSSystem.TPS or ball2,
+					70,
+					Vector3.new(400000, 800, 400000),
+					false,
+					true,
+					0,
+					"Rock'n'roll Star",
+					"NeverFearTruth",
+					"power=95/100"
+				)
+			end
+		end
+	end)
 end
 
 local function ag_start()
@@ -3381,7 +3418,7 @@ v38:CreateButton({
 				and workspace.FE.NameLevel:FindFirstChild("CardSelection")
 			if event then
 				event:FireServer(517)
-				v1:Notify({Title = "UCL Card", Content = "Unlocked âœ“", Duration = 2})
+				v1:Notify({Title = "UCL Card", Content = "Unlocked ✓", Duration = 2})
 			else
 				v1:Notify({Title = "UCL Card", Content = "Event not found!", Duration = 3})
 			end
