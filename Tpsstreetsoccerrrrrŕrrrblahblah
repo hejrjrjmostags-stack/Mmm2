@@ -1,435 +1,99 @@
-local rawLib = game:HttpGet("https://raw.githubusercontent.com/noxaetheris/nice-one/refs/heads/main/s.txt")
-rawLib = rawLib:gsub("punishment hub", "specter")
-rawLib = rawLib:gsub("Exit punishment hub%?", "Exit specter?")
-rawLib = rawLib:gsub("if gameProcessed then%s*return%s*end%s*if input%.KeyCode == Window%.ToggleKey then%s*Window:Toggle%(%)%s*end", "-- toggle handled by v2")
-rawLib = rawLib:gsub("chip%.Text = tName", 'chip.Text = (tName == "cezar" and "Black") or (tName == "Graphite" and "Dark Gray") or (tName == "Contrast" and "Silver") or (tName == "Paper" and "White") or tName')
-rawLib = rawLib:gsub("tBtn%.Text = tName", 'tBtn.Text = (tName == "cezar" and "Black") or (tName == "Graphite" and "Dark Gray") or (tName == "Contrast" and "Silver") or (tName == "Paper" and "White") or tName')
-local Library = loadstring(rawLib)()
+--[[
+    SPECTRE HUB — TPS STREET SOCCER
+    Black & White Edition
+    Powered by PEAK / Spectre UI
+]]
+
+local rawLib = game:HttpGet("https://raw.githubusercontent.com/Twistzzmassivescripts/UI_Libarys/refs/heads/main/OUTLAWS.dev/NEW%20ONE%20PEAK.lua")
+
+-- Helper for exact string replacement
+local function replaceExact(source, target, replacement)
+	local p1, p2 = source:find(target, 1, true)
+	if p1 then
+		return source:sub(1, p1 - 1) .. replacement .. source:sub(p2 + 1)
+	end
+	return source
+end
+
+-- 1. Apply Black & White Theme
+rawLib = rawLib:gsub(
+	"f%.Theme=%b{}",
+	"f.Theme={Background=Color3.fromRGB(12,12,12),Surface=Color3.fromRGB(18,18,18),Surface2=Color3.fromRGB(24,24,24),Surface3=Color3.fromRGB(34,34,34),Stroke=Color3.fromRGB(46,46,46),StrokeHover=Color3.fromRGB(90,90,90),Accent=Color3.fromRGB(255,255,255),AccentDark=Color3.fromRGB(15,15,15),Text=Color3.fromRGB(255,255,255),Muted=Color3.fromRGB(140,140,140),Warning=Color3.fromRGB(240,176,108),Success=Color3.fromRGB(150,220,170),Error=Color3.fromRGB(240,120,120)}"
+)
+
+-- 2. Turn purple glow tint into monochrome white glow
+rawLib = rawLib:gsub("Color3%.fromRGB%(226,218,230%)", "Color3.fromRGB(255,255,255)")
+
+-- 3. Swap purple logo asset ID for the Spectre S icon
+rawLib = rawLib:gsub('Logo="rbxassetid://103859712365480"', 'Logo="rbxassetid://106249189352631"')
+
+-- 4. Replace purple top-left logo with bold text "SPECTRE"
+local headerTarget = 'local J=c(p,{Name="Header",Size=UDim2.new(1,0,0,72),BackgroundTransparency=1,Parent=C})local X=c("ImageLabel",{Position=UDim2.fromOffset(22,27),Size=UDim2.fromOffset(30,28),BackgroundTransparency=1,Image="",ImageColor3=a.Accent,ScaleType=Enum.ScaleType.Fit,Parent=J})u(X,k.Icon or t.Logo)d{Position=UDim2.fromOffset(60,25),Size=UDim2.new(1,-70,0,20),Text=k.Title or"Airflow",TextSize=20,Parent=J}d{Position=UDim2.fromOffset(60,45),Size=UDim2.new(1,-70,0,14),Text=k.Subtitle or"",TextSize=13,FontFace=i.Regular,TextColor3=a.Muted,Parent=J}'
+
+local newHeader = 'local J=c(p,{Name="Header",Size=UDim2.new(1,0,0,72),BackgroundTransparency=1,Parent=C})c("ImageLabel",{Position=UDim2.fromOffset(22,18),Size=UDim2.fromOffset(28,28),BackgroundTransparency=1,Image="rbxassetid://106249189352631",ImageColor3=a.Text,ScaleType=Enum.ScaleType.Fit,Parent=J})d{Position=UDim2.fromOffset(55,24),Size=UDim2.new(1,-65,0,22),Text="SPECTRE",TextSize=21,FontFace=i.Bold,TextColor3=a.Text,Parent=J}d{Position=UDim2.fromOffset(55,46),Size=UDim2.new(1,-65,0,14),Text=k.Subtitle or"TPS Street Soccer",TextSize=12,FontFace=i.Regular,TextColor3=a.Muted,Parent=J}'
+
+rawLib = replaceExact(rawLib, headerTarget, newHeader)
+
+-- 5. Replace branding names (Outlaw, kimi, airflow -> Spectre)
+rawLib = rawLib:gsub("AirFlow", "Spectre")
+rawLib = rawLib:gsub("Airflow", "Spectre")
+rawLib = rawLib:gsub("airflow", "spectre")
+rawLib = rawLib:gsub("OUTLAW", "SPECTRE")
+rawLib = rawLib:gsub("Outlaw", "Spectre")
+rawLib = rawLib:gsub("outlaw", "spectre")
+rawLib = rawLib:gsub("Kimi", "Spectre")
+rawLib = rawLib:gsub("kimi", "spectre")
+
+local PEAK = loadstring(rawLib)()
+
+pcall(function()
+	PEAK:LoadFont({Name = "ValleySans"})
+end)
+
+local Window = PEAK:CreateWindow({
+	Name = "SPECTRE",
+	Subtitle = "TPS Street Soccer",
+	ToggleUIKeybind = "RightShift",
+	Loading = false
+})
 
 local v1 = {}
-function v1:LoadFont(...) end
-
 function v1:Notify(tbl)
 	tbl = tbl or {}
 	pcall(function()
-		Library:Notify({
-			Title = tostring(tbl.Title or "TPS"),
+		Window:Notify({
+			Title = tostring(tbl.Title or "Spectre"),
 			Content = tostring(tbl.Content or tbl.Title or ""),
+			Type = tbl.Type or "Success",
 			Duration = tonumber(tbl.Duration) or 3,
+			Icon = tbl.Icon or "bell"
 		})
 	end)
 end
 
-function v1:CreateWindow(config)
-	config = config or {}
-	local winTitle = tostring(config.Name or "specter")
-	local win = Library:CreateWindow(winTitle)
-
-	local v2 = {}
-	v2.Window = win
-
-	function v2:SelectTab(tabObj)
-		if tabObj and tabObj._activate then
-			pcall(tabObj._activate)
-		end
-	end
-
-	local currentToggleKey = Enum.KeyCode.RightShift
-
-	function v2:SetToggleKey(keyName)
-		pcall(function()
-			local kc = typeof(keyName) == "EnumItem" and keyName or Enum.KeyCode[tostring(keyName)]
-			if kc then
-				currentToggleKey = kc
-				if win then
-					win.ToggleKey = kc
-				end
-			end
-		end)
-	end
-
-	if config and config.ToggleUIKeybind then
-		v2:SetToggleKey(config.ToggleUIKeybind)
-	else
-		v2:SetToggleKey("RightShift")
-	end
-
-	function v2:Toggle()
-		pcall(function()
-			if win and win.Toggle then
-				win:Toggle()
-			elseif self.Window and self.Window.Toggle then
-				self.Window:Toggle()
-			end
-		end)
-	end
-
-	pcall(function()
-		local uis = game:GetService("UserInputService")
-		uis.InputBegan:Connect(function(input, gpe)
-			if input.UserInputType ~= Enum.UserInputType.Keyboard then return end
-			if uis:GetFocusedTextBox() then return end
-			if input.KeyCode == currentToggleKey then
-				v2:Toggle()
-			end
-		end)
-	end)
-
-	pcall(function()
-		local function sanitizeText(desc)
-			if desc:IsA("TextLabel") or desc:IsA("TextButton") or desc:IsA("TextBox") then
-				desc.AutoLocalize = false
-				local function applyReplacement()
-					local txt = desc.Text
-					if txt == "Impostazioni" then
-						desc.Text = "Settings"
-					elseif txt == "cezar" then
-						desc.Text = "Black"
-					elseif txt == "Graphite" then
-						desc.Text = "Dark Gray"
-					elseif txt == "Contrast" then
-						desc.Text = "Silver"
-					elseif txt == "Paper" then
-						desc.Text = "White"
-					elseif txt:find("[Pp]unishment%s*[Hh]ub") then
-						desc.Text = txt:gsub("[Pp]unishment%s*[Hh]ub", "specter")
-					elseif txt:find("[Pp]unishment") then
-						desc.Text = txt:gsub("[Pp]unishment", "specter")
-					end
-				end
-				applyReplacement()
-				desc:GetPropertyChangedSignal("Text"):Connect(applyReplacement)
-			end
-		end
-
-		local function handleGui(gui)
-			if gui and (gui.Name == "cezarUI" or gui:IsA("ScreenGui")) then
-				gui.AutoLocalize = false
-				for _, desc in ipairs(gui:GetDescendants()) do
-					sanitizeText(desc)
-				end
-				gui.DescendantAdded:Connect(sanitizeText)
-			end
-		end
-
-		local pGui = LocalPlayer:FindFirstChildOfClass("PlayerGui") or LocalPlayer:WaitForChild("PlayerGui")
-		for _, g in ipairs(pGui:GetChildren()) do
-			handleGui(g)
-		end
-		pGui.ChildAdded:Connect(handleGui)
-
-		pcall(function()
-			local cGui = (gethui and gethui()) or game:GetService("CoreGui")
-			if cGui then
-				for _, g in ipairs(cGui:GetChildren()) do
-					handleGui(g)
-				end
-				cGui.ChildAdded:Connect(handleGui)
-			end
-		end)
-	end)
-
-	function v2:CreateTab(tConfig)
-		local tName = "Tab"
-		local icon = nil
-		if type(tConfig) == "table" then
-			tName = tostring(tConfig.Name or tConfig.Title or tConfig[1] or "Tab")
-			icon = tConfig.Icon
-		else
-			tName = tostring(tConfig or "Tab")
-		end
-
-		local pTab = win:CreateTab(tName, icon)
-		local tabObj = {}
-		tabObj.RawTab = pTab
-
-		local tData = (win.Tabs and win.Tabs[#win.Tabs])
-		if tData and tData.TitleLabel then
-			tData.TitleLabel.AutoLocalize = false
-			tData.TitleLabel.Text = tName
-			if tName == "Settings" then
-				tData.TitleLabel:GetPropertyChangedSignal("Text"):Connect(function()
-					if tData.TitleLabel.Text == "Impostazioni" then
-						tData.TitleLabel.AutoLocalize = false
-						tData.TitleLabel.Text = "Settings"
-					end
-				end)
-			end
-
-			tabObj._activate = function()
-				pcall(function()
-					for _, v in pairs(win.Tabs) do
-						if v ~= tData and v.Page then v.Page.Visible = false end
-					end
-					win.CurrentTab = tData
-					if tData.Page then tData.Page.Visible = true end
-				end)
-			end
-		end
-
-		function tabObj:CreateSection(sTitle)
-			local title = ""
-			if type(sTitle) == "table" then
-				title = tostring(sTitle.Title or sTitle.Name or sTitle[1] or "")
-			else
-				title = tostring(sTitle or "")
-			end
-			if pTab and pTab.CreateSection then
-				return pTab:CreateSection(title)
-			end
-		end
-
-		function tabObj:CreateParagraph(pConfig)
-			local pTitle = ""
-			local pContent = ""
-			if type(pConfig) == "table" then
-				pTitle = tostring(pConfig.Title or pConfig.Name or "")
-				pContent = tostring(pConfig.Content or pConfig.Text or pConfig.Desc or "")
-			else
-				pTitle = tostring(pConfig or "")
-			end
-			if pTab and pTab.CreateParagraph then
-				return pTab:CreateParagraph(pTitle, pContent)
-			end
-		end
-
-		function tabObj:CreateLabel(lConfig)
-			local text = ""
-			local updateFunc = nil
-			local updateRate = nil
-			if type(lConfig) == "table" then
-				text = tostring(lConfig.Text or lConfig.Title or lConfig.Name or "")
-				updateFunc = lConfig.Update
-				updateRate = tonumber(lConfig.UpdateRate) or 1
-			else
-				text = tostring(lConfig or "")
-			end
-			local lbl = nil
-			if pTab and pTab.CreateLabel then
-				lbl = pTab:CreateLabel(text)
-			end
-			if type(updateFunc) == "function" and lbl then
-				task.spawn(function()
-					while true do
-						task.wait(updateRate or 1)
-						local ok, newTxt = pcall(updateFunc)
-						if ok and newTxt then
-							pcall(function()
-								if lbl.SetText then
-									lbl:SetText(tostring(newTxt))
-								elseif lbl.Text then
-									lbl.Text = tostring(newTxt)
-								end
-							end)
-						end
-					end
-				end)
-			end
-			return lbl or { Set = function() end }
-		end
-
-		function tabObj:CreateButton(bConfig)
-			local bName = "Button"
-			local bDesc = ""
-			local bCallback = function() end
-			if type(bConfig) == "table" then
-				bName = tostring(bConfig.Name or bConfig.Title or "Button")
-				bDesc = tostring(bConfig.Desc or bConfig.Description or "")
-				bCallback = bConfig.Callback or function() end
-			else
-				bName = tostring(bConfig or "Button")
-			end
-			if pTab and pTab.CreateButton then
-				return pTab:CreateButton(bName, bDesc, nil, bCallback)
-			end
-			return { Set = function() end }
-		end
-
-		function tabObj:CreateToggle(tData)
-			local tName = "Toggle"
-			local tDesc = ""
-			local tVal = false
-			local tCallback = function() end
-			if type(tData) == "table" then
-				tName = tostring(tData.Name or tData.Title or "Toggle")
-				tDesc = tostring(tData.Desc or tData.Description or "")
-				tVal = tData.CurrentValue == true or tData.Default == true
-				tCallback = tData.Callback or function() end
-			else
-				tName = tostring(tData or "Toggle")
-			end
-
-			local current = tVal
-			if pTab and pTab.CreateToggle then
-				pTab:CreateToggle(tName, tDesc, tVal, function(newVal)
-					current = newVal
-					pcall(tCallback, newVal)
-				end)
-			end
-
-			local ctrl = {
-				CurrentValue = current,
-				Set = function(self, val)
-					current = val == true
-					self.CurrentValue = current
-					pcall(tCallback, current)
-				end
-			}
-			return ctrl
-		end
-
-		function tabObj:CreateSlider(sData)
-			local sName = "Slider"
-			local minVal = 0
-			local maxVal = 100
-			local defaultVal = 50
-			local sCallback = function() end
-			if type(sData) == "table" then
-				sName = tostring(sData.Name or sData.Title or "Slider")
-				local range = sData.Range or {0, 100}
-				minVal = tonumber(range[1]) or 0
-				maxVal = tonumber(range[2]) or 100
-				defaultVal = tonumber(sData.CurrentValue or sData.Default) or minVal
-				sCallback = sData.Callback or function() end
-			else
-				sName = tostring(sData or "Slider")
-			end
-
-			local current = defaultVal
-			if pTab and pTab.CreateSlider then
-				pTab:CreateSlider(sName, minVal, maxVal, defaultVal, function(newVal)
-					current = newVal
-					pcall(sCallback, newVal)
-				end)
-			end
-
-			local ctrl = {
-				CurrentValue = current,
-				Set = function(self, val)
-					local num = tonumber(val) or current
-					current = math.clamp(num, minVal, maxVal)
-					self.CurrentValue = current
-					pcall(sCallback, current)
-				end
-			}
-			return ctrl
-		end
-
-		function tabObj:CreateDropdown(dData)
-			local dName = "Dropdown"
-			local dDesc = ""
-			local options = {}
-			local defaultOpt = nil
-			local dCallback = function() end
-			if type(dData) == "table" then
-				dName = tostring(dData.Name or dData.Title or "Dropdown")
-				dDesc = tostring(dData.Desc or dData.Description or "")
-				options = dData.Options or {}
-				defaultOpt = dData.CurrentOption or dData.Default or (options[1] or "")
-				dCallback = dData.Callback or function() end
-			else
-				dName = tostring(dData or "Dropdown")
-			end
-
-			local current = defaultOpt
-			if pTab and pTab.CreateDropdown then
-				pTab:CreateDropdown(dName, dDesc, options, function(selected)
-					current = selected
-					pcall(dCallback, selected)
-				end)
-			end
-
-			local ctrl = {
-				CurrentOption = current,
-				Set = function(self, opt)
-					current = opt
-					self.CurrentOption = current
-					pcall(dCallback, current)
-				end
-			}
-			return ctrl
-		end
-
-		function tabObj:CreateInput(iData)
-			local iName = "Input"
-			local iDesc = ""
-			local iPlaceholder = "Type here..."
-			local iCallback = function() end
-			if type(iData) == "table" then
-				iName = tostring(iData.Name or iData.Title or "Input")
-				iDesc = tostring(iData.Desc or iData.Description or "")
-				iPlaceholder = tostring(iData.PlaceholderText or iData.Placeholder or iData.Default or "")
-				iCallback = iData.Callback or function() end
-			else
-				iName = tostring(iData or "Input")
-			end
-
-			local current = ""
-			if pTab and pTab.CreateInput then
-				pTab:CreateInput(iName, iDesc, iPlaceholder, nil, nil, function(text)
-					current = text
-					pcall(iCallback, text)
-				end)
-			end
-
-			return {
-				Set = function(self, val)
-					current = tostring(val)
-					pcall(iCallback, current)
-				end
-			}
-		end
-
-		function tabObj:CreateKeybind(kData)
-			local kName = "Keybind"
-			local kDesc = ""
-			local defaultKey = "None"
-			local kCallback = function() end
-			if type(kData) == "table" then
-				kName = tostring(kData.Name or kData.Title or "Keybind")
-				kDesc = tostring(kData.Desc or kData.Description or "")
-				defaultKey = tostring(kData.CurrentKeybind or kData.Default or "None")
-				kCallback = kData.Callback or function() end
-			else
-				kName = tostring(kData or "Keybind")
-			end
-
-			if pTab and pTab.CreateKeybind then
-				pTab:CreateKeybind(kName, kDesc, defaultKey, function(key)
-					pcall(kCallback, key)
-				end)
-			end
-
-			return { Set = function() end }
-		end
-
-		function tabObj:CreateDivider()
-			if pTab and pTab.CreateDivider then
-				return pTab:CreateDivider()
-			end
-		end
-
-		return tabObj
-	end
-
-	return v2
-end
-
-local v2 = v1:CreateWindow({Name = "TPS", Subtitle = "TPS", ToggleUIKeybind = "RightShift"})
-
+-- ============================================================
+-- CORE VARIABLES & SERVICES
+-- ============================================================
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local HttpService = game:GetService("HttpService")
+local UserInputService = game:GetService("UserInputService")
 local LocalPlayer = Players.LocalPlayer
+
 local clamp = math.clamp
 local abs = math.abs
 local sqrt = math.sqrt
 local clock = os.clock
 local new = Vector3.new
 local zero = Vector3.zero
+
 local function func(...)
 	pcall(...)
 end
+
+-- ============================================================
+-- ANTICHEAT HARDENING & SAFE FIRETOCKINTEREST
+-- ============================================================
 local v3 = getgenv()
 v3.HARDEN = v3.HARDEN or {}
 if not v3.HARDEN.namecallInstalled then
@@ -447,6 +111,7 @@ if not v3.HARDEN.namecallInstalled then
 		return v3.HARDEN._origNamecall(arg1, ...)
 	end))
 end
+
 local num = 0
 local num1 = 0
 v3.HARDEN.fti = newcclosure(function(arg1, arg2, arg3)
@@ -458,29 +123,30 @@ v3.HARDEN.fti = newcclosure(function(arg1, arg2, arg3)
 		num1 = num1 + 1
 		return
 	end
-	local v1 = os.clock()
-	if v1 - num < 0.012 then
+	local v1_clock = os.clock()
+	if v1_clock - num < 0.012 then
 		num1 = num1 + 1
 		return
 	end
-	num = v1
+	num = v1_clock
 	pcall(firetouchinterest, arg1, arg2, 0)
 end)
+
 v3.HARDEN.drained = function()
 	return num1
 end
+
 if not v3.HARDEN.holder then
 	local v4 = workspace.CurrentCamera or workspace:WaitForChild("Camera", 5)
 	local folder = Instance.new("Folder", v4)
 	folder.Name = "Ae" .. math.random(1000, 9999)
 	v3.HARDEN.holder = folder
 end
--- Hidden FireServer path: goes through __namecall so raw :FireServer never appears in the call site
+
 if not v3.HARDEN.safeFire then
 	local realNamecall = v3.HARDEN._origNamecall
 	v3.HARDEN.safeFire = newcclosure(function(remote, ...)
 		if not remote or typeof(remote) ~= "Instance" then return end
-		local method = ("Fire" .. "Server")
 		local args = {...}
 		local ok = pcall(function()
 			realNamecall(remote, table.unpack(args))
@@ -488,76 +154,145 @@ if not v3.HARDEN.safeFire then
 		return ok
 	end)
 end
-local v5 = v2:CreateTab({Name = "Home", Desc = "Info", Icon = "house"})
-v2:SelectTab(v5)
+
+-- Cleanup remote exploit honeypots
+task.spawn(function()
+	func(function()
+		local FE = workspace:FindFirstChild("FE")
+		local v1_fe = FE and FE:FindFirstChild("System")
+		if v1_fe then
+			for _, v2 in ipairs(v1_fe:GetChildren()) do
+				if v2.Name == "HelloWorld" or v2:IsA("RemoteEvent") and v2:FindFirstChildWhichIsA("LuaSourceContainer") then
+					v2:Destroy()
+				end
+			end
+		end
+		local ReplicatedStorage = game:GetService("ReplicatedStorage")
+		local function delRemote(arg1)
+			local v1_rep = ReplicatedStorage
+			for _, v2 in ipairs(string.split(arg1, "/")) do
+				local v3 = v1_rep and v1_rep:FindFirstChild(v2)
+				v1_rep = v3
+				if not v3 then return end
+			end
+			v1_rep:Destroy()
+		end
+		delRemote("Remotes/RemoteEvents/IlllIIIllIIIIIlIIlIIIlI/Exploit")
+		delRemote("Remotes/RemoteEvents/IlllIIIllIIIIIlIIlIIIlI/Bindable/Exploit")
+		for _, v3_rep in ipairs(ReplicatedStorage:GetChildren()) do
+			if v3_rep:IsA("RemoteEvent") and v3_rep.Name:match("[%W_]+") then
+				v3_rep:Destroy()
+			end
+		end
+	end)
+end)
+
+-- Shared arrays for cleanup
+local tbl10 = {}
+local tbl11 = {}
+local tbl12 = {}
+
+-- Ball resolution helper
+local function func25()
+	local TPSSystem = workspace:FindFirstChild("TPSSystem")
+	return TPSSystem and TPSSystem:FindFirstChild("TPS") or workspace:FindFirstChild("Ball")
+end
+local func3 = func25
+
+-- Preferred foot part helper
+local function func26(arg1, arg2)
+	local Value
+	local v1_light = game:GetService("Lighting"):FindFirstChild(LocalPlayer.Name)
+	local v2_light = v1_light and v1_light:FindFirstChild("PreferredFoot")
+	if v2_light then Value = v2_light.Value end
+	local v3_val = Value == 1
+	if arg2 and arg2.RigType == Enum.HumanoidRigType.R6 then
+		return arg1 and arg1:FindFirstChild(v3_val and "Right Leg" or "Left Leg")
+	end
+	return arg1 and arg1:FindFirstChild(v3_val and "RightLowerLeg" or "LeftLowerLeg")
+		or arg1 and arg1:FindFirstChild(v3_val and "RightFoot" or "LeftFoot")
+		or arg1 and arg1:FindFirstChild(v3_val and "Right Leg" or "Left Leg")
+end
+
+-- Fire touch interest wrapper
+local function func27(arg1, arg2)
+	if not (arg1 and arg2 and firetouchinterest) then return end
+	func(function()
+		firetouchinterest(arg1, arg2, 0)
+		firetouchinterest(arg1, arg2, 1)
+	end)
+end
+
+-- ============================================================
+-- TAB 1: HOME
+-- ============================================================
+local v5 = Window:CreateTab({Name = "Home", Desc = "Info", Icon = "house"})
+Window:SelectTab(v5)
+
 local Stats = game:GetService("Stats")
-game:GetService("TeleportService")
 local DataPing = Stats.Network.ServerStatsItem:FindFirstChild("Data Ping")
 local ElapsedTime = Stats.Network.ServerStatsItem:FindFirstChild("ElapsedTime")
 local v6 = os.clock()
 local num2 = 0
 local v7 = v6
+
 local function func1()
-	local v1 = tonumber(os.date("%H")) or 12
-	if v1 >= 5 and v1 < 12 then
-		return "Good morning"
-	end
-	if v1 < 18 then
-		return "Good afternoon"
-	end
-	if v1 < 23 then
-		return "Good evening"
-	end
+	local v1_h = tonumber(os.date("%H")) or 12
+	if v1_h >= 5 and v1_h < 12 then return "Good morning" end
+	if v1_h < 18 then return "Good afternoon" end
+	if v1_h < 23 then return "Good evening" end
 	return "Good night"
 end
-local str = "Real"
+
+local str_executor = "Real"
 func(function()
-	str = select(1, identifyexecutor())
+	str_executor = select(1, identifyexecutor())
 end)
-local str1 = "Unknown"
+
+local str_region = "Unknown"
 task.spawn(function()
 	func(function()
-		local v1 = string.format("https://games.roblox.com/v1/games/%d/servers/Public?limit=40", game.PlaceId)
-		local v2 = HttpService:JSONDecode(game:HttpGet(v1))
-		for _, v3 in ipairs(v2.data) do
-			if v3.id == game.JobId then
-				str1 = v3.region or "Unknown"
+		local v1_url = string.format("https://games.roblox.com/v1/games/%d/servers/Public?limit=40", game.PlaceId)
+		local v2_res = HttpService:JSONDecode(game:HttpGet(v1_url))
+		for _, v3_srv in ipairs(v2_res.data) do
+			if v3_srv.id == game.JobId then
+				str_region = v3_srv.region or "Unknown"
 				break
 			end
 		end
 	end)
 end)
+
 v5:CreateSection("Welcome")
-v5:CreateParagraph({Title = func1() .. ", " .. (LocalPlayer.DisplayName or LocalPlayer.Name), Content = ""})
+v5:CreateParagraph({Title = func1() .. ", " .. (LocalPlayer.DisplayName or LocalPlayer.Name), Content = "Welcome to SPECTRE Hub. Clean Black & White edition."})
+
 v5:CreateSection("System Information")
 v5:CreateLabel({
 	Text = "FPS: --",
 	Update = function()
-		local v1 = os.clock()
+		local v1_time = os.clock()
 		num2 = num2 + 1
-		local v2 = v1 - v7
-		if v2 < 0.5 then
-			return
-		end
-		local v3 = math.floor(num2 / v2 + 0.5)
-		v7 = v1
+		local v2_diff = v1_time - v7
+		if v2_diff < 0.5 then return end
+		local v3_fps = math.floor(num2 / v2_diff + 0.5)
+		v7 = v1_time
 		num2 = 0
-		return "FPS: " .. v3
+		return "FPS: " .. v3_fps
 	end,
 	UpdateRate = 0.5,
 })
 v5:CreateLabel({
 	Text = "Ping: --",
 	Update = function()
-		local v1 = DataPing and DataPing:GetValue()
-		return "Ping: " .. math.floor(v1 or 0) .. " ms"
+		local v1_p = DataPing and DataPing:GetValue()
+		return "Ping: " .. math.floor(v1_p or 0) .. " ms"
 	end,
 	UpdateRate = 1,
 })
 v5:CreateLabel({
 	Text = "Executor: --",
 	Update = function()
-		return "Executor: " .. str
+		return "Executor: " .. str_executor
 	end,
 	UpdateRate = 1,
 })
@@ -571,7 +306,7 @@ v5:CreateLabel({
 v5:CreateLabel({
 	Text = "Region: --",
 	Update = function()
-		return "Region: " .. (str1 or "Loading..")
+		return "Region: " .. (str_region or "Loading..")
 	end,
 	UpdateRate = 1,
 })
@@ -592,83 +327,68 @@ v5:CreateLabel({
 v5:CreateLabel({
 	Text = "Uptime: --",
 	Update = function()
-		local v1 = ElapsedTime and ElapsedTime:GetValue() or 0
-		local v2 = math.floor(v1 / 3600)
-		local v3 = math.floor(v1 % 3600 / 60)
-		local v4 = math.floor(v1 % 60)
-		return string.format("Uptime: %02d:%02d:%02d", v2, v3, v4)
+		local v1_up = ElapsedTime and ElapsedTime:GetValue() or 0
+		local h = math.floor(v1_up / 3600)
+		local m = math.floor(v1_up % 3600 / 60)
+		local s = math.floor(v1_up % 60)
+		return string.format("Uptime: %02d:%02d:%02d", h, m, s)
 	end,
 	UpdateRate = 1,
 })
-local v8 = v2:CreateTab({Name = "Reach", Desc = "Reach methods", Icon = "mouse-pointer-click"})
+
+-- ============================================================
+-- TAB 2: REACH
+-- ============================================================
+local v8 = Window:CreateTab({Name = "Reach", Desc = "Reach methods", Icon = "mouse-pointer-click"})
+
 local function func2(arg1, arg2)
 	local tbl = {}
 	if arg2 and arg2.RigType == Enum.HumanoidRigType.R6 then
 		local RightLeg = arg1:FindFirstChild("Right Leg")
 		local LeftLeg = arg1:FindFirstChild("Left Leg")
-		if RightLeg then
-			table.insert(tbl, RightLeg)
-		end
-		if LeftLeg then
-			table.insert(tbl, LeftLeg)
-		end
+		if RightLeg then table.insert(tbl, RightLeg) end
+		if LeftLeg then table.insert(tbl, LeftLeg) end
 	else
-		local v1 = arg1:FindFirstChild("RightLowerLeg") or arg1:FindFirstChild("Right Leg")
-		local v2 = arg1:FindFirstChild("LeftLowerLeg") or arg1:FindFirstChild("Left Leg")
-		if v1 then
-			table.insert(tbl, v1)
-		end
-		if v2 then
-			table.insert(tbl, v2)
-		end
+		local v1_rl = arg1:FindFirstChild("RightLowerLeg") or arg1:FindFirstChild("Right Leg")
+		local v2_ll = arg1:FindFirstChild("LeftLowerLeg") or arg1:FindFirstChild("Left Leg")
+		if v1_rl then table.insert(tbl, v1_rl) end
+		if v2_ll then table.insert(tbl, v2_ll) end
 		local RightFoot = arg1:FindFirstChild("RightFoot")
 		local LeftFoot = arg1:FindFirstChild("LeftFoot")
-		if RightFoot then
-			table.insert(tbl, RightFoot)
-		end
-		if LeftFoot then
-			table.insert(tbl, LeftFoot)
-		end
+		if RightFoot then table.insert(tbl, RightFoot) end
+		if LeftFoot then table.insert(tbl, LeftFoot) end
 	end
 	return tbl
 end
-local CreateSection = v8.CreateSection
-local function func3()
-	local TPSSystem = workspace:FindFirstChild("TPSSystem")
-	return TPSSystem and TPSSystem:FindFirstChild("TPS") or workspace:FindFirstChild("Ball")
-end
-CreateSection(v8, "Reach [Method 1]")
+
+-- Method 1
+v8:CreateSection("Reach [Method 1]")
 v8:CreateParagraph({Title = "Reach [Method 1]", Content = "NOT Xeno & Solara Support"})
+
 local tbl1 = {m1_on = false, m1_dist = 5}
-local v40
+local v40 = nil
+
 local function func4()
 	if v40 then
 		v40:Disconnect()
 		v40 = nil
 	end
-	if not tbl1.m1_on then
-		return
-	end
+	if not tbl1.m1_on then return end
 	v40 = RunService.RenderStepped:Connect(function()
 		local Character = LocalPlayer.Character
-		local v1 = Character and Character:FindFirstChild("HumanoidRootPart")
-		local v2 = Character and Character:FindFirstChild("Humanoid")
-		if not (Character and v1 and v2) then
-			return
-		end
-		local v3 = func3()
-		if not v3 then
-			return
-		end
-		if (v1.Position - v3.Position).Magnitude > tbl1.m1_dist then
-			return
-		end
-		for _, v4 in ipairs((func2(Character, v2))) do
-			firetouchinterest(v4, v3, 0)
-			firetouchinterest(v4, v3, 1)
+		local v1_hrp = Character and Character:FindFirstChild("HumanoidRootPart")
+		local v2_hum = Character and Character:FindFirstChild("Humanoid")
+		if not (Character and v1_hrp and v2_hum) then return end
+		local v3_b = func3()
+		if not v3_b then return end
+		if (v1_hrp.Position - v3_b.Position).Magnitude > tbl1.m1_dist then return end
+		for _, v4_limb in ipairs(func2(Character, v2_hum)) do
+			firetouchinterest(v4_limb, v3_b, 0)
+			firetouchinterest(v4_limb, v3_b, 1)
 		end
 	end)
 end
+
 local v9 = v8:CreateToggle({
 	Name = "Enable / Disable Reach",
 	CurrentValue = false,
@@ -677,40 +397,39 @@ local v9 = v8:CreateToggle({
 		func4()
 	end,
 })
+
 local v10 = v8:CreateInput({
 	Name = "Reach Size",
 	PlaceholderText = "Distance in studs",
+	Default = "5",
 	Callback = function(arg1)
 		tbl1.m1_dist = tonumber(arg1) or tbl1.m1_dist
 		func4()
 	end,
 })
 v10:Set("5")
+
+-- Method 2
 v8:CreateSection("Reach [Method 2]")
 v8:CreateParagraph({Title = "Reach [Method 2]", Content = "NOT Xeno & Solara Support"})
+
 local tbl2 = {on = false, shape = "Box", hide = false, size = new(5, 5, 5), transparency = 0.7}
 local part = Instance.new("Part")
-part.Name = "TPS_ReachPart"
+part.Name = "SpectreReachPart"
 part.Anchored = true
 part.CanCollide = false
 part.Transparency = tbl2.transparency
-part.Color = Color3.fromRGB(0, 85, 255)
+part.Color = Color3.fromRGB(255, 255, 255)
 part.CFrame = CFrame.new(0, -9999, 0)
 part.Parent = workspace
+
 local HumanoidRootPart
 local Humanoid
-local v41
-local v42
-local RightFoot
-local LeftFoot
-local v43
-local v44
-local v45
-local v46
+local v41, v42, RightFoot, LeftFoot
+local v43, v44, v45, v46
+
 local function func5(arg1)
-	if not arg1 then
-		return
-	end
+	if not arg1 then return end
 	HumanoidRootPart = arg1:FindFirstChild("HumanoidRootPart")
 	Humanoid = arg1:FindFirstChild("Humanoid")
 	local RightLeg = arg1:FindFirstChild("Right Leg")
@@ -726,6 +445,7 @@ local function func5(arg1)
 	v45 = RightFoot ~= nil
 	v46 = LeftFoot ~= nil
 end
+
 func5(LocalPlayer.Character)
 LocalPlayer.CharacterAdded:Connect(function(arg1)
 	task.wait()
@@ -734,196 +454,138 @@ LocalPlayer.CharacterAdded:Connect(function(arg1)
 		func5(arg1)
 	end)
 end)
+
 local function func6(arg1)
 	if HumanoidRootPart then
-		local v1 = HumanoidRootPart
-		firetouchinterest(arg1, v1, 0)
-		firetouchinterest(arg1, v1, 1)
+		firetouchinterest(arg1, HumanoidRootPart, 0)
+		firetouchinterest(arg1, HumanoidRootPart, 1)
 	end
 	if v43 then
-		local v2 = v41
-		firetouchinterest(arg1, v2, 0)
-		firetouchinterest(arg1, v2, 1)
+		firetouchinterest(arg1, v41, 0)
+		firetouchinterest(arg1, v41, 1)
 	end
 	if v44 then
-		local v3 = v42
-		firetouchinterest(arg1, v3, 0)
-		firetouchinterest(arg1, v3, 1)
+		firetouchinterest(arg1, v42, 0)
+		firetouchinterest(arg1, v42, 1)
 	end
 	if v45 then
-		local v4 = RightFoot
-		firetouchinterest(arg1, v4, 0)
-		firetouchinterest(arg1, v4, 1)
+		firetouchinterest(arg1, RightFoot, 0)
+		firetouchinterest(arg1, RightFoot, 1)
 	end
 	if v46 then
-		local v5 = LeftFoot
-		firetouchinterest(arg1, v5, 0)
-		firetouchinterest(arg1, v5, 1)
+		firetouchinterest(arg1, LeftFoot, 0)
+		firetouchinterest(arg1, LeftFoot, 1)
 	end
 end
+
 local tbl3 = {}
-tbl3[1] = {t = 0, pos = zero, vel = zero}
-tbl3[2] = {t = 0, pos = zero, vel = zero}
-tbl3[3] = {t = 0, pos = zero, vel = zero}
-tbl3[4] = {t = 0, pos = zero, vel = zero}
-tbl3[5] = {t = 0, pos = zero, vel = zero}
-tbl3[6] = {t = 0, pos = zero, vel = zero}
-tbl3[7] = {t = 0, pos = zero, vel = zero}
-tbl3[8] = {t = 0, pos = zero, vel = zero}
+for i = 1, 8 do
+	tbl3[i] = {t = 0, pos = zero, vel = zero}
+end
 local num3 = 0
 local num4 = 0
+
 local function func7(arg1)
 	num3 = num3 % 8 + 1
-	local v1 = tbl3[num3]
-	v1.t = clock()
-	v1.pos = arg1.Position
-	v1.vel = arg1.AssemblyLinearVelocity
-	if num4 < 8 then
-		num4 = num4 + 1
-	end
+	local v1_item = tbl3[num3]
+	v1_item.t = clock()
+	v1_item.pos = arg1.Position
+	v1_item.vel = arg1.AssemblyLinearVelocity
+	if num4 < 8 then num4 = num4 + 1 end
 end
+
 local function func8(arg1, arg2)
 	if num4 < 2 then
-		if not arg1 then
-			return zero, zero
-		end
+		if not arg1 then return zero, zero end
 		return arg1.Position + arg1.AssemblyLinearVelocity * arg2, arg1.AssemblyLinearVelocity
 	end
-	local v1 = tbl3[(num3 - 0 - 1) % 8 + 1]
-	local v2 = tbl3[(num3 - 1 - 1) % 8 + 1]
-	local v3 = v1.t - v2.t
-	if v3 <= 0 then
-		v3 = 0.016
-	end
-	local v4 = v1.pos.X - v2.pos.X
-	local pos = v1.pos
-	local v5 = v4 / v3
-	local v6 = (pos.Y - v2.pos.Y) / v3
-	local v7 = v1.pos.Z - v2.pos.Z
-	local vel = v1.vel
-	local v8 = v7 / v3
-	local X = vel.X
-	local vel1 = v1.vel
-	local Y = v1.vel.Y
-	local v9 = Y - v6
-	local Z = vel1.Z
-	local v10 = X - v5
-	local v11 = Z - v8
-	local v12 = clamp((v10 * v10 + v9 * v9 + v11 * v11) / 1225, 0, 1)
-	local v13 = 1 - v12
-	local v14 = X * v12
-	local v15 = v5 * v13 + v14
-	local v16 = 1 - v12
-	local v17 = Y * v12
-	local v18 = v6 * v16 + v17
-	local v19 = 1 - v12
-	local v20 = Z * v12
-	local num = 0
-	local v21 = v8 * v19 + v20
-	local num1 = 0
-	local num2 = 0
+	local v1_p = tbl3[(num3 - 0 - 1) % 8 + 1]
+	local v2_p = tbl3[(num3 - 1 - 1) % 8 + 1]
+	local v3_dt = v1_p.t - v2_p.t
+	if v3_dt <= 0 then v3_dt = 0.016 end
+	local v4_dx = v1_p.pos.X - v2_p.pos.X
+	local v5_vx = v4_dx / v3_dt
+	local v6_vy = (v1_p.pos.Y - v2_p.pos.Y) / v3_dt
+	local v7_dz = v1_p.pos.Z - v2_p.pos.Z
+	local v8_vz = v7_dz / v3_dt
+	local vel = v1_p.vel
+	local X, Y, Z = vel.X, vel.Y, vel.Z
+	local v10_diff = X - v5_vx
+	local v9_diff = Y - v6_vy
+	local v11_diff = Z - v8_vz
+	local v12_blend = clamp((v10_diff * v10_diff + v9_diff * v9_diff + v11_diff * v11_diff) / 1225, 0, 1)
+	local v13_inv = 1 - v12_blend
+	local v15_fx = v5_vx * v13_inv + X * v12_blend
+	local v18_fy = v6_vy * v13_inv + Y * v12_blend
+	local v21_fz = v8_vz * v13_inv + Z * v12_blend
+	local num_ax, num1_ay, num2_az = 0, 0, 0
 	if num4 >= 3 then
-		local v22 = tbl3[(num3 - 2 - 1) % 8 + 1]
-		local v23 = v2.t - v22.t
-		if v23 > 0 then
-			local v24 = v2.pos.X - v22.pos.X
-			local pos1 = v2.pos
-			local v25 = v24 / v23
-			local v26 = pos1.Y - v22.pos.Y
-			local pos2 = v2.pos
-			local v27 = v26 / v23
-			local v28 = pos2.Z - v22.pos.Z
-			local v29 = v5 - v25
-			local v30 = v28 / v23
-			num = clamp(v29 / v3, -120, 120)
-			num1 = clamp((v6 - v27) / v3, -120, 120)
-			num2 = clamp((v8 - v30) / v3, -120, 120)
+		local v22_p = tbl3[(num3 - 2 - 1) % 8 + 1]
+		local v23_dt2 = v2_p.t - v22_p.t
+		if v23_dt2 > 0 then
+			local v25_oldvx = (v2_p.pos.X - v22_p.pos.X) / v23_dt2
+			local v27_oldvy = (v2_p.pos.Y - v22_p.pos.Y) / v23_dt2
+			local v30_oldvz = (v2_p.pos.Z - v22_p.pos.Z) / v23_dt2
+			num_ax = clamp((v5_vx - v25_oldvx) / v3_dt, -120, 120)
+			num1_ay = clamp((v6_vy - v27_oldvy) / v3_dt, -120, 120)
+			num2_az = clamp((v8_vz - v30_oldvz) / v3_dt, -120, 120)
 		end
 	end
-	local v31 = -9.8 * arg2 * arg2 * (1 - v12)
-	local v32 = clamp(arg2, 0.016, 0.25)
-	local v33 = 0.5 * v32 * v32
-	local v34 = v1.pos.X + v15 * v32
-	local v35 = num * v33
-	local pos3 = v1.pos
-	local v36 = v34 + v35
-	local Y1 = pos3.Y
-	local v37 = v18 * v32
-	local v38 = num1 * v33
-	return new(v36, Y1 + v37 + v38 + v31, v1.pos.Z + v21 * v32 + num2 * v33), new(v15, v18, v21)
+	local v31_g = -9.8 * arg2 * arg2 * (1 - v12_blend)
+	local v32_dt = clamp(arg2, 0.016, 0.25)
+	local v33_half = 0.5 * v32_dt * v32_dt
+	local v36_x = v1_p.pos.X + v15_fx * v32_dt + num_ax * v33_half
+	local v36_y = v1_p.pos.Y + v18_fy * v32_dt + num1_ay * v33_half + v31_g
+	local v36_z = v1_p.pos.Z + v21_fz * v32_dt + num2_az * v33_half
+	return new(v36_x, v36_y, v36_z), new(v15_fx, v18_fy, v21_fz)
 end
+
 local num5 = 0.05
 local num6 = 0
 local connection10
+
 local function func9()
-	if connection10 then
-		connection10:Disconnect()
-	end
+	if connection10 then connection10:Disconnect() end
 	part.Size = tbl2.size
 	connection10 = RunService.PreSimulation:Connect(function()
-		if not HumanoidRootPart or not Humanoid then
-			return
-		end
-		local v1 = func3()
-		if not v1 then
-			return
-		end
-		local v2 = clock()
-		if v2 - num6 >= 2 then
-			num6 = v2
+		if not HumanoidRootPart or not Humanoid then return end
+		local v1_ball = func3()
+		if not v1_ball then return end
+		local v2_c = clock()
+		if v2_c - num6 >= 2 then
+			num6 = v2_c
 			num5 = clamp(LocalPlayer:GetNetworkPing(), 0.016, 0.25)
 		end
-		local Position = v1.Position
-		local Position1 = HumanoidRootPart.Position
-		local Z = Position1.Z
-		local Z1 = Position.Z
-		local v3 = Position.X - Position1.X
-		local v4 = Z1 - Z
-		if abs(v3) > 16 or abs(v4) > 16 then
-			return
-		end
-		func7(v1)
-		local v5 = Position.Y - Position1.Y
-		local v6 = sqrt(v3 * v3 + v5 * v5 + v4 * v4)
-		local v7 = num5 + 0.016666666666666666
-		local v10, v11
-		if num5 >= 0.1 or v6 >= 7 then
-			local v8, v9 = func8(v1, v7)
-			v10 = v8
-			v11 = v9
+		local PosBall = v1_ball.Position
+		local PosHRP = HumanoidRootPart.Position
+		local dx = PosBall.X - PosHRP.X
+		local dz = PosBall.Z - PosHRP.Z
+		if abs(dx) > 16 or abs(dz) > 16 then return end
+		func7(v1_ball)
+		local dy = PosBall.Y - PosHRP.Y
+		local distMag = sqrt(dx * dx + dy * dy + dz * dz)
+		local leadTime = num5 + 0.016666666666666666
+		local pPos, pVel
+		if num5 >= 0.1 or distMag >= 7 then
+			pPos, pVel = func8(v1_ball, leadTime)
 		else
-			v10 = Position
-			v11 = v1.AssemblyLinearVelocity
+			pPos = PosBall
+			pVel = v1_ball.AssemblyLinearVelocity
 		end
-		local Y = v11.Y
-		local Z2 = v11.Z
-		local X = v10.X
-		local v12 = v11.X * 0.016666666666666666
-		local Y1 = v10.Y
-		local v13 = new(X + v12, Y1 + Y * 0.016666666666666666 + -0.0013611111111111111, v10.Z + Z2 * 0.016666666666666666)
-		local v14 = tbl2.size.X / 2
-		local v15 = tbl2.size.Y / 2
-		local v16 = tbl2.size.Z / 2
-		local Y2 = Position1.Y
-		local v17 = v10.X - Position1.X
-		local v18 = v10.Y - Y2
-		local X1 = Position1.X
-		local X2 = v13.X
-		local v19 = v10.Z - Position1.Z
-		local Y3 = Position1.Y
-		local Y4 = v13.Y
-		local v20 = X2 - X1
-		local v21 = Y4 - Y3
-		local v22 = v13.Z - Position1.Z
-		if v6 < 2.5 then
-			func6(v1)
-		end
-		if abs(v17) <= v14 and abs(v18) <= v15 and abs(v19) <= v16 or abs(v20) <= v14 and abs(v21) <= v15 and abs(v22) <= v16 then
-			func6(v1)
+		local dt = 0.016666666666666666
+		local nextPos = new(pPos.X + pVel.X * dt, pPos.Y + pVel.Y * dt - 0.0013611111111111111, pPos.Z + pVel.Z * dt)
+		local halfX, halfY, halfZ = tbl2.size.X / 2, tbl2.size.Y / 2, tbl2.size.Z / 2
+		local relX1, relY1, relZ1 = pPos.X - PosHRP.X, pPos.Y - PosHRP.Y, pPos.Z - PosHRP.Z
+		local relX2, relY2, relZ2 = nextPos.X - PosHRP.X, nextPos.Y - PosHRP.Y, nextPos.Z - PosHRP.Z
+		if distMag < 2.5 then func6(v1_ball) end
+		if (abs(relX1) <= halfX and abs(relY1) <= halfY and abs(relZ1) <= halfZ) or
+		   (abs(relX2) <= halfX and abs(relY2) <= halfY and abs(relZ2) <= halfZ) then
+			func6(v1_ball)
 		end
 		part.CFrame = HumanoidRootPart.CFrame
 	end)
 end
+
 local function func10()
 	if connection10 then
 		connection10:Disconnect()
@@ -931,6 +593,7 @@ local function func10()
 	end
 	part.CFrame = CFrame.new(0, -9999, 0)
 end
+
 local function func11(arg1)
 	tbl2.shape = arg1
 	if arg1 == "Box" then
@@ -940,10 +603,9 @@ local function func11(arg1)
 	elseif arg1 == "Cylinder" then
 		part.Shape = Enum.PartType.Cylinder
 	end
-	if tbl2.on then
-		func9()
-	end
+	if tbl2.on then func9() end
 end
+
 local v11 = v8:CreateDropdown({
 	Name = "Select Shape",
 	Options = {"Box", "Sphere", "Cylinder"},
@@ -952,18 +614,16 @@ local v11 = v8:CreateDropdown({
 		func11(arg1)
 	end,
 })
+
 local v12 = v8:CreateToggle({
 	Name = "Enable Reach",
 	CurrentValue = false,
 	Callback = function(arg1)
 		tbl2.on = arg1
-		if arg1 then
-			func9()
-		else
-			func10()
-		end
+		if arg1 then func9() else func10() end
 	end,
 })
+
 local v13 = v8:CreateSlider({
 	Name = "Reach X",
 	Range = {1, 50},
@@ -972,11 +632,10 @@ local v13 = v8:CreateSlider({
 	Callback = function(arg1)
 		tbl2.size = new(arg1, tbl2.size.Y, tbl2.size.Z)
 		part.Size = tbl2.size
-		if tbl2.on then
-			func9()
-		end
+		if tbl2.on then func9() end
 	end,
 })
+
 local v14 = v8:CreateSlider({
 	Name = "Reach Y",
 	Range = {1, 50},
@@ -985,11 +644,10 @@ local v14 = v8:CreateSlider({
 	Callback = function(arg1)
 		tbl2.size = new(tbl2.size.X, arg1, tbl2.size.Z)
 		part.Size = tbl2.size
-		if tbl2.on then
-			func9()
-		end
+		if tbl2.on then func9() end
 	end,
 })
+
 local v15 = v8:CreateSlider({
 	Name = "Reach Z",
 	Range = {1, 50},
@@ -998,25 +656,23 @@ local v15 = v8:CreateSlider({
 	Callback = function(arg1)
 		tbl2.size = new(tbl2.size.X, tbl2.size.Y, arg1)
 		part.Size = tbl2.size
-		if tbl2.on then
-			func9()
-		end
+		if tbl2.on then func9() end
 	end,
 })
+
 local v16 = v8:CreateInput({
 	Name = "Sync Reach X Y Z",
 	PlaceholderText = "Set all three axes to the same value",
 	Callback = function(arg1)
-		local num = tonumber(arg1)
-		if num then
-			tbl2.size = new(num, num, num)
+		local num_val = tonumber(arg1)
+		if num_val then
+			tbl2.size = new(num_val, num_val, num_val)
 			part.Size = tbl2.size
-			if tbl2.on then
-				func9()
-			end
+			if tbl2.on then func9() end
 		end
 	end,
 })
+
 local v17 = v8:CreateToggle({
 	Name = "Hide Box",
 	CurrentValue = false,
@@ -1026,10 +682,175 @@ local v17 = v8:CreateToggle({
 		part.Transparency = tbl2.transparency
 	end,
 })
+
+-- Preferred Foot Reach
+v8:CreateSection("Preferred Foot Reach")
+v8:CreateParagraph({Title = "Preferred Foot Reach", Content = "Script 2's preferred-foot touch method."})
+
+local tbl13 = {on = false, distance = 1, connection = nil}
+
+local function func28()
+	if tbl13.connection then
+		func(function() tbl13.connection:Disconnect() end)
+	end
+	tbl13.connection = nil
+	if not tbl13.on then return end
+	local conn = RunService.RenderStepped:Connect(function()
+		local Character = LocalPlayer.Character
+		local v1_h = Character and Character:FindFirstChildOfClass("Humanoid")
+		local v2_hrp = Character and Character:FindFirstChild("HumanoidRootPart")
+		local v3_b = func25()
+		if not (Character and v1_h and v2_hrp and v3_b) then return end
+		if (v2_hrp.Position - v3_b.Position).Magnitude > tbl13.distance then return end
+		func27(func26(Character, v1_h), v3_b)
+	end)
+	if conn then table.insert(tbl10, conn) end
+	tbl13.connection = conn
+end
+
+v8:CreateToggle({
+	Name = "Preferred Foot Reach",
+	CurrentValue = false,
+	Callback = function(arg1)
+		tbl13.on = arg1
+		func28()
+	end,
+})
+
+v8:CreateInput({
+	Name = "Preferred Foot Distance",
+	PlaceholderText = "Distance in studs",
+	Default = "1",
+	Callback = function(arg1)
+		tbl13.distance = tonumber(arg1) or tbl13.distance
+		func28()
+	end,
+})
+
+-- Preferred Foot Shape Reach
+v8:CreateSection("Preferred Foot Shape Reach")
+
+local tbl14 = {on = false, shape = "Box", size = new(1, 1, 1), part = nil, connection = nil}
+
+local function func29()
+	if tbl14.connection then
+		func(function() tbl14.connection:Disconnect() end)
+	end
+	tbl14.connection = nil
+	if tbl14.part then
+		func(function() tbl14.part:Destroy() end)
+	end
+	tbl14.part = nil
+end
+
+local function func30()
+	func29()
+	if not tbl14.on then return end
+	local p = Instance.new("Part")
+	p.Name = "SpectreScript2ReachPart"
+	p.Anchored = true
+	p.CanCollide = false
+	p.Material = Enum.Material.Neon
+	p.Color = Color3.fromRGB(255, 255, 255)
+	p.Transparency = 0.7
+	p.Size = tbl14.size
+	if tbl14.shape == "Sphere" then
+		p.Shape = Enum.PartType.Ball
+	elseif tbl14.shape == "Cylinder" then
+		p.Shape = Enum.PartType.Cylinder
+	else
+		p.Shape = Enum.PartType.Block
+	end
+	p.Parent = workspace
+	table.insert(tbl11, p)
+	tbl14.part = p
+
+	local conn = RunService.RenderStepped:Connect(function()
+		local Character = LocalPlayer.Character
+		local v1_h = Character and Character:FindFirstChildOfClass("Humanoid")
+		local v2_hrp = Character and Character:FindFirstChild("HumanoidRootPart")
+		local v3_b = func25()
+		if not (Character and v1_h and v2_hrp and v3_b and tbl14.part) then return end
+		if tbl14.shape == "Cylinder" then
+			tbl14.part.CFrame = v2_hrp.CFrame * CFrame.Angles(0, 0, math.rad(90))
+		else
+			tbl14.part.CFrame = v2_hrp.CFrame
+		end
+		local v4_obj = tbl14.part.CFrame:PointToObjectSpace(v3_b.Position)
+		local v5_half = tbl14.size / 2
+		local inBounds = false
+		if tbl14.shape == "Sphere" then
+			local vx = v5_half.X == 0 and 0 or v4_obj.X / v5_half.X
+			local vy = v5_half.Y == 0 and 0 or v4_obj.Y / v5_half.Y
+			local vz = v5_half.Z == 0 and 0 or v4_obj.Z / v5_half.Z
+			inBounds = (vx * vx + vy * vy + vz * vz) <= 1
+		else
+			inBounds = abs(v4_obj.X) <= v5_half.X and abs(v4_obj.Y) <= v5_half.Y and abs(v4_obj.Z) <= v5_half.Z
+		end
+		if inBounds then
+			func27(func26(Character, v1_h), v3_b)
+		end
+	end)
+	if conn then table.insert(tbl10, conn) end
+	tbl14.connection = conn
+end
+
+v8:CreateDropdown({
+	Name = "Preferred Foot Shape",
+	Options = {"Box", "Sphere", "Cylinder"},
+	CurrentOption = "Box",
+	Callback = function(arg1)
+		tbl14.shape = type(arg1) == "table" and arg1[1] or arg1
+		if tbl14.on then func30() end
+	end,
+})
+
+v8:CreateSlider({
+	Name = "Preferred Shape X",
+	Range = {1, 30},
+	Increment = 1,
+	CurrentValue = 1,
+	Callback = function(arg1)
+		tbl14.size = new(arg1, tbl14.size.Y, tbl14.size.Z)
+		if tbl14.on then func30() end
+	end,
+})
+
+v8:CreateSlider({
+	Name = "Preferred Shape Y",
+	Range = {1, 30},
+	Increment = 1,
+	CurrentValue = 1,
+	Callback = function(arg1)
+		tbl14.size = new(tbl14.size.X, arg1, tbl14.size.Z)
+		if tbl14.on then func30() end
+	end,
+})
+
+v8:CreateSlider({
+	Name = "Preferred Shape Z",
+	Range = {1, 30},
+	Increment = 1,
+	CurrentValue = 1,
+	Callback = function(arg1)
+		tbl14.size = new(tbl14.size.X, tbl14.size.Y, arg1)
+		if tbl14.on then func30() end
+	end,
+})
+
+v8:CreateToggle({
+	Name = "Preferred Foot Shape Reach",
+	CurrentValue = false,
+	Callback = function(arg1)
+		tbl14.on = arg1
+		if arg1 then func30() else func29() end
+	end,
+})
+
 -- ============================================================
--- ARM REACH TAB
+-- TAB 3: ARM REACH
 -- ============================================================
-local v_armTab = v2:CreateTab({Name = "Arm Reach", Desc = "Arm reach methods", Icon = "hand"})
+local v_armTab = Window:CreateTab({Name = "Arm Reach", Desc = "Arm reach methods", Icon = "hand"})
 
 local function hb_getArms(ch)
 	local arms = {}
@@ -1063,13 +884,13 @@ local function hb1_start()
 	if not ch then return end
 	for _, arm in ipairs(hb_getArms(ch)) do
 		local p = Instance.new("Part")
-		p.Name = "TPS_HB1_" .. arm.Name
+		p.Name = "Spectre_HB1_" .. arm.Name
 		p.Anchored = false
 		p.CanCollide = false
 		p.Massless = true
 		p.Size = Vector3.new(hb1.dist, hb1.dist, hb1.dist)
 		p.Transparency = hb1.show and 0.5 or 1
-		p.Color = Color3.fromRGB(0, 85, 255)
+		p.Color = Color3.fromRGB(255, 255, 255)
 		local w = Instance.new("WeldConstraint")
 		w.Part0 = p
 		w.Part1 = arm
@@ -1091,20 +912,33 @@ local function hb1_start()
 	if hb1.conn then table.insert(tbl10, hb1.conn) end
 end
 
-v_armTab:CreateToggle({Name = "Enable Method 1", CurrentValue = false, Callback = function(val)
-	hb1.on = val
-	if val then hb1_start() else hb1_cleanup() end
-end})
-v_armTab:CreateInput({Name = "Reach Size (1-50)", PlaceholderText = "Default: 10", Callback = function(val)
-	hb1.dist = math.clamp(tonumber(val) or hb1.dist, 1, 50)
-	if hb1.on then hb1_start() end
-end})
-v_armTab:CreateToggle({Name = "Show Hitbox M1", CurrentValue = false, Callback = function(val)
-	hb1.show = val
-	for _, p in ipairs(hb1.parts) do
-		if p and p.Parent then p.Transparency = val and 0.5 or 1 end
+v_armTab:CreateToggle({
+	Name = "Enable Method 1",
+	CurrentValue = false,
+	Callback = function(val)
+		hb1.on = val
+		if val then hb1_start() else hb1_cleanup() end
 	end
-end})
+})
+v_armTab:CreateInput({
+	Name = "Reach Size (1-50)",
+	PlaceholderText = "Default: 10",
+	Default = "10",
+	Callback = function(val)
+		hb1.dist = math.clamp(tonumber(val) or hb1.dist, 1, 50)
+		if hb1.on then hb1_start() end
+	end
+})
+v_armTab:CreateToggle({
+	Name = "Show Hitbox M1",
+	CurrentValue = false,
+	Callback = function(val)
+		hb1.show = val
+		for _, p in ipairs(hb1.parts) do
+			if p and p.Parent then p.Transparency = val and 0.5 or 1 end
+		end
+	end
+})
 
 -- Method 2: Slider
 v_armTab:CreateSection("Method 2 — Slider Size")
@@ -1125,13 +959,13 @@ local function hb2_start()
 	if not ch then return end
 	for _, arm in ipairs(hb_getArms(ch)) do
 		local p = Instance.new("Part")
-		p.Name = "TPS_HB2_" .. arm.Name
+		p.Name = "Spectre_HB2_" .. arm.Name
 		p.Anchored = false
 		p.CanCollide = false
 		p.Massless = true
 		p.Size = Vector3.new(hb2.dist, hb2.dist, hb2.dist)
 		p.Transparency = hb2.show and 0.5 or 1
-		p.Color = Color3.fromRGB(255, 85, 0)
+		p.Color = Color3.fromRGB(220, 220, 220)
 		local w = Instance.new("WeldConstraint")
 		w.Part0 = p
 		w.Part1 = arm
@@ -1154,22 +988,36 @@ local function hb2_start()
 	if hb2.conn then table.insert(tbl10, hb2.conn) end
 end
 
-v_armTab:CreateToggle({Name = "Enable Method 2", CurrentValue = false, Callback = function(val)
-	hb2.on = val
-	if val then hb2_start() else hb2_cleanup() end
-end})
-v_armTab:CreateSlider({Name = "Reach Size", Range = {1, 50}, Increment = 1, CurrentValue = 10, Callback = function(val)
-	hb2.dist = val
-	for _, p in ipairs(hb2.parts) do
-		if p and p.Parent then p.Size = Vector3.new(val, val, val) end
+v_armTab:CreateToggle({
+	Name = "Enable Method 2",
+	CurrentValue = false,
+	Callback = function(val)
+		hb2.on = val
+		if val then hb2_start() else hb2_cleanup() end
 	end
-end})
-v_armTab:CreateToggle({Name = "Show Hitbox M2", CurrentValue = false, Callback = function(val)
-	hb2.show = val
-	for _, p in ipairs(hb2.parts) do
-		if p and p.Parent then p.Transparency = val and 0.5 or 1 end
+})
+v_armTab:CreateSlider({
+	Name = "Reach Size",
+	Range = {1, 50},
+	Increment = 1,
+	CurrentValue = 10,
+	Callback = function(val)
+		hb2.dist = val
+		for _, p in ipairs(hb2.parts) do
+			if p and p.Parent then p.Size = Vector3.new(val, val, val) end
+		end
 	end
-end})
+})
+v_armTab:CreateToggle({
+	Name = "Show Hitbox M2",
+	CurrentValue = false,
+	Callback = function(val)
+		hb2.show = val
+		for _, p in ipairs(hb2.parts) do
+			if p and p.Parent then p.Transparency = val and 0.5 or 1 end
+		end
+	end
+})
 
 -- Method 3: X/Y/Z
 v_armTab:CreateSection("Method 3 — X / Y / Z")
@@ -1190,13 +1038,13 @@ local function hb3_start()
 	if not ch then return end
 	for _, arm in ipairs(hb_getArms(ch)) do
 		local p = Instance.new("Part")
-		p.Name = "TPS_HB3_" .. arm.Name
+		p.Name = "Spectre_HB3_" .. arm.Name
 		p.Anchored = false
 		p.CanCollide = false
 		p.Massless = true
 		p.Size = Vector3.new(hb3.x, hb3.y, hb3.z)
 		p.Transparency = hb3.show and 0.5 or 1
-		p.Color = Color3.fromRGB(0, 200, 100)
+		p.Color = Color3.fromRGB(200, 200, 200)
 		local w = Instance.new("WeldConstraint")
 		w.Part0 = p
 		w.Part1 = arm
@@ -1219,86 +1067,99 @@ local function hb3_start()
 	if hb3.conn then table.insert(tbl10, hb3.conn) end
 end
 
-v_armTab:CreateToggle({Name = "Enable Method 3", CurrentValue = false, Callback = function(val)
-	hb3.on = val
-	if val then hb3_start() else hb3_cleanup() end
-end})
-v_armTab:CreateSlider({Name = "Reach X", Range = {1, 50}, Increment = 1, CurrentValue = 10, Callback = function(val)
-	hb3.x = val
-end})
-v_armTab:CreateSlider({Name = "Reach Y", Range = {1, 50}, Increment = 1, CurrentValue = 10, Callback = function(val)
-	hb3.y = val
-end})
-v_armTab:CreateSlider({Name = "Reach Z", Range = {1, 50}, Increment = 1, CurrentValue = 10, Callback = function(val)
-	hb3.z = val
-end})
-v_armTab:CreateToggle({Name = "Show Hitbox M3", CurrentValue = false, Callback = function(val)
-	hb3.show = val
-	for _, p in ipairs(hb3.parts) do
-		if p and p.Parent then p.Transparency = val and 0.5 or 1 end
+v_armTab:CreateToggle({
+	Name = "Enable Method 3",
+	CurrentValue = false,
+	Callback = function(val)
+		hb3.on = val
+		if val then hb3_start() else hb3_cleanup() end
 	end
-end})
+})
+v_armTab:CreateSlider({
+	Name = "Reach X",
+	Range = {1, 50},
+	Increment = 1,
+	CurrentValue = 10,
+	Callback = function(val) hb3.x = val end
+})
+v_armTab:CreateSlider({
+	Name = "Reach Y",
+	Range = {1, 50},
+	Increment = 1,
+	CurrentValue = 10,
+	Callback = function(val) hb3.y = val end
+})
+v_armTab:CreateSlider({
+	Name = "Reach Z",
+	Range = {1, 50},
+	Increment = 1,
+	CurrentValue = 10,
+	Callback = function(val) hb3.z = val end
+})
+v_armTab:CreateToggle({
+	Name = "Show Hitbox M3",
+	CurrentValue = false,
+	Callback = function(val)
+		hb3.show = val
+		for _, p in ipairs(hb3.parts) do
+			if p and p.Parent then p.Transparency = val and 0.5 or 1 end
+		end
+	end
+})
 
 -- ============================================================
-local v18 = v2:CreateTab({Name = "Xeno & Solara Reach", Desc = "Leg reach", Icon = "settings-2"})
+-- TAB 4: XENO & SOLARA REACH
+-- ============================================================
+local v18 = Window:CreateTab({Name = "Xeno & Solara Reach", Desc = "Leg reach", Icon = "settings-2"})
 v18:CreateSection("Xeno & Solara Reach")
+
 local tbl4 = {on = false, dist = 16}
-local flag = false
+local flag_xeno = false
 local connection11
 local RightHip
+
 local function func12()
-	if tbl4.on then
-		return
-	end
+	if tbl4.on then return end
 	tbl4.on = true
-	flag = true
-	local v1 = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
-	local HumanoidRootPart = v1:WaitForChild("HumanoidRootPart")
-	local RightLeg = v1:WaitForChild("Right Leg")
-	if v1:FindFirstChild("Right Leg") then
-		v1["Right Leg"].Transparency = 1
-	end
-	if v1:FindFirstChild("Left Leg") then
-		v1["Left Leg"].Transparency = 1
-	end
-	RightHip = v1:FindFirstChild("Right Hip", true)
-	if RightHip then
-		RightHip.Enabled = false
-	end
+	flag_xeno = true
+	local v1_ch = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
+	local v1_hrp = v1_ch:WaitForChild("HumanoidRootPart")
+	local RightLeg = v1_ch:WaitForChild("Right Leg")
+	if v1_ch:FindFirstChild("Right Leg") then v1_ch["Right Leg"].Transparency = 1 end
+	if v1_ch:FindFirstChild("Left Leg") then v1_ch["Left Leg"].Transparency = 1 end
+	RightHip = v1_ch:FindFirstChild("Right Hip", true)
+	if RightHip then RightHip.Enabled = false end
+
 	connection11 = RunService.RenderStepped:Connect(function()
-		local v1 = func3()
-		if not v1 or not HumanoidRootPart or not RightLeg then
-			return
-		end
-		local v2 = v1.Position - HumanoidRootPart.Position
-		if v2.Magnitude <= tbl4.dist then
-			RightLeg.CFrame = v1.CFrame
+		local v1_b = func3()
+		if not v1_b or not v1_hrp or not RightLeg then return end
+		local v2_delta = v1_b.Position - v1_hrp.Position
+		if v2_delta.Magnitude <= tbl4.dist then
+			RightLeg.CFrame = v1_b.CFrame
 		else
-			RightLeg.CFrame = CFrame.new(HumanoidRootPart.Position + v2.Unit * tbl4.dist)
+			RightLeg.CFrame = CFrame.new(v1_hrp.Position + v2_delta.Unit * tbl4.dist)
 		end
 	end)
 end
+
 local function func13()
 	tbl4.on = false
-	flag = false
+	flag_xeno = false
 	if connection11 then
 		connection11:Disconnect()
 		connection11 = nil
 	end
 	local Character = LocalPlayer.Character
 	if Character then
-		if Character:FindFirstChild("Right Leg") then
-			Character["Right Leg"].Transparency = 0
-		end
-		if Character:FindFirstChild("Left Leg") then
-			Character["Left Leg"].Transparency = 0
-		end
+		if Character:FindFirstChild("Right Leg") then Character["Right Leg"].Transparency = 0 end
+		if Character:FindFirstChild("Left Leg") then Character["Left Leg"].Transparency = 0 end
 	end
 	if RightHip then
 		RightHip.Enabled = true
 		RightHip = nil
 	end
 end
+
 LocalPlayer.CharacterAdded:Connect(function()
 	tbl4.on = false
 	RightHip = nil
@@ -1306,261 +1167,312 @@ LocalPlayer.CharacterAdded:Connect(function()
 		connection11:Disconnect()
 		connection11 = nil
 	end
-	if flag then
+	if flag_xeno then
 		task.wait(0.25)
-		local v1 = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
-		if v1:WaitForChild("Humanoid").RigType == Enum.HumanoidRigType.R6 then
-			v1["Right Leg"].Transparency = 1
-			v1["Left Leg"].Transparency = 1
-			v1["Left Leg"].Massless = true
-			local part = Instance.new("Part", v1)
-			part.Name = "Left Leg"
-			part.CanCollide = false
-			part.Color = v1["Left Leg"].Color
-			part.Size = Vector3.new(1, 2, 1)
-			part.Locked = true
-			part.Position = v1["Left Leg"].Position
-			local attachment = Instance.new("Attachment", part)
-			attachment.Name = "LeftFootAttachment"
-			attachment.Position = Vector3.new(0, -1, 0)
-			local motor6D = Instance.new("Motor6D", v1.Torso)
-			motor6D.Name = "Fake Left Hip"
-			motor6D.C0 = CFrame.new(-1, -1, 0, 0, 0, -1, 0, 1, 0, 1, 0, 0)
-			motor6D.C1 = CFrame.new(-0.5, 1, 0, 0, 0, -1, 0, 1, 0, 1, 0, 0)
-			motor6D.MaxVelocity = 0.1
-			motor6D.Part0 = v1.Torso
-			motor6D.Part1 = part
-			v1["Right Leg"].Massless = true
-			local part1 = Instance.new("Part", v1)
-			part1.Name = "Right Leg"
-			part1.CanCollide = false
-			part1.Color = v1["Right Leg"].Color
-			part1.Size = Vector3.new(1, 2, 1)
-			part1.Locked = true
-			part1.Position = v1["Right Leg"].Position
-			local attachment1 = Instance.new("Attachment", part1)
-			attachment1.Name = "RightFootAttachment"
-			attachment1.Position = Vector3.new(0, -1, 0)
-			local motor6D1 = Instance.new("Motor6D", v1.Torso)
-			motor6D1.Name = "Fake Right Hip"
-			motor6D1.C0 = CFrame.new(1, -1, 0, 0, 0, 1, 0, 1, 0, -1, 0, 0)
-			motor6D1.C1 = CFrame.new(0.5, 1, 0, 0, 0, 1, 0, -1, 0, 0)
-			motor6D1.MaxVelocity = 0.1
-			motor6D1.Part0 = v1.Torso
-			motor6D1.Part1 = part1
+		local v1_c = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
+		if v1_c:WaitForChild("Humanoid").RigType == Enum.HumanoidRigType.R6 then
+			v1_c["Right Leg"].Transparency = 1
+			v1_c["Left Leg"].Transparency = 1
+			v1_c["Left Leg"].Massless = true
+			local p_ll = Instance.new("Part", v1_c)
+			p_ll.Name = "Left Leg"
+			p_ll.CanCollide = false
+			p_ll.Color = v1_c["Left Leg"].Color
+			p_ll.Size = Vector3.new(1, 2, 1)
+			p_ll.Locked = true
+			p_ll.Position = v1_c["Left Leg"].Position
+			local att_l = Instance.new("Attachment", p_ll)
+			att_l.Name = "LeftFootAttachment"
+			att_l.Position = Vector3.new(0, -1, 0)
+			local mot_l = Instance.new("Motor6D", v1_c.Torso)
+			mot_l.Name = "Fake Left Hip"
+			mot_l.C0 = CFrame.new(-1, -1, 0, 0, 0, -1, 0, 1, 0, 1, 0, 0)
+			mot_l.C1 = CFrame.new(-0.5, 1, 0, 0, 0, -1, 0, 1, 0, 1, 0, 0)
+			mot_l.MaxVelocity = 0.1
+			mot_l.Part0 = v1_c.Torso
+			mot_l.Part1 = p_ll
+
+			v1_c["Right Leg"].Massless = true
+			local p_rl = Instance.new("Part", v1_c)
+			p_rl.Name = "Right Leg"
+			p_rl.CanCollide = false
+			p_rl.Color = v1_c["Right Leg"].Color
+			p_rl.Size = Vector3.new(1, 2, 1)
+			p_rl.Locked = true
+			p_rl.Position = v1_c["Right Leg"].Position
+			local att_r = Instance.new("Attachment", p_rl)
+			att_r.Name = "RightFootAttachment"
+			att_r.Position = Vector3.new(0, -1, 0)
+			local mot_r = Instance.new("Motor6D", v1_c.Torso)
+			mot_r.Name = "Fake Right Hip"
+			mot_r.C0 = CFrame.new(1, -1, 0, 0, 0, 1, 0, 1, 0, -1, 0, 0)
+			mot_r.C1 = CFrame.new(0.5, 1, 0, 0, 0, 1, 0, -1, 0, 0)
+			mot_r.MaxVelocity = 0.1
+			mot_r.Part0 = v1_c.Torso
+			mot_r.Part1 = p_rl
 		end
 		func12()
 	end
 end)
+
 local v19 = v18:CreateToggle({
 	Name = "Enable / Disable Reach",
 	CurrentValue = false,
 	Callback = function(arg1)
-		if arg1 then
-			func12()
-		else
-			func13()
-		end
+		if arg1 then func12() else func13() end
 	end,
 })
+
 local v20 = v18:CreateSlider({
 	Name = "Reach Size",
 	Range = {1, 25},
 	Increment = 1,
 	CurrentValue = 16,
-	Callback = function(arg1)
-		tbl4.dist = arg1
-	end,
+	Callback = function(arg1) tbl4.dist = arg1 end,
 })
+
 v18:CreateButton({
 	Name = "Fake Legs",
 	Callback = function()
-		local v1 = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
-		if v1:WaitForChild("Humanoid").RigType == Enum.HumanoidRigType.R6 then
-			v1["Right Leg"].Transparency = 1
-			v1["Left Leg"].Transparency = 1
-			v1["Left Leg"].Massless = true
-			local part = Instance.new("Part", v1)
-			part.Name = "Left Leg"
-			part.CanCollide = false
-			part.Color = v1["Left Leg"].Color
-			part.Size = Vector3.new(1, 2, 1)
-			part.Locked = true
-			part.Position = v1["Left Leg"].Position
-			local attachment = Instance.new("Attachment", part)
-			attachment.Name = "LeftFootAttachment"
-			attachment.Position = Vector3.new(0, -1, 0)
-			local motor6D = Instance.new("Motor6D", v1.Torso)
-			motor6D.Name = "Fake Left Hip"
-			motor6D.C0 = CFrame.new(-1, -1, 0, 0, 0, -1, 0, 1, 0, 1, 0, 0)
-			motor6D.C1 = CFrame.new(-0.5, 1, 0, 0, 0, -1, 0, 1, 0, 1, 0, 0)
-			motor6D.MaxVelocity = 0.1
-			motor6D.Part0 = v1.Torso
-			motor6D.Part1 = part
-			v1["Right Leg"].Massless = true
-			local part1 = Instance.new("Part", v1)
-			part1.Name = "Right Leg"
-			part1.CanCollide = false
-			part1.Color = v1["Right Leg"].Color
-			part1.Size = Vector3.new(1, 2, 1)
-			part1.Locked = true
-			part1.Position = v1["Right Leg"].Position
-			local attachment1 = Instance.new("Attachment", part1)
-			attachment1.Name = "RightFootAttachment"
-			attachment1.Position = Vector3.new(0, -1, 0)
-			local motor6D1 = Instance.new("Motor6D", v1.Torso)
-			motor6D1.Name = "Fake Right Hip"
-			motor6D1.C0 = CFrame.new(1, -1, 0, 0, 0, 1, 0, 1, 0, -1, 0, 0)
-			motor6D1.C1 = CFrame.new(0.5, 1, 0, 0, 0, 1, 0, -1, 0, 0)
-			motor6D1.MaxVelocity = 0.1
-			motor6D1.Part0 = v1.Torso
-			motor6D1.Part1 = part1
+		local v1_fl = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
+		if v1_fl:WaitForChild("Humanoid").RigType == Enum.HumanoidRigType.R6 then
+			v1_fl["Right Leg"].Transparency = 1
+			v1_fl["Left Leg"].Transparency = 1
+			v1_fl["Left Leg"].Massless = true
+			local p_l = Instance.new("Part", v1_fl)
+			p_l.Name = "Left Leg"
+			p_l.CanCollide = false
+			p_l.Color = v1_fl["Left Leg"].Color
+			p_l.Size = Vector3.new(1, 2, 1)
+			p_l.Locked = true
+			p_l.Position = v1_fl["Left Leg"].Position
+			local att_l = Instance.new("Attachment", p_l)
+			att_l.Name = "LeftFootAttachment"
+			att_l.Position = Vector3.new(0, -1, 0)
+			local mot_l = Instance.new("Motor6D", v1_fl.Torso)
+			mot_l.Name = "Fake Left Hip"
+			mot_l.C0 = CFrame.new(-1, -1, 0, 0, 0, -1, 0, 1, 0, 1, 0, 0)
+			mot_l.C1 = CFrame.new(-0.5, 1, 0, 0, 0, -1, 0, 1, 0, 1, 0, 0)
+			mot_l.MaxVelocity = 0.1
+			mot_l.Part0 = v1_fl.Torso
+			mot_l.Part1 = p_l
+
+			v1_fl["Right Leg"].Massless = true
+			local p_r = Instance.new("Part", v1_fl)
+			p_r.Name = "Right Leg"
+			p_r.CanCollide = false
+			p_r.Color = v1_fl["Right Leg"].Color
+			p_r.Size = Vector3.new(1, 2, 1)
+			p_r.Locked = true
+			p_r.Position = v1_fl["Right Leg"].Position
+			local att_r = Instance.new("Attachment", p_r)
+			att_r.Name = "RightFootAttachment"
+			att_r.Position = Vector3.new(0, -1, 0)
+			local mot_r = Instance.new("Motor6D", v1_fl.Torso)
+			mot_r.Name = "Fake Right Hip"
+			mot_r.C0 = CFrame.new(1, -1, 0, 0, 0, 1, 0, 1, 0, -1, 0, 0)
+			mot_r.C1 = CFrame.new(0.5, 1, 0, 0, 0, 1, 0, -1, 0, 0)
+			mot_r.MaxVelocity = 0.1
+			mot_r.Part0 = v1_fl.Torso
+			mot_r.Part1 = p_r
 		end
 	end,
 })
-local v21 = v2:CreateTab({Name = "Head Reach & Moss", Desc = "Head reach", Icon = "headphones"})
+
+-- ============================================================
+-- TAB 5: HEAD REACH & MOSS
+-- ============================================================
+local v21 = Window:CreateTab({Name = "Head Reach & Moss", Desc = "Head reach", Icon = "headphones"})
 v21:CreateSection("Head Reach & Moss")
 v21:CreateParagraph({Title = "Head Reach", Content = "wallah best."})
+
 local function func14(arg1)
 	return tostring(arg1):gsub("^DFInt", ""):gsub("^DFFlag", ""):gsub("FString", ""):gsub("FLog", ""):gsub("^FFlag", ""):gsub("^DFint", ""):gsub("^FInt", "")
 end
+
 local v47
 local function func15(arg1, arg2, arg3, arg4, arg5, arg6)
-	if v47 then
-		task.cancel(v47)
-	end
+	if v47 then task.cancel(v47) end
 	v47 = task.spawn(function()
 		while true do
-			local str = "DFIntTargetTimeDelayFacctorTenths"
+			local str_tt = "DFIntTargetTimeDelayFacctorTenths"
 			if setfflag then
 				func(function()
-					local v1 = func14(str)
-					if getfflag(v1) ~= nil then
-						setfflag(v1, arg1)
-					elseif getfflag(str) ~= nil then
-						setfflag(str, arg1)
+					local v1_s = func14(str_tt)
+					if getfflag(v1_s) ~= nil then
+						setfflag(v1_s, arg1)
+					elseif getfflag(str_tt) ~= nil then
+						setfflag(str_tt, arg1)
 					end
 				end)
 			end
-			local str1 = "FIntInterpolationMaxDelayMSec"
+			local str_in = "FIntInterpolationMaxDelayMSec"
 			if setfflag then
 				func(function()
-					local v1 = func14(str1)
-					if getfflag(v1) ~= nil then
-						setfflag(v1, arg3)
-					elseif getfflag(str1) ~= nil then
-						setfflag(str1, arg3)
+					local v1_s = func14(str_in)
+					if getfflag(v1_s) ~= nil then
+						setfflag(v1_s, arg3)
+					elseif getfflag(str_in) ~= nil then
+						setfflag(str_in, arg3)
 					end
 				end)
 			end
 			task.wait(20)
 		end
 	end)
+
 	local Head
-	local v1
-	local flag = false
+	local v1_ball
+	local flag_m = false
 	local Character = LocalPlayer.Character
-	if Character then
-		Head = Character:FindFirstChild("Head")
-	end
-	LocalPlayer.CharacterAdded:Connect(function(arg1)
+	if Character then Head = Character:FindFirstChild("Head") end
+
+	LocalPlayer.CharacterAdded:Connect(function(arg1_ch)
 		task.wait()
-		if arg1 then
-			Head = arg1:FindFirstChild("Head")
-		end
-		arg1.ChildAdded:Connect(function()
-			if arg1 then
-				Head = arg1:FindFirstChild("Head")
-			end
+		if arg1_ch then Head = arg1_ch:FindFirstChild("Head") end
+		arg1_ch.ChildAdded:Connect(function()
+			if arg1_ch then Head = arg1_ch:FindFirstChild("Head") end
 		end)
 	end)
-	RunService.PreSimulation:Connect(function()
-		if not Head then
-			return
+
+	local conn_head = RunService.PreSimulation:Connect(function()
+		if not Head then return end
+		local v2_b = v1_ball
+		if not (v2_b and v2_b.Parent) then
+			v1_ball = func3()
+			v2_b = v1_ball
 		end
-		local v2 = v1
-		if not (v2 and v2.Parent) then
-			local TPSSystem = workspace:FindFirstChild("TPSSystem")
-			v1 = TPSSystem and TPSSystem:FindFirstChild("TPS") or workspace:FindFirstChild("Ball")
-			v2 = v1
-		end
-		if not v2 then
-			return
-		end
-		local Position = v2.Position
-		local Position1 = Head.Position
-		local Y = Position1.Y
-		local Y1 = Position.Y
-		local v3 = Position.X - Position1.X
-		local Z = Position.Z
-		local Z1 = Position1.Z
-		local v4 = Y1 - Y
-		local v5 = Z - Z1
-		if v3 >= -arg4 and v3 <= arg4 and v5 >= -arg5 and v5 <= arg5 and v4 >= 1 and v4 <= arg6 then
-			local v6 = Head
-			firetouchinterest(v2, v6, 0)
-			firetouchinterest(v2, v6, 1)
-			if not flag then
-				flag = true
-				local str = "DFIntTargetTimeDelayFacctorTenths"
+		if not v2_b then return end
+		local PosB = v2_b.Position
+		local PosH = Head.Position
+		local dx = PosB.X - PosH.X
+		local dy = PosB.Y - PosH.Y
+		local dz = PosB.Z - PosH.Z
+		if dx >= -arg4 and dx <= arg4 and dz >= -arg5 and dz <= arg5 and dy >= 1 and dy <= arg6 then
+			firetouchinterest(v2_b, Head, 0)
+			firetouchinterest(v2_b, Head, 1)
+			if not flag_m then
+				flag_m = true
 				if setfflag then
+					local s_key = func14("DFIntTargetTimeDelayFacctorTenths")
 					func(function()
-						local v1 = func14(str)
-						if getfflag(v1) ~= nil then
-							setfflag(v1, arg2)
-						elseif getfflag(str) ~= nil then
-							setfflag(str, arg2)
-						end
+						if getfflag(s_key) ~= nil then setfflag(s_key, arg2) end
 					end)
 				end
 			end
-		elseif flag then
-			flag = false
-			local str1 = "DFIntTargetTimeDelayFacctorTenths"
+		elseif flag_m then
+			flag_m = false
 			if setfflag then
+				local s_key = func14("DFIntTargetTimeDelayFacctorTenths")
 				func(function()
-					local v1 = func14(str1)
-					if getfflag(v1) ~= nil then
-						setfflag(v1, arg1)
-					elseif getfflag(str1) ~= nil then
-						setfflag(str1, arg1)
-					end
+					if getfflag(s_key) ~= nil then setfflag(s_key, arg1) end
 				end)
 			end
 		end
 	end)
+	table.insert(tbl10, conn_head)
 end
-v21:CreateButton({
-	Name = "Moss 15%",
-	Callback = function()
-		func15("13", "9", "90", 2.5, 1.5, 3)
+
+v21:CreateButton({Name = "Moss 15%", Callback = function() func15("13", "9", "90", 2.5, 1.5, 3) end})
+v21:CreateButton({Name = "Moss 25%", Callback = function() func15("12", "8", "85", 2.7, 1.7, 3.4) end})
+v21:CreateButton({Name = "Moss 50%", Callback = function() func15("10", "6", "75", 3.1, 2.3, 4.2) end})
+v21:CreateButton({Name = "Moss 75%", Callback = function() func15("8", "3", "67", 3.6, 2.9, 5.1) end})
+v21:CreateButton({Name = "Moss 100%", Callback = function() func15("7", "0", "60", 4, 3.5, 6) end})
+
+-- Configurable Mossing
+v21:CreateSection("Configurable Mossing")
+v21:CreateParagraph({Title = "Configurable Mossing", Content = "Ground, jump-leg, and head-reach values from Script 2."})
+
+local tbl15 = {on = false, ground = 6, jump = 6, head = new(7, 7, 6), spike = 60, forward = 90, connection = nil}
+
+local function func31()
+	if tbl15.connection then
+		func(function() tbl15.connection:Disconnect() end)
+	end
+	tbl15.connection = nil
+	if not tbl15.on then return end
+
+	local conn = RunService.Heartbeat:Connect(function()
+		local Character = LocalPlayer.Character
+		local v1_hrp = Character and Character:FindFirstChild("HumanoidRootPart")
+		local v2_hum = Character and Character:FindFirstChildOfClass("Humanoid")
+		local v3_b = func25()
+		if not (Character and v1_hrp and v2_hum and v3_b) then return end
+		local dx = v3_b.Position.X - v1_hrp.Position.X
+		local dy = v3_b.Position.Y - v1_hrp.Position.Y
+		local dz = v3_b.Position.Z - v1_hrp.Position.Z
+		local inAir = v2_hum.FloorMaterial == Enum.Material.Air
+		if dy > 1.5 and abs(dx) <= tbl15.head.X and abs(dz) <= tbl15.head.Z and dy <= tbl15.head.Y then
+			func27(v3_b, Character:FindFirstChild("Head") or v1_hrp)
+		end
+		local reachBound = inAir and tbl15.jump or tbl15.ground
+		if abs(dx) <= reachBound and abs(dy) <= reachBound and abs(dz) <= reachBound then
+			if inAir then
+				local cam = workspace.CurrentCamera
+				local lv = cam and cam.CFrame.LookVector
+				if lv then
+					v3_b.AssemblyLinearVelocity = new(lv.X * tbl15.forward, -tbl15.spike, lv.Z * tbl15.forward)
+				end
+			end
+			func27(v3_b, v1_hrp)
+		end
+	end)
+	if conn then table.insert(tbl10, conn) end
+	tbl15.connection = conn
+end
+
+v21:CreateToggle({
+	Name = "Configurable Mossing",
+	CurrentValue = false,
+	Callback = function(arg1)
+		tbl15.on = arg1
+		func31()
 	end,
 })
-v21:CreateButton({
-	Name = "Moss 25%",
-	Callback = function()
-		func15("12", "8", "85", 2.7, 1.7, 3.4)
+
+v21:CreateSlider({
+	Name = "Head Reach X",
+	Range = {1, 15},
+	Increment = 1,
+	CurrentValue = 7,
+	Callback = function(arg1)
+		tbl15.head = new(arg1, tbl15.head.Y, tbl15.head.Z)
 	end,
 })
-v21:CreateButton({
-	Name = "Moss 50%",
-	Callback = function()
-		func15("10", "6", "75", 3.1, 2.3, 4.2)
+
+v21:CreateSlider({
+	Name = "Head Reach Y",
+	Range = {1, 15},
+	Increment = 1,
+	CurrentValue = 7,
+	Callback = function(arg1)
+		tbl15.head = new(tbl15.head.X, arg1, tbl15.head.Z)
 	end,
 })
-v21:CreateButton({
-	Name = "Moss 75%",
-	Callback = function()
-		func15("8", "3", "67", 3.6, 2.9, 5.1)
+
+v21:CreateSlider({
+	Name = "Head Reach Z",
+	Range = {1, 15},
+	Increment = 1,
+	CurrentValue = 6,
+	Callback = function(arg1)
+		tbl15.head = new(tbl15.head.X, tbl15.head.Y, arg1)
 	end,
 })
+
 v21:CreateButton({
-	Name = "Moss 100%",
+	Name = "Reset Moss Values",
 	Callback = function()
-		func15("7", "0", "60", 4, 3.5, 6)
+		tbl15.ground = 6
+		tbl15.jump = 6
+		tbl15.head = new(7, 7, 6)
 	end,
 })
-local v22 = v2:CreateTab({Name = "React", Desc = "React delay", Icon = "smile-plus"})
+
+-- ============================================================
+-- TAB 6: REACT
+-- ============================================================
+local v22 = Window:CreateTab({Name = "React", Desc = "React delay", Icon = "smile-plus"})
 v22:CreateSection("React")
 v22:CreateParagraph({
 	Title = "React",
@@ -1570,22 +1482,16 @@ v22:CreateParagraph({
 local v48
 local function applyReact(tt, interp)
 	local function strip(k)
-		return k:gsub("^DFInt", ""):gsub("^DFFlag", ""):gsub("FString", ""):gsub("FLog", ""):gsub(
-			"^FFlag", ""
-		):gsub("^DFint", ""):gsub("^FInt", "")
+		return k:gsub("^DFInt", ""):gsub("^DFFlag", ""):gsub("FString", ""):gsub("FLog", ""):gsub("^FFlag", ""):gsub("^DFint", ""):gsub("^FInt", "")
 	end
-	if v48 then
-		task.cancel(v48)
-	end
+	if v48 then task.cancel(v48) end
 	v48 = task.spawn(function()
 		local flags = {
 			["DFIntTargetTimeDelayFacctorTenths"] = tt,
 			["FIntInterpolationMaxDelayMSec"] = interp,
 		}
 		local function apply()
-			if not setfflag then
-				return
-			end
+			if not setfflag then return end
 			for k, v in pairs(flags) do
 				local ck = strip(k)
 				pcall(function()
@@ -1604,829 +1510,13 @@ local function applyReact(tt, interp)
 	end)
 end
 
-v22:CreateButton({
-	Name = "React 15%",
-	Desc = "Delay: 13 | Interp: 90 (Highest delay, safer)",
-	Callback = function()
-		applyReact("13", "90")
-	end,
-})
-v22:CreateButton({
-	Name = "React 25%",
-	Desc = "Delay: 12 | Interp: 85 (Mild delay reduction)",
-	Callback = function()
-		applyReact("12", "85")
-	end,
-})
-v22:CreateButton({
-	Name = "React 50%",
-	Desc = "Delay: 10 | Interp: 75 (Balanced / medium)",
-	Callback = function()
-		applyReact("10", "75")
-	end,
-})
-v22:CreateButton({
-	Name = "React 75%",
-	Desc = "Delay: 8 | Interp: 67 (Fast reaction, competitive)",
-	Callback = function()
-		applyReact("8", "67")
-	end,
-})
-v22:CreateButton({
-	Name = "React 100%",
-	Desc = "Delay: 7 | Interp: 60 (Lowest delay, most aggressive)",
-	Callback = function()
-		applyReact("7", "60")
-	end,
-})
-local v23 = v2:CreateTab({Name = "Xeno Moss", Desc = "Moss for Xeno & Solara", Icon = "zap"})
-v23:CreateSection("Xeno Moss")
-v23:CreateParagraph({Title = "Xeno Moss", Content = "Moss for Xeno & Solara. Pick your %. Higher % = bigger hitbox."})
-local v49
-local function func16(arg1, arg2, arg3, arg4)
-	if v49 then
-		v49:Disconnect()
-		v49 = nil
-	end
-	local function func1(arg1, arg2, arg3, arg4)
-		local Position = arg1.Position
-		local v1 = arg2 / 2
-		local Position1 = arg1.Position
-		local v2 = Position - v1
-		local v3 = arg2 / 2
-		local Position2 = arg3.Position
-		local v4 = Position1 + v3
-		local v5 = arg4 / 2
-		local Position3 = arg3.Position
-		local v6 = Position2 - v5
-		local v7 = arg4 / 2
-		local X = v2.X
-		local v8 = Position3 + v7
-		return X <= v8.X and v4.X >= v6.X and (v2.Y <= v8.Y and v4.Y >= v6.Y) and (v2.Z <= v8.Z and v4.Z >= v6.Z)
-	end
-	local animation = Instance.new("Animation")
-	animation.AnimationId = "rbxassetid://301501585"
-	local v1
-	local function func2()
-		local Character = LocalPlayer.Character
-		if not Character then
-			return
-		end
-		local Humanoid = Character:FindFirstChildOfClass("Humanoid")
-		if not Humanoid then
-			return
-		end
-		if v1 and v1.IsPlaying then
-			return
-		end
-		func(function()
-			v1 = Humanoid:LoadAnimation(animation)
-			v1:Play()
-		end)
-	end
-	local function func3()
-		local TPSSystem = workspace:FindFirstChild("TPSSystem")
-		local v1 = TPSSystem and TPSSystem:FindFirstChild("TPS")
-		if not v1 then
-			return
-		end
-		local FE = workspace:FindFirstChild("FE")
-		local v2 = FE and FE:FindFirstChild("System") and FE.System:FindFirstChild("Header")
-		if not v2 then
-			return
-		end
-		v2:FireServer(LocalPlayer.UserId, v1, "Rock'n'roll Star", "NeverFearTruth", "power=95/100")
-	end
-	local flag = false
-	local flag1 = false
-	v49 = RunService.Heartbeat:Connect(function()
-		local Character = LocalPlayer.Character
-		if not Character then
-			return
-		end
-		local Head = Character:FindFirstChild("Head")
-		if not Head then
-			return
-		end
-		local HumanoidRootPart = Character:FindFirstChild("HumanoidRootPart")
-		if not HumanoidRootPart then
-			return
-		end
-		local v1 = Head.CFrame * CFrame.new(0, arg4, 0)
-		local vector3 = Vector3.new(arg1, arg2, arg3)
-		local tbl = {}
-		local Balls = workspace:FindFirstChild("Balls")
-		if Balls then
-			for _, v2 in Balls:GetChildren() do
-				if v2:IsA("BasePart") then
-					table.insert(tbl, v2)
-				end
-			end
-		end
-		local TPSSystem = workspace:FindFirstChild("TPSSystem")
-		if TPSSystem then
-			for _, v3 in TPSSystem:GetChildren() do
-				if v3:IsA("BasePart") or v3.Name == "TPS" then
-					table.insert(tbl, v3)
-				end
-			end
-		end
-		local flag2 = false
-		for _, v4 in tbl, nil, nil do
-			local v5 = v4.Position + v4.Velocity * 0.001
-			local cFrame = CFrame.new(v5)
-			local Position = v4.Position
-			local v6 = cFrame * v4.CFrame.Rotation
-			if Position.Y >= HumanoidRootPart.Position.Y + 1 then
-				if func1(v1, vector3, v6, v4.Size) then
-					flag2 = true
-					break
-				end
-			end
-		end
-		if flag2 and not flag and not flag1 then
-			flag1 = true
-			func2()
-			func3()
-			task.delay(0.3, function()
-				flag1 = false
-			end)
-		end
-		flag = flag2
-	end)
-end
-v23:CreateButton({
-	Name = "Xeno Moss 15%",
-	Callback = function()
-		func16(2, 2.8, 3, 1.5)
-	end,
-})
-v23:CreateButton({
-	Name = "Xeno Moss 25%",
-	Callback = function()
-		func16(2.5, 3.2, 3.3, 1.5)
-	end,
-})
-v23:CreateButton({
-	Name = "Xeno Moss 50%",
-	Callback = function()
-		func16(3, 3.8, 3.6, 1.5)
-	end,
-})
-v23:CreateButton({
-	Name = "Xeno Moss 75%",
-	Callback = function()
-		func16(3.5, 4.5, 4.1, 1.5)
-	end,
-})
-v23:CreateButton({
-	Name = "Xeno Moss 100%",
-	Callback = function()
-		func16(4, 5, 4.5, 1.5)
-	end,
-})
-v23:CreateButton({
-	Name = "Stop Xeno Moss",
-	Callback = function()
-		if v49 then
-			v49:Disconnect()
-			v49 = nil
-		end
-	end,
-})
-local v24 = v2:CreateTab({Name = "Flag Func", Desc = "Flag override", Icon = "settings-2"})
-v24:CreateSection("Flag Override")
-local tbl5 = {tt = "4", interp = "60", s2 = "38720"}
-local v50
-local function func17()
-	if not setfflag then
-		return
-	end
-	for k, v1 in pairs({
-		DFIntTargetTimeDelayFacctorTenths = tbl5.tt,
-		FIntInterpolationMaxDelayMSec = tbl5.interp,
-		DFIntS2PhysicsSenderRate = tbl5.s2,
-	}) do
-		local v2 = func14(k)
-		func(function()
-			if getfflag(v2) ~= nil then
-				setfflag(v2, v1)
-			elseif getfflag(k) ~= nil then
-				setfflag(k, v1)
-			end
-		end)
-	end
-end
-local v25 = v24:CreateInput({
-	Name = "TargetTimeDelay",
-	PlaceholderText = "DFIntTargetTimeDelayFacctorTenths",
-	Callback = function(arg1)
-		if arg1 and arg1 ~= "" then
-			tbl5.tt = arg1
-		end
-	end,
-})
-v25:Set(tbl5.tt)
-local v26 = v24:CreateInput({
-	Name = "Interpolation",
-	PlaceholderText = "FIntInterpolationMaxDelayMSec",
-	Callback = function(arg1)
-		if arg1 and arg1 ~= "" then
-			tbl5.interp = arg1
-		end
-	end,
-})
-v26:Set(tbl5.interp)
-local v27 = v24:CreateInput({
-	Name = "PhysicsSenderRate",
-	PlaceholderText = "DFIntS2PhysicsSenderRate",
-	Callback = function(arg1)
-		if arg1 and arg1 ~= "" then
-			tbl5.s2 = arg1
-		end
-	end,
-})
-v27:Set(tbl5.s2)
-v24:CreateButton({
-	Name = "Apply & Lock",
-	Callback = function()
-		if v50 then
-			task.cancel(v50)
-		end
-		v50 = task.spawn(function()
-			while true do
-				func17()
-				task.wait(2)
-			end
-		end)
-	end,
-})
-v24:CreateButton({
-	Name = "Unlock",
-	Callback = function()
-		if v50 then
-			task.cancel(v50)
-			v50 = nil
-		end
-	end,
-})
-v24:CreateSection("Flag Inject")
-v24:CreateParagraph({
-	Title = "Flag Inject",
-	Content = 'Paste your JSON flags below. Supports any amount. Format: {"FlagName":"value"}',
-})
-local v51
-local tbl6 = {}
-v24:CreateInput({
-	Name = "Flag JSON",
-	PlaceholderText = "Paste full JSON here",
-	Callback = function(arg1)
-		if not arg1 or arg1 == "" then
-			return
-		end
-		func(function()
-			local v1 = HttpService:JSONDecode(arg1)
-			if type(v1) == "table" then
-				tbl6 = v1
-			end
-		end)
-	end,
-})
-v24:CreateButton({
-	Name = "Inject & Lock All",
-	Callback = function()
-		if v51 then
-			task.cancel(v51)
-		end
-		v51 = task.spawn(function()
-			while true do
-				if setfflag then
-					for k, v1 in pairs(tbl6) do
-						local v2 = tostring(k):gsub("^DFInt", ""):gsub("^DFFlag", ""):gsub("FString", ""):gsub("FLog", ""):gsub("^FFlag", ""):gsub("^DFint", ""):gsub("^FInt", "")
-						func(function()
-							if getfflag(v2) ~= nil then
-								setfflag(v2, tostring(v1))
-							elseif getfflag(k) ~= nil then
-								setfflag(k, tostring(v1))
-							end
-						end)
-					end
-				end
-				task.wait(10)
-			end
-		end)
-	end,
-})
-v24:CreateButton({
-	Name = "Stop Inject",
-	Callback = function()
-		if v51 then
-			task.cancel(v51)
-			v51 = nil
-		end
-	end,
-})
-local tbl7 = {on = false, radius = 6, cooldown = 1.2}
-local num7 = 0
-local v52
-local v29, v30, v31
-local function func18()
-	local PlayerGui = LocalPlayer:FindFirstChild("PlayerGui")
-	if not PlayerGui then
-		return false
-	end
-	local RedGK = PlayerGui:FindFirstChild("RedGK")
-	local BlueGK = PlayerGui:FindFirstChild("BlueGK")
-	return RedGK and RedGK.Value or BlueGK and BlueGK.Value
-end
-local function func19()
-	local Backpack = LocalPlayer:FindFirstChild("Backpack")
-	if not Backpack then
-		return nil
-	end
-	local Module = Backpack:FindFirstChild("Module")
-	if not Module or Module.ClassName ~= "ModuleScript" then
-		return nil
-	end
-	local v1, v2 = pcall(require, Module)
-	if v1 and type(v2) == "table" and type(v2.Save) == "function" then
-		return v2
-	end
-	return nil
-end
-local function func20()
-	local v1 = func19()
-	if not v1 then
-		return
-	end
-	func(function()
-		v1.Save()
-	end)
-end
-local function func21()
-	if v52 then
-		v52:Disconnect()
-		v52 = nil
-	end
-	if not tbl7.on then
-		return
-	end
-	v52 = RunService.Heartbeat:Connect(function()
-		if not func18() then
-			return
-		end
-		local Character = LocalPlayer.Character
-		local v1 = Character and Character:FindFirstChild("HumanoidRootPart")
-		local v2 = func3()
-		if not (v1 and v2) then
-			return
-		end
-		if (v1.Position - v2.Position).Magnitude > tbl7.radius then
-			return
-		end
-		local v3 = clock()
-		if v3 - num7 < tbl7.cooldown then
-			return
-		end
-		num7 = v3
-		func20()
-	end)
-end
-if STATE then
-	STATE.onCleanup(function()
-		for _, v1 in ipairs({v40, connection10, connection11, v52, v49}) do
-			if v1 then
-				func(function()
-					v1:Disconnect()
-				end)
-			end
-		end
-		for _, v3 in ipairs({v47, v48, v50, v51}) do
-			if v3 then
-				func(function()
-					task.cancel(v3)
-				end)
-			end
-		end
-		func(function()
-			part:Destroy()
-		end)
-		func(function()
-			v2:Destroy()
-		end)
-	end)
-end
-local tbl10 = {}
-local tbl11 = {}
-local tbl12 = {}
-local function func25()
-	local TPSSystem = workspace:FindFirstChild("TPSSystem")
-	return TPSSystem and TPSSystem:FindFirstChild("TPS") or workspace:FindFirstChild("Ball")
-end
-local function func26(arg1, arg2)
-	local Value
-	local v1 = game:GetService("Lighting"):FindFirstChild(LocalPlayer.Name)
-	local v2 = v1 and v1:FindFirstChild("PreferredFoot")
-	if v2 then
-		Value = v2.Value
-	end
-	local v3 = Value == 1
-	if arg2 and arg2.RigType == Enum.HumanoidRigType.R6 then
-		return arg1 and arg1:FindFirstChild(v3 and "Right Leg" or "Left Leg")
-	end
-	return arg1 and arg1:FindFirstChild(v3 and "RightLowerLeg" or "LeftLowerLeg") or arg1 and arg1:FindFirstChild(v3 and "RightFoot" or "LeftFoot") or arg1 and arg1:FindFirstChild(v3 and "Right Leg" or "Left Leg")
-end
-local function func27(arg1, arg2)
-	if not (arg1 and arg2 and firetouchinterest) then
-		return
-	end
-	func(function()
-		firetouchinterest(arg1, arg2, 0)
-		firetouchinterest(arg1, arg2, 1)
-	end)
-end
-task.spawn(function()
-	func(function()
-		local FE = workspace:FindFirstChild("FE")
-		local v1 = FE and FE:FindFirstChild("System")
-		if v1 then
-			for _, v2 in ipairs(v1:GetChildren()) do
-				if v2.Name == "HelloWorld" or v2:IsA("RemoteEvent") and v2:FindFirstChildWhichIsA("LuaSourceContainer") then
-					v2:Destroy()
-				end
-			end
-		end
-		local ReplicatedStorage = game:GetService("ReplicatedStorage")
-		local function func(arg1)
-			local v1 = ReplicatedStorage
-			for _, v2 in ipairs(string.split(arg1, "/")) do
-				local v3 = v1 and v1:FindFirstChild(v2)
-				v1 = v3
-				if not v3 then
-					return
-				end
-			end
-			v1:Destroy()
-		end
-		func("Remotes/RemoteEvents/IlllIIIllIIIIIlIIlIIIlI/Exploit")
-		func("Remotes/RemoteEvents/IlllIIIllIIIIIlIIlIIIlI/Bindable/Exploit")
-		for _, v3 in ipairs(ReplicatedStorage:GetChildren()) do
-			if v3:IsA("RemoteEvent") and v3.Name:match("[%W_]+") then
-				v3:Destroy()
-			end
-		end
-	end)
-end)
-v8:CreateSection("Preferred Foot Reach")
-v8:CreateParagraph({Title = "Preferred Foot Reach", Content = "Script 2's preferred-foot touch method."})
-local tbl13 = {on = false, distance = 1}
-tbl13.connection = nil
-local function func28()
-	local connection = tbl13.connection
-	if connection then
-		func(function()
-			connection:Disconnect()
-		end)
-	end
-	tbl13.connection = nil
-	if not tbl13.on then
-		return
-	end
-	local connection1 = RunService.RenderStepped:Connect(function()
-		local Character = LocalPlayer.Character
-		local v1 = Character and Character:FindFirstChildOfClass("Humanoid")
-		local v2 = Character and Character:FindFirstChild("HumanoidRootPart")
-		local v3 = func25()
-		if not (Character and v1 and v2 and v3) then
-			return
-		end
-		if (v2.Position - v3.Position).Magnitude > tbl13.distance then
-			return
-		end
-		func27(func26(Character, v1), v3)
-	end)
-	if connection1 then
-		table.insert(tbl10, connection1)
-	end
-	tbl13.connection = connection1
-end
-v8:CreateToggle({
-	Name = "Preferred Foot Reach",
-	CurrentValue = false,
-	Callback = function(arg1)
-		tbl13.on = arg1
-		func28()
-	end,
-})
-v8:CreateInput({
-	Name = "Preferred Foot Distance",
-	PlaceholderText = "Distance in studs",
-	Callback = function(arg1)
-		tbl13.distance = tonumber(arg1) or tbl13.distance
-		func28()
-	end,
-})
-local tbl14 = {on = false, shape = "Box", size = new(1, 1, 1)}
-tbl14.part = nil
-tbl14.connection = nil
-local function func29()
-	local connection = tbl14.connection
-	if connection then
-		func(function()
-			connection:Disconnect()
-		end)
-	end
-	tbl14.connection = nil
-	local part = tbl14.part
-	if part then
-		func(function()
-			part:Destroy()
-		end)
-	end
-	tbl14.part = nil
-end
-local function func30()
-	func29()
-	if not tbl14.on then
-		return
-	end
-	local part = Instance.new("Part")
-	part.Name = "TPS_Script2ReachPart"
-	part.Anchored = true
-	part.CanCollide = false
-	part.Material = Enum.Material.Neon
-	part.Color = Color3.fromRGB(0, 85, 255)
-	part.Transparency = 0.7
-	part.Size = tbl14.size
-	if tbl14.shape == "Sphere" then
-		part.Shape = Enum.PartType.Ball
-	elseif tbl14.shape == "Cylinder" then
-		part.Shape = Enum.PartType.Cylinder
-	else
-		part.Shape = Enum.PartType.Block
-	end
-	part.Parent = workspace
-	if part then
-		table.insert(tbl11, part)
-	end
-	tbl14.part = part
-	local connection = RunService.RenderStepped:Connect(function()
-		local Character = LocalPlayer.Character
-		local v1 = Character and Character:FindFirstChildOfClass("Humanoid")
-		local v2 = Character and Character:FindFirstChild("HumanoidRootPart")
-		local v3 = func25()
-		if not (Character and v1 and v2 and v3 and tbl14.part) then
-			return
-		end
-		if tbl14.shape == "Cylinder" then
-			tbl14.part.CFrame = v2.CFrame * CFrame.Angles(0, 0, math.rad(90))
-		else
-			tbl14.part.CFrame = v2.CFrame
-		end
-		local v4 = tbl14.part.CFrame:PointToObjectSpace(v3.Position)
-		local v5 = tbl14.size / 2
-		local v12
-		if tbl14.shape == "Sphere" then
-			local v6 = v5.X == 0 and 0 or v4.X / v5.X
-			local v7 = v5.Y == 0 and 0 or v4.Y / v5.Y
-			local v8 = v5.Z == 0 and 0 or v4.Z / v5.Z
-			local v9 = v7 * v7
-			local v10 = v6 * v6
-			local v11 = v8 * v8
-			v12 = v10 + v9 + v11 <= 1
-		else
-			v12 = abs(v4.X) <= v5.X and abs(v4.Y) <= v5.Y and abs(v4.Z) <= v5.Z
-		end
-		if v12 then
-			func27(func26(Character, v1), v3)
-		end
-	end)
-	if connection then
-		table.insert(tbl10, connection)
-	end
-	tbl14.connection = connection
-end
-v8:CreateSection("Preferred Foot Shape Reach")
-v8:CreateDropdown({
-	Name = "Preferred Foot Shape",
-	Options = {"Box", "Sphere", "Cylinder"},
-	CurrentOption = "Box",
-	Callback = function(arg1)
-		tbl14.shape = type(arg1) == "table" and arg1[1] or arg1
-		if tbl14.on then
-			func30()
-		end
-	end,
-})
-local str2 = "X"
-v8:CreateSlider({
-	Name = "Preferred Shape X",
-	Range = {1, 30},
-	Increment = 1,
-	CurrentValue = 1,
-	Callback = function(arg1)
-		local X = tbl14.size.X
-		local Y = tbl14.size.Y
-		local Z = tbl14.size.Z
-		if str2 == "X" then
-			X = arg1
-		elseif str2 == "Y" then
-			Y = arg1
-		else
-			Z = arg1
-		end
-		tbl14.size = new(X, Y, Z)
-		if tbl14.on then
-			func30()
-		end
-	end,
-})
-local str3 = "Y"
-v8:CreateSlider({
-	Name = "Preferred Shape Y",
-	Range = {1, 30},
-	Increment = 1,
-	CurrentValue = 1,
-	Callback = function(arg1)
-		local X = tbl14.size.X
-		local Y = tbl14.size.Y
-		local Z = tbl14.size.Z
-		if str3 == "X" then
-			X = arg1
-		elseif str3 == "Y" then
-			Y = arg1
-		else
-			Z = arg1
-		end
-		tbl14.size = new(X, Y, Z)
-		if tbl14.on then
-			func30()
-		end
-	end,
-})
-local str4 = "Z"
-v8:CreateSlider({
-	Name = "Preferred Shape Z",
-	Range = {1, 30},
-	Increment = 1,
-	CurrentValue = 1,
-	Callback = function(arg1)
-		local X = tbl14.size.X
-		local Y = tbl14.size.Y
-		local Z = tbl14.size.Z
-		if str4 == "X" then
-			X = arg1
-		elseif str4 == "Y" then
-			Y = arg1
-		else
-			Z = arg1
-		end
-		tbl14.size = new(X, Y, Z)
-		if tbl14.on then
-			func30()
-		end
-	end,
-})
-v8:CreateToggle({
-	Name = "Preferred Foot Shape Reach",
-	CurrentValue = false,
-	Callback = function(arg1)
-		tbl14.on = arg1
-		if arg1 then
-			func30()
-		else
-			func29()
-		end
-	end,
-})
-v21:CreateSection("Configurable Mossing")
-v21:CreateParagraph({Title = "Configurable Mossing", Content = "Ground, jump-leg, and head-reach values from Script 2."})
-local tbl15 = {on = false, ground = 6, jump = 6, head = new(7, 7, 6), spike = 60, forward = 90}
-tbl15.connection = nil
-local function func31()
-	local connection = tbl15.connection
-	if connection then
-		func(function()
-			connection:Disconnect()
-		end)
-	end
-	tbl15.connection = nil
-	if not tbl15.on then
-		return
-	end
-	local connection1 = RunService.Heartbeat:Connect(function()
-		local Character = LocalPlayer.Character
-		local v1 = Character and Character:FindFirstChild("HumanoidRootPart")
-		local v2 = Character and Character:FindFirstChildOfClass("Humanoid")
-		local v3 = func25()
-		if not (Character and v1 and v2 and v3) then
-			return
-		end
-		local Position = v3.Position
-		local v4 = v3.Position.X - v1.Position.X
-		local Position1 = v3.Position
-		local v5 = Position.Y - v1.Position.Y
-		local v6 = Position1.Z - v1.Position.Z
-		local v7 = v2.FloorMaterial == Enum.Material.Air
-		if v5 > 1.5 and abs(v4) <= tbl15.head.X and abs(v6) <= tbl15.head.Z and v5 <= tbl15.head.Y then
-			func27(v3, Character:FindFirstChild("Head") or v1)
-		end
-		local v8 = v7 and tbl15.jump or tbl15.ground
-		if abs(v4) <= v8 and abs(v5) <= v8 and abs(v6) <= v8 then
-			if v7 then
-				local CurrentCamera = workspace.CurrentCamera
-				local v9 = CurrentCamera and CurrentCamera.CFrame.LookVector
-				if v9 then
-					local v10 = v9.X * tbl15.forward
-					local spike = tbl15.spike
-					local Z = v9.Z
-					v3.AssemblyLinearVelocity = new(v10, -spike, Z * tbl15.forward)
-				end
-			end
-			if v3 and v1 and firetouchinterest then
-				func(function()
-					firetouchinterest(v3, v1, 0)
-					firetouchinterest(v3, v1, 1)
-				end)
-			end
-		end
-	end)
-	if connection1 then
-		table.insert(tbl10, connection1)
-	end
-	tbl15.connection = connection1
-end
-v21:CreateToggle({
-	Name = "Configurable Mossing",
-	CurrentValue = false,
-	Callback = function(arg1)
-		tbl15.on = arg1
-		func31()
-	end,
-})
-local str7 = "headX"
-v21:CreateSlider({
-	Name = "Head Reach X",
-	Range = {1, 15},
-	Increment = 1,
-	CurrentValue = 7,
-	Callback = function(arg1)
-		if str7 == "headX" then
-			tbl15.head = new(arg1, tbl15.head.Y, tbl15.head.Z)
-		elseif str7 == "headY" then
-			tbl15.head = new(tbl15.head.X, arg1, tbl15.head.Z)
-		elseif str7 == "headZ" then
-			tbl15.head = new(tbl15.head.X, tbl15.head.Y, arg1)
-		else
-			tbl15[str7] = arg1
-		end
-	end,
-})
-local str8 = "headY"
-v21:CreateSlider({
-	Name = "Head Reach Y",
-	Range = {1, 15},
-	Increment = 1,
-	CurrentValue = 7,
-	Callback = function(arg1)
-		if str8 == "headX" then
-			tbl15.head = new(arg1, tbl15.head.Y, tbl15.head.Z)
-		elseif str8 == "headY" then
-			tbl15.head = new(tbl15.head.X, arg1, tbl15.head.Z)
-		elseif str8 == "headZ" then
-			tbl15.head = new(tbl15.head.X, tbl15.head.Y, arg1)
-		else
-			tbl15[str8] = arg1
-		end
-	end,
-})
-local str9 = "headZ"
-v21:CreateSlider({
-	Name = "Head Reach Z",
-	Range = {1, 15},
-	Increment = 1,
-	CurrentValue = 6,
-	Callback = function(arg1)
-		if str9 == "headX" then
-			tbl15.head = new(arg1, tbl15.head.Y, tbl15.head.Z)
-		elseif str9 == "headY" then
-			tbl15.head = new(tbl15.head.X, arg1, tbl15.head.Z)
-		elseif str9 == "headZ" then
-			tbl15.head = new(tbl15.head.X, tbl15.head.Y, arg1)
-		else
-			tbl15[str9] = arg1
-		end
-	end,
-})
-v21:CreateButton({
-	Name = "Reset Moss Values",
-	Callback = function()
-		local v1 = new(7, 7, 6)
-		tbl15.ground = 6
-		tbl15.jump = 6
-		tbl15.head = v1
-	end,
-})
+v22:CreateButton({Name = "React 15%", Desc = "Delay: 13 | Interp: 90 (Highest delay, safer)", Callback = function() applyReact("13", "90") end})
+v22:CreateButton({Name = "React 25%", Desc = "Delay: 12 | Interp: 85 (Mild delay reduction)", Callback = function() applyReact("12", "85") end})
+v22:CreateButton({Name = "React 50%", Desc = "Delay: 10 | Interp: 75 (Balanced / medium)", Callback = function() applyReact("10", "75") end})
+v22:CreateButton({Name = "React 75%", Desc = "Delay: 8 | Interp: 67 (Fast reaction, competitive)", Callback = function() applyReact("8", "67") end})
+v22:CreateButton({Name = "React 100%", Desc = "Delay: 7 | Interp: 60 (Lowest delay, most aggressive)", Callback = function() applyReact("7", "60") end})
+
+-- Script 2 React Helpers
 v22:CreateSection("Script 2 React Helpers")
 local tbl16 = {movement = false, guard = false, noCollision = false, esp = false, bigHead = false}
 tbl16.moveConnection = nil
@@ -2434,182 +1524,128 @@ tbl16.guardConnection = nil
 tbl16.collisionConnection = nil
 tbl16.moveKeys = {W = false, A = false, S = false, D = false}
 tbl16.espConnections = {}
-local UserInputService = game:GetService("UserInputService")
+
 local function func32(arg1, arg2)
-	if arg1 == Enum.KeyCode.W then
-		tbl16.moveKeys.W = arg2
-	elseif arg1 == Enum.KeyCode.A then
-		tbl16.moveKeys.A = arg2
-	elseif arg1 == Enum.KeyCode.S then
-		tbl16.moveKeys.S = arg2
-	elseif arg1 == Enum.KeyCode.D then
-		tbl16.moveKeys.D = arg2
-	end
+	if arg1 == Enum.KeyCode.W then tbl16.moveKeys.W = arg2
+	elseif arg1 == Enum.KeyCode.A then tbl16.moveKeys.A = arg2
+	elseif arg1 == Enum.KeyCode.S then tbl16.moveKeys.S = arg2
+	elseif arg1 == Enum.KeyCode.D then tbl16.moveKeys.D = arg2 end
 end
-local connection = UserInputService.InputBegan:Connect(function(arg1, arg2)
-	if arg2 then
-		return
-	end
+
+local c_ib = UserInputService.InputBegan:Connect(function(arg1, arg2)
+	if arg2 then return end
 	func32(arg1.KeyCode, true)
 end)
-if connection then
-	table.insert(tbl10, connection)
-end
-local connection1 = UserInputService.InputEnded:Connect(function(arg1)
+table.insert(tbl10, c_ib)
+
+local c_ie = UserInputService.InputEnded:Connect(function(arg1)
 	func32(arg1.KeyCode, false)
 end)
-if connection1 then
-	table.insert(tbl10, connection1)
-end
+table.insert(tbl10, c_ie)
+
 local function func33()
-	local moveConnection = tbl16.moveConnection
-	if moveConnection then
-		func(function()
-			moveConnection:Disconnect()
-		end)
-	end
+	if tbl16.moveConnection then func(function() tbl16.moveConnection:Disconnect() end) end
 	tbl16.moveConnection = nil
-	if not tbl16.movement then
-		return
-	end
-	local connection = RunService.Heartbeat:Connect(function()
+	if not tbl16.movement then return end
+	local conn = RunService.Heartbeat:Connect(function()
 		local Character = LocalPlayer.Character
-		local v1 = Character and Character:FindFirstChild("HumanoidRootPart")
-		if not v1 then
-			return
-		end
-		local v2 = zero
-		if tbl16.moveKeys.W then
-			v2 = v2 + v1.CFrame.LookVector * 0.0075
-		end
-		if tbl16.moveKeys.S then
-			v2 = v2 - v1.CFrame.LookVector * 0.0075
-		end
-		if tbl16.moveKeys.A then
-			v2 = v2 - v1.CFrame.RightVector * 0.0075
-		end
-		if tbl16.moveKeys.D then
-			v2 = v2 + v1.CFrame.RightVector * 0.0075
-		end
-		if v2.Magnitude > 0 then
-			v1.CFrame = v1.CFrame + v2
-		end
+		local v1_hrp = Character and Character:FindFirstChild("HumanoidRootPart")
+		if not v1_hrp then return end
+		local v2_v = zero
+		if tbl16.moveKeys.W then v2_v = v2_v + v1_hrp.CFrame.LookVector * 0.0075 end
+		if tbl16.moveKeys.S then v2_v = v2_v - v1_hrp.CFrame.LookVector * 0.0075 end
+		if tbl16.moveKeys.A then v2_v = v2_v - v1_hrp.CFrame.RightVector * 0.0075 end
+		if tbl16.moveKeys.D then v2_v = v2_v + v1_hrp.CFrame.RightVector * 0.0075 end
+		if v2_v.Magnitude > 0 then v1_hrp.CFrame = v1_hrp.CFrame + v2_v end
 	end)
-	if connection then
-		table.insert(tbl10, connection)
-	end
-	tbl16.moveConnection = connection
+	table.insert(tbl10, conn)
+	tbl16.moveConnection = conn
 end
+
 local function func34()
 	local Character = LocalPlayer.Character
-	local v1 = Character and Character:FindFirstChild("HumanoidRootPart")
-	if not v1 then
-		return nil
-	end
-	local v4
+	local v1_hrp = Character and Character:FindFirstChild("HumanoidRootPart")
+	if not v1_hrp then return nil end
+	local v4_pl = nil
 	local huge = math.huge
-	for _, v2 in ipairs(Players:GetPlayers()) do
-		local Character1 = v2.Character
-		local v3 = Character1 and Character1:FindFirstChild("HumanoidRootPart")
-		if v2 ~= LocalPlayer and v3 then
-			local Magnitude = (v1.Position - v3.Position).Magnitude
-			if Magnitude < huge then
-				v4 = v2
-				huge = Magnitude
+	for _, v2_pl in ipairs(Players:GetPlayers()) do
+		local ch = v2_pl.Character
+		local hrp = ch and ch:FindFirstChild("HumanoidRootPart")
+		if v2_pl ~= LocalPlayer and hrp then
+			local mag = (v1_hrp.Position - hrp.Position).Magnitude
+			if mag < huge then
+				v4_pl = v2_pl
+				huge = mag
 			end
 		end
 	end
-	return v4
+	return v4_pl
 end
+
 local function func35()
 	local Character = LocalPlayer.Character
-	local v1 = Character and Character:FindFirstChild("HumanoidRootPart")
+	local v1_hrp = Character and Character:FindFirstChild("HumanoidRootPart")
 	local Goals = workspace:FindFirstChild("Goals")
-	if not (v1 and Goals) then
-		return nil
-	end
-	local v4
+	if not (v1_hrp and Goals) then return nil end
+	local v4_g = nil
 	local huge = math.huge
-	for _, v2 in ipairs({"GK_A", "GK_B"}) do
-		local v3 = Goals:FindFirstChild(v2)
-		if v3 and v3:IsA("BasePart") then
-			local Magnitude = (v1.Position - v3.Position).Magnitude
-			if Magnitude < huge then
-				v4 = v3
-				huge = Magnitude
+	for _, v2_gn in ipairs({"GK_A", "GK_B"}) do
+		local v3_gp = Goals:FindFirstChild(v2_gn)
+		if v3_gp and v3_gp:IsA("BasePart") then
+			local mag = (v1_hrp.Position - v3_gp.Position).Magnitude
+			if mag < huge then
+				v4_g = v3_gp
+				huge = mag
 			end
 		end
 	end
-	return v4
+	return v4_g
 end
+
 local function func36()
-	local guardConnection = tbl16.guardConnection
-	if guardConnection then
-		func(function()
-			guardConnection:Disconnect()
-		end)
-	end
+	if tbl16.guardConnection then func(function() tbl16.guardConnection:Disconnect() end) end
 	tbl16.guardConnection = nil
-	if not tbl16.guard then
-		return
-	end
-	local connection = RunService.Heartbeat:Connect(function()
-		local v1 = func35()
-		local v2 = func34()
-		local v3 = v2
-		if v2 then
-			local Character = v2.Character
-			v3 = Character and Character:FindFirstChild("HumanoidRootPart")
-		end
-		local Character1 = LocalPlayer.Character
-		local v4 = Character1 and Character1:FindFirstChildOfClass("Humanoid")
-		if v1 and v3 and v4 then
-			local v5 = v1.Position - v3.Position
-			if v5.Magnitude > 0 then
-				v4:MoveTo(v3.Position + v5.Unit * 7.2)
+	if not tbl16.guard then return end
+	local conn = RunService.Heartbeat:Connect(function()
+		local v1_g = func35()
+		local v2_pl = func34()
+		local v3_ehrp = v2_pl and v2_pl.Character and v2_pl.Character:FindFirstChild("HumanoidRootPart")
+		local Character = LocalPlayer.Character
+		local v4_hum = Character and Character:FindFirstChildOfClass("Humanoid")
+		if v1_g and v3_ehrp and v4_hum then
+			local v5_diff = v1_g.Position - v3_ehrp.Position
+			if v5_diff.Magnitude > 0 then
+				v4_hum:MoveTo(v3_ehrp.Position + v5_diff.Unit * 7.2)
 			end
 		end
 	end)
-	if connection then
-		table.insert(tbl10, connection)
-	end
-	tbl16.guardConnection = connection
+	table.insert(tbl10, conn)
+	tbl16.guardConnection = conn
 end
+
 local function func37()
-	local collisionConnection = tbl16.collisionConnection
-	if collisionConnection then
-		func(function()
-			collisionConnection:Disconnect()
-		end)
-	end
+	if tbl16.collisionConnection then func(function() tbl16.collisionConnection:Disconnect() end) end
 	tbl16.collisionConnection = nil
-	if not tbl16.noCollision then
-		return
-	end
-	local connection = RunService.Heartbeat:Connect(function()
-		for _, v1 in ipairs(Players:GetPlayers()) do
-			if v1 ~= LocalPlayer then
-				local v2 = workspace:FindFirstChild(v1.Name)
-				if v2 then
-					local Legs = v2:FindFirstChild("Legs")
-					local v3 = Legs and Legs:FindFirstChild("Weld")
-					if v3 then
-						func(v3.Destroy, v3)
-					end
-					for _, v4 in ipairs(v2:GetChildren()) do
-						if v4:IsA("BasePart") then
-							v4.CanCollide = false
-						end
+	if not tbl16.noCollision then return end
+	local conn = RunService.Heartbeat:Connect(function()
+		for _, v1_pl in ipairs(Players:GetPlayers()) do
+			if v1_pl ~= LocalPlayer then
+				local v2_m = workspace:FindFirstChild(v1_pl.Name)
+				if v2_m then
+					local legs = v2_m:FindFirstChild("Legs")
+					local weld = legs and legs:FindFirstChild("Weld")
+					if weld then func(weld.Destroy, weld) end
+					for _, v4_bp in ipairs(v2_m:GetChildren()) do
+						if v4_bp:IsA("BasePart") then v4_bp.CanCollide = false end
 					end
 				end
 			end
 		end
 	end)
-	if connection then
-		table.insert(tbl10, connection)
-	end
-	tbl16.collisionConnection = connection
+	table.insert(tbl10, conn)
+	tbl16.collisionConnection = conn
 end
+
 local tbl17 = {
 	Shoot = Color3.fromRGB(255, 0, 0),
 	Pass = Color3.fromRGB(0, 255, 0),
@@ -2619,259 +1655,383 @@ local tbl17 = {
 	Clear = Color3.fromRGB(120, 81, 169),
 	TI = Color3.fromRGB(255, 255, 255),
 }
+
 local function func38()
-	for _, v1 in ipairs(Players:GetPlayers()) do
-		local Character = v1.Character
-		local v2 = Character and Character:FindFirstChild("Head")
-		local v3 = v2 and v2:FindFirstChild("TPS_ToolBillboard")
-		if v3 then
-			v3:Destroy()
-		end
+	for _, v1_pl in ipairs(Players:GetPlayers()) do
+		local ch = v1_pl.Character
+		local head = ch and ch:FindFirstChild("Head")
+		local bb = head and head:FindFirstChild("TPS_ToolBillboard")
+		if bb then bb:Destroy() end
 	end
-	for _, v4 in ipairs(tbl16.espConnections) do
-		if v4 then
-			func(function()
-				v4:Disconnect()
-			end)
-		end
+	for _, v4_c in ipairs(tbl16.espConnections) do
+		if v4_c then func(function() v4_c:Disconnect() end) end
 	end
 	tbl16.espConnections = {}
 end
+
 local function func39(arg1)
-	if arg1 == LocalPlayer then
-		return
-	end
-	local Character = arg1.Character
-	local v1 = Character and Character:FindFirstChild("Head")
-	if not v1 or v1:FindFirstChild("TPS_ToolBillboard") then
-		return
-	end
-	local billboardGui = Instance.new("BillboardGui")
-	billboardGui.Name = "TPS_ToolBillboard"
-	billboardGui.Adornee = v1
-	billboardGui.AlwaysOnTop = true
-	billboardGui.Size = UDim2.fromOffset(200, 50)
-	billboardGui.StudsOffset = new(0, -8, 0)
-	billboardGui.Parent = v1
-	local textLabel = Instance.new("TextLabel")
-	textLabel.Size = UDim2.fromScale(1, 1)
-	textLabel.BackgroundTransparency = 1
-	textLabel.TextStrokeTransparency = 0.5
-	textLabel.TextScaled = true
-	textLabel.Parent = billboardGui
-	if billboardGui then
-		table.insert(tbl11, billboardGui)
-	end
-	local insert = table.insert
-	local espConnections = tbl16.espConnections
-	local connection = RunService.Heartbeat:Connect(function()
-		if not (tbl16.esp and billboardGui.Parent) then
-			return
-		end
-		local v1 = workspace:FindFirstChild(arg1.Name)
-		local v2 = v1 and v1:FindFirstChildOfClass("Tool")
-		textLabel.Text = v2 and v2.Name or "No Tool"
-		textLabel.TextColor3 = v2 and tbl17[v2.Name] or Color3.new(1, 1, 1)
+	if arg1 == LocalPlayer then return end
+	local ch = arg1.Character
+	local head = ch and ch:FindFirstChild("Head")
+	if not head or head:FindFirstChild("TPS_ToolBillboard") then return end
+	local bb = Instance.new("BillboardGui")
+	bb.Name = "TPS_ToolBillboard"
+	bb.Adornee = head
+	bb.AlwaysOnTop = true
+	bb.Size = UDim2.fromOffset(200, 50)
+	bb.StudsOffset = new(0, -8, 0)
+	bb.Parent = head
+	local lbl = Instance.new("TextLabel")
+	lbl.Size = UDim2.fromScale(1, 1)
+	lbl.BackgroundTransparency = 1
+	lbl.TextStrokeTransparency = 0.5
+	lbl.TextScaled = true
+	lbl.Parent = bb
+	table.insert(tbl11, bb)
+
+	local conn1 = RunService.Heartbeat:Connect(function()
+		if not (tbl16.esp and bb.Parent) then return end
+		local p_model = workspace:FindFirstChild(arg1.Name)
+		local tool = p_model and p_model:FindFirstChildOfClass("Tool")
+		lbl.Text = tool and tool.Name or "No Tool"
+		lbl.TextColor3 = tool and tbl17[tool.Name] or Color3.new(1, 1, 1)
 	end)
-	if connection then
-		table.insert(tbl10, connection)
-	end
-	insert(espConnections, connection)
-	local insert1 = table.insert
-	local espConnections1 = tbl16.espConnections
-	local connection1 = RunService.RenderStepped:Connect(function()
-		if not billboardGui.Parent then
-			return
-		end
-		local CurrentCamera = workspace.CurrentCamera
-		local v2 = CurrentCamera and (v1.Position - CurrentCamera.CFrame.Position).Magnitude
-		billboardGui.Size = UDim2.fromOffset(clamp(200 / math.max((v2 or 10) / 10, 1), 50, 200), 50)
+	table.insert(tbl10, conn1)
+	table.insert(tbl16.espConnections, conn1)
+
+	local conn2 = RunService.RenderStepped:Connect(function()
+		if not bb.Parent then return end
+		local cam = workspace.CurrentCamera
+		local dist = cam and (head.Position - cam.CFrame.Position).Magnitude or 10
+		bb.Size = UDim2.fromOffset(clamp(200 / math.max(dist / 10, 1), 50, 200), 50)
 	end)
-	if connection1 then
-		table.insert(tbl10, connection1)
-	end
-	insert1(espConnections1, connection1)
+	table.insert(tbl10, conn2)
+	table.insert(tbl16.espConnections, conn2)
 end
+
 local function func40()
 	func38()
-	if not tbl16.esp then
-		return
-	end
-	for _, v1 in ipairs(Players:GetPlayers()) do
-		func39(v1)
-	end
+	if not tbl16.esp then return end
+	for _, pl in ipairs(Players:GetPlayers()) do func39(pl) end
 end
-local connection2 = Players.PlayerAdded:Connect(function(arg1)
-	local connection = arg1.CharacterAdded:Connect(function()
-		if tbl16.esp then
-			task.wait()
-			func39(arg1)
-		end
+
+local c_pa = Players.PlayerAdded:Connect(function(arg1_pl)
+	local conn = arg1_pl.CharacterAdded:Connect(function()
+		if tbl16.esp then task.wait() func39(arg1_pl) end
 	end)
-	if connection then
-		table.insert(tbl10, connection)
-	end
+	table.insert(tbl10, conn)
 end)
-if connection2 then
-	table.insert(tbl10, connection2)
-end
-local v53
+table.insert(tbl10, c_pa)
+
+local v53 = nil
 local function func41(arg1)
 	tbl16.bigHead = arg1
 	local Character = LocalPlayer.Character
-	local v1 = Character and Character:FindFirstChild("Head")
-	if not v1 or not v1:IsA("BasePart") then
-		return
-	end
+	local head = Character and Character:FindFirstChild("Head")
+	if not head or not head:IsA("BasePart") then return end
 	if arg1 then
-		v53 = v53 or {Size = v1.Size, Transparency = v1.Transparency, Massless = v1.Massless, CanCollide = v1.CanCollide}
-		v1.Size = new(3.21, 3.21, 3.21)
-		v1.Transparency = 0.4
-		v1.Massless = true
-		v1.CanCollide = false
+		v53 = v53 or {Size = head.Size, Transparency = head.Transparency, Massless = head.Massless, CanCollide = head.CanCollide}
+		head.Size = new(3.21, 3.21, 3.21)
+		head.Transparency = 0.4
+		head.Massless = true
+		head.CanCollide = false
 	elseif v53 then
-		v1.Size = v53.Size
-		v1.Transparency = v53.Transparency
-		v1.Massless = v53.Massless
-		v1.CanCollide = v53.CanCollide
+		head.Size = v53.Size
+		head.Transparency = v53.Transparency
+		head.Massless = v53.Massless
+		head.CanCollide = v53.CanCollide
 		v53 = nil
 	end
 end
-v22:CreateToggle({
-	Name = "React Keyboard Movement",
-	CurrentValue = false,
-	Callback = function(arg1)
-		tbl16.movement = arg1
-		func33()
-	end,
-})
-v22:CreateToggle({
-	Name = "React Goal Guard",
-	CurrentValue = false,
-	Callback = function(arg1)
-		tbl16.guard = arg1
-		func36()
-	end,
-})
-v22:CreateToggle({
-	Name = "React Player Collision Bypass",
-	CurrentValue = false,
-	Callback = function(arg1)
-		tbl16.noCollision = arg1
-		func37()
-	end,
-})
-v22:CreateToggle({
-	Name = "React Tool ESP",
-	CurrentValue = false,
-	Callback = function(arg1)
-		tbl16.esp = arg1
-		func40()
-	end,
-})
-v22:CreateToggle({
-	Name = "React Big Head",
-	CurrentValue = false,
-	Callback = function(arg1)
-		func41(arg1)
-	end,
-})
+
+v22:CreateToggle({Name = "React Keyboard Movement", CurrentValue = false, Callback = function(v) tbl16.movement = v func33() end})
+v22:CreateToggle({Name = "React Goal Guard", CurrentValue = false, Callback = function(v) tbl16.guard = v func36() end})
+v22:CreateToggle({Name = "React Player Collision Bypass", CurrentValue = false, Callback = function(v) tbl16.noCollision = v func37() end})
+v22:CreateToggle({Name = "React Tool ESP", CurrentValue = false, Callback = function(v) tbl16.esp = v func40() end})
+v22:CreateToggle({Name = "React Big Head", CurrentValue = false, Callback = function(v) func41(v) end})
 v22:CreateButton({
 	Name = "Re-run React Remote Cleanup",
 	Callback = function()
 		local ReplicatedStorage = game:GetService("ReplicatedStorage")
 		for _, v2 in ipairs(ReplicatedStorage:GetChildren()) do
-			if v2:IsA("RemoteEvent") and v2.Name:match("[%W_]+") then
-				v2:Destroy()
+			if v2:IsA("RemoteEvent") and v2.Name:match("[%W_]+") then v2:Destroy() end
+		end
+		v1:Notify({Title = "React Cleanup", Content = "Cleanup complete", Duration = 2})
+	end
+})
+
+-- ============================================================
+-- TAB 7: XENO MOSS
+-- ============================================================
+local v23 = Window:CreateTab({Name = "Xeno Moss", Desc = "Moss for Xeno & Solara", Icon = "zap"})
+v23:CreateSection("Xeno Moss")
+v23:CreateParagraph({Title = "Xeno Moss", Content = "Moss for Xeno & Solara. Pick your %. Higher % = bigger hitbox."})
+
+local v49
+local function func16(arg1, arg2, arg3, arg4)
+	if v49 then v49:Disconnect() v49 = nil end
+	local function checkOverlap(p1, s1, p2, s2)
+		local min1 = p1.Position - s1 / 2
+		local max1 = p1.Position + s1 / 2
+		local min2 = p2.Position - s2 / 2
+		local max2 = p2.Position + s2 / 2
+		return min1.X <= max2.X and max1.X >= min2.X and min1.Y <= max2.Y and max1.Y >= min2.Y and min1.Z <= max2.Z and max1.Z >= min2.Z
+	end
+
+	local animation = Instance.new("Animation")
+	animation.AnimationId = "rbxassetid://301501585"
+	local animTrack
+
+	local function playAnim()
+		local Character = LocalPlayer.Character
+		if not Character then return end
+		local hum = Character:FindFirstChildOfClass("Humanoid")
+		if not hum or (animTrack and animTrack.IsPlaying) then return end
+		func(function()
+			animTrack = hum:LoadAnimation(animation)
+			animTrack:Play()
+		end)
+	end
+
+	local function fireHeader()
+		local tpsBall = func25()
+		if not tpsBall then return end
+		local FE = workspace:FindFirstChild("FE")
+		local hdr = FE and FE:FindFirstChild("System") and FE.System:FindFirstChild("Header")
+		if not hdr then return end
+		hdr:FireServer(LocalPlayer.UserId, tpsBall, "Rock'n'roll Star", "NeverFearTruth", "power=95/100")
+	end
+
+	local flag_xm = false
+	local flag1_xm = false
+
+	v49 = RunService.Heartbeat:Connect(function()
+		local Character = LocalPlayer.Character
+		if not Character then return end
+		local Head = Character:FindFirstChild("Head")
+		local HRP = Character:FindFirstChild("HumanoidRootPart")
+		if not (Head and HRP) then return end
+		local v1_cf = Head.CFrame * CFrame.new(0, arg4, 0)
+		local v_size = Vector3.new(arg1, arg2, arg3)
+		local tbl_balls = {}
+		local bFolder = workspace:FindFirstChild("Balls")
+		if bFolder then
+			for _, v in ipairs(bFolder:GetChildren()) do if v:IsA("BasePart") then table.insert(tbl_balls, v) end end
+		end
+		local tFolder = workspace:FindFirstChild("TPSSystem")
+		if tFolder then
+			for _, v in ipairs(tFolder:GetChildren()) do if v:IsA("BasePart") or v.Name == "TPS" then table.insert(tbl_balls, v) end end
+		end
+
+		local hit = false
+		for _, bPart in ipairs(tbl_balls) do
+			local predPos = bPart.Position + bPart.Velocity * 0.001
+			local predCF = CFrame.new(predPos) * bPart.CFrame.Rotation
+			if bPart.Position.Y >= HRP.Position.Y + 1 then
+				if checkOverlap(v1_cf, v_size, predCF, bPart.Size) then
+					hit = true
+					break
+				end
 			end
 		end
-		local tbl = {Title = "React cleanup complete", Duration = 2}
+
+		if hit and not flag_xm and not flag1_xm then
+			flag1_xm = true
+			playAnim()
+			fireHeader()
+			task.delay(0.3, function() flag1_xm = false end)
+		end
+		flag_xm = hit
+	end)
+end
+
+v23:CreateButton({Name = "Xeno Moss 15%", Callback = function() func16(2, 2.8, 3, 1.5) end})
+v23:CreateButton({Name = "Xeno Moss 25%", Callback = function() func16(2.5, 3.2, 3.3, 1.5) end})
+v23:CreateButton({Name = "Xeno Moss 50%", Callback = function() func16(3, 3.8, 3.6, 1.5) end})
+v23:CreateButton({Name = "Xeno Moss 75%", Callback = function() func16(3.5, 4.5, 4.1, 1.5) end})
+v23:CreateButton({Name = "Xeno Moss 100%", Callback = function() func16(4, 5, 4.5, 1.5) end})
+v23:CreateButton({Name = "Stop Xeno Moss", Callback = function() if v49 then v49:Disconnect() v49 = nil end end})
+
+-- ============================================================
+-- TAB 8: FLAG FUNC
+-- ============================================================
+local v24 = Window:CreateTab({Name = "Flag Func", Desc = "Flag override", Icon = "settings-2"})
+v24:CreateSection("Flag Override")
+
+local tbl5 = {tt = "4", interp = "60", s2 = "38720"}
+local v50
+
+local function func17()
+	if not setfflag then return end
+	for k, v1_val in pairs({
+		DFIntTargetTimeDelayFacctorTenths = tbl5.tt,
+		FIntInterpolationMaxDelayMSec = tbl5.interp,
+		DFIntS2PhysicsSenderRate = tbl5.s2,
+	}) do
+		local v2_k = func14(k)
 		func(function()
-			v1:Notify({
-				Title = tbl.Title or "TPS",
-				Content = tbl.Content or tbl.Title or "",
-				Icon = tbl.Icon or "bell",
-				Type = tbl.Type or "Success",
-				Duration = tbl.Duration or 3,
-			})
+			if getfflag(v2_k) ~= nil then
+				setfflag(v2_k, v1_val)
+			elseif getfflag(k) ~= nil then
+				setfflag(k, v1_val)
+			end
 		end)
-	end,
+	end
+end
+
+local v25 = v24:CreateInput({
+	Name = "TargetTimeDelay",
+	PlaceholderText = "DFIntTargetTimeDelayFacctorTenths",
+	Default = tbl5.tt,
+	Callback = function(arg1) if arg1 and arg1 ~= "" then tbl5.tt = arg1 end end
 })
-local v33 = v2:CreateTab({Name = "Helpers", Desc = "Script 2 helpers", Icon = "circle-help"})
+v25:Set(tbl5.tt)
+
+local v26 = v24:CreateInput({
+	Name = "Interpolation",
+	PlaceholderText = "FIntInterpolationMaxDelayMSec",
+	Default = tbl5.interp,
+	Callback = function(arg1) if arg1 and arg1 ~= "" then tbl5.interp = arg1 end end
+})
+v26:Set(tbl5.interp)
+
+local v27 = v24:CreateInput({
+	Name = "PhysicsSenderRate",
+	PlaceholderText = "DFIntS2PhysicsSenderRate",
+	Default = tbl5.s2,
+	Callback = function(arg1) if arg1 and arg1 ~= "" then tbl5.s2 = arg1 end end
+})
+v27:Set(tbl5.s2)
+
+v24:CreateButton({
+	Name = "Apply & Lock",
+	Callback = function()
+		if v50 then task.cancel(v50) end
+		v50 = task.spawn(function()
+			while true do
+				func17()
+				task.wait(2)
+			end
+		end)
+	end
+})
+v24:CreateButton({
+	Name = "Unlock",
+	Callback = function()
+		if v50 then task.cancel(v50) v50 = nil end
+	end
+})
+
+v24:CreateSection("Flag Inject")
+v24:CreateParagraph({
+	Title = "Flag Inject",
+	Content = 'Paste your JSON flags below. Supports any amount. Format: {"FlagName":"value"}',
+})
+
+local v51
+local tbl6 = {}
+
+v24:CreateInput({
+	Name = "Flag JSON",
+	PlaceholderText = "Paste full JSON here",
+	Callback = function(arg1)
+		if not arg1 or arg1 == "" then return end
+		func(function()
+			local v = HttpService:JSONDecode(arg1)
+			if type(v) == "table" then tbl6 = v end
+		end)
+	end
+})
+
+v24:CreateButton({
+	Name = "Inject & Lock All",
+	Callback = function()
+		if v51 then task.cancel(v51) end
+		v51 = task.spawn(function()
+			while true do
+				if setfflag then
+					for k, v1_val in pairs(tbl6) do
+						local v2_clean = func14(k)
+						func(function()
+							if getfflag(v2_clean) ~= nil then
+								setfflag(v2_clean, tostring(v1_val))
+							elseif getfflag(k) ~= nil then
+								setfflag(k, tostring(v1_val))
+							end
+						end)
+					end
+				end
+				task.wait(10)
+			end
+		end)
+	end
+})
+
+v24:CreateButton({
+	Name = "Stop Inject",
+	Callback = function()
+		if v51 then task.cancel(v51) v51 = nil end
+	end
+})
+
+-- ============================================================
+-- TAB 9: HELPERS
+-- ============================================================
+local v33 = Window:CreateTab({Name = "Helpers", Desc = "Script 2 helpers", Icon = "circle-help"})
+
+-- Air Dribble
 v33:CreateSection("Air Dribble")
-v33:CreateParagraph({Title = "Helpers", Content = "Script 2 helper functions, presented with the Specter UI."})
-local tbl18 = {on = false, radius = 13, height = 1.7, strength = 35, damping = 0.5}
-tbl18.connection = nil
-tbl18.velocity = nil
+v33:CreateParagraph({Title = "Helpers", Content = "Script 2 helper functions, presented with the Spectre UI."})
+
+local tbl18 = {on = false, radius = 13, height = 1.7, strength = 35, damping = 0.5, connection = nil, velocity = nil}
+
 local function func42()
-	local connection = tbl18.connection
-	if connection then
-		func(function()
-			connection:Disconnect()
-		end)
-	end
+	if tbl18.connection then func(function() tbl18.connection:Disconnect() end) end
 	tbl18.connection = nil
-	local velocity = tbl18.velocity
-	if velocity then
-		func(function()
-			velocity:Destroy()
-		end)
-	end
+	if tbl18.velocity then func(function() tbl18.velocity:Destroy() end) end
 	tbl18.velocity = nil
 end
+
 local function func43()
 	func42()
-	if not tbl18.on then
-		return
-	end
+	if not tbl18.on then return end
 	local bodyVelocity = Instance.new("BodyVelocity")
 	bodyVelocity.MaxForce = new(0, 9000000000, 0)
 	bodyVelocity.Velocity = zero
-	if bodyVelocity then
-		table.insert(tbl11, bodyVelocity)
-	end
+	table.insert(tbl11, bodyVelocity)
 	tbl18.velocity = bodyVelocity
-	local connection = RunService.Heartbeat:Connect(function()
+
+	local conn = RunService.Heartbeat:Connect(function()
 		local Character = LocalPlayer.Character
-		local v1 = Character and Character:FindFirstChild("HumanoidRootPart")
-		local v2 = func25()
-		if not (v1 and v2 and tbl18.velocity) then
-			return
-		end
-		if (v1.Position - v2.Position).Magnitude <= tbl18.radius then
-			if tbl18.velocity.Parent ~= v1 then
-				tbl18.velocity.Parent = v1
-			end
-			local v3 = (v2.Position.Y + tbl18.height - v1.Position.Y) * tbl18.strength - v1.AssemblyLinearVelocity.Y * tbl18.damping
-			tbl18.velocity.Velocity = new(0, v3, 0)
+		local v1_hrp = Character and Character:FindFirstChild("HumanoidRootPart")
+		local v2_b = func25()
+		if not (v1_hrp and v2_b and tbl18.velocity) then return end
+		if (v1_hrp.Position - v2_b.Position).Magnitude <= tbl18.radius then
+			if tbl18.velocity.Parent ~= v1_hrp then tbl18.velocity.Parent = v1_hrp end
+			local v3_vy = (v2_b.Position.Y + tbl18.height - v1_hrp.Position.Y) * tbl18.strength - v1_hrp.AssemblyLinearVelocity.Y * tbl18.damping
+			tbl18.velocity.Velocity = new(0, v3_vy, 0)
 		else
 			tbl18.velocity.Velocity = zero
 			tbl18.velocity.Parent = nil
 		end
 	end)
-	if connection then
-		table.insert(tbl10, connection)
-	end
-	tbl18.connection = connection
+	table.insert(tbl10, conn)
+	tbl18.connection = conn
 end
+
 v33:CreateToggle({
 	Name = "Enable Air Dribble Helper",
 	CurrentValue = false,
 	Callback = function(arg1)
 		tbl18.on = arg1
-		if arg1 then
-			func43()
-		else
-			func42()
-		end
-	end,
+		if arg1 then func43() else func42() end
+	end
 })
 v33:CreateInput({
 	Name = "Air Dribble Radius",
 	PlaceholderText = "Input size",
-	Callback = function(arg1)
-		tbl18.radius = tonumber(arg1) or tbl18.radius
-	end,
+	Default = "13",
+	Callback = function(arg1) tbl18.radius = tonumber(arg1) or tbl18.radius end
 })
 v33:CreateButton({
 	Name = "ZZZZ Helper",
@@ -2882,94 +2042,72 @@ v33:CreateButton({
 		tbl18.damping = 0.5
 		tbl18.on = true
 		func43()
-	end,
+	end
 })
+
+-- Ball Modifications
 v33:CreateSection("Ball Modifications")
 local tbl21 = {size = 2.6, antiFling = false, prediction = false, collision = false}
 tbl21.predictionConnection = nil
 tbl21.antiFlingConnection = nil
 tbl21.parts = {}
 tbl21.lines = {}
-local function func46(arg1, arg2, arg3, arg4, arg5)
-	local v1 = arg1[arg2]
-	if not v1 or not v1.Parent then
-		local part = Instance.new("Part")
-		v1 = part
-		part.Anchored = true
-		part.CanCollide = false
-		part.Material = Enum.Material.Neon
-		part.CastShadow = false
-		part.Parent = workspace
-		if part then
-			table.insert(tbl11, part)
-		end
-		arg1[arg2] = part
+
+local function func46(arg1_t, arg2_idx, arg3_sz, arg4_col, arg5_tr)
+	local p = arg1_t[arg2_idx]
+	if not p or not p.Parent then
+		local part_m = Instance.new("Part")
+		part_m.Anchored = true
+		part_m.CanCollide = false
+		part_m.Material = Enum.Material.Neon
+		part_m.CastShadow = false
+		part_m.Parent = workspace
+		table.insert(tbl11, part_m)
+		arg1_t[arg2_idx] = part_m
+		p = part_m
 	end
-	v1.Size = arg3
-	v1.Color = arg4
-	v1.Transparency = arg5
-	return v1
+	p.Size = arg3_sz
+	p.Color = arg4_col
+	p.Transparency = arg5_tr
+	return p
 end
+
 local function func47()
-	for _, v1 in ipairs(tbl21.parts) do
-		if v1 then
-			v1.Transparency = 1
-		end
-	end
-	for _, v2 in ipairs(tbl21.lines) do
-		if v2 then
-			v2.Transparency = 1
-		end
-	end
+	for _, v in ipairs(tbl21.parts) do if v then v.Transparency = 1 end end
+	for _, v in ipairs(tbl21.lines) do if v then v.Transparency = 1 end end
 end
+
 local function func48()
-	local predictionConnection = tbl21.predictionConnection
-	if predictionConnection then
-		func(function()
-			predictionConnection:Disconnect()
-		end)
-	end
+	if tbl21.predictionConnection then func(function() tbl21.predictionConnection:Disconnect() end) end
 	tbl21.predictionConnection = nil
 	func47()
-	local connection = RunService.Heartbeat:Connect(function()
-		local v1 = func25()
-		local v2
-		if v1 and v1:IsA("BasePart") then
-			v2 = v1
-		else
-			v2 = nil
-		end
-		if not v2 then
-			return
-		end
-		local Gravity = workspace.Gravity
-		local Position = v2.Position
-		local tbl = {}
-		local AssemblyLinearVelocity = v2.AssemblyLinearVelocity
+
+	local conn = RunService.Heartbeat:Connect(function()
+		local ball = func25()
+		if not (ball and ball:IsA("BasePart")) then return end
+		local grav = workspace.Gravity
+		local pos = ball.Position
+		local vel = ball.AssemblyLinearVelocity
+		local pts = {}
 		for i = 1, 10 do
-			local v3 = i * 0.05
-			local v4 = Position + AssemblyLinearVelocity * v3 + new(0, -0.5 * Gravity * v3 * v3, 0)
-			tbl[i] = v4
-			func46(tbl21.parts, i, new(0.3, 0.3, 0.3), Color3.fromRGB(0, 255, 0), 0.4).CFrame = CFrame.new(v4)
+			local t = i * 0.05
+			local p = pos + vel * t + new(0, -0.5 * grav * t * t, 0)
+			pts[i] = p
+			func46(tbl21.parts, i, new(0.3, 0.3, 0.3), Color3.fromRGB(255, 255, 255), 0.4).CFrame = CFrame.new(p)
 		end
-		for i1 = 1, 9 do
-			local v5 = tbl[i1]
-			local v6 = tbl[i1 + 1]
-			local v7 = v6 - v5
-			func46(tbl21.lines, i1, new(0.1, 0.1, v7.Magnitude), Color3.fromRGB(0, 255, 0), 0.6).CFrame = CFrame.new(v5 + v7 / 2, v6)
+		for i = 1, 9 do
+			local p1 = pts[i]
+			local p2 = pts[i + 1]
+			local seg = p2 - p1
+			func46(tbl21.lines, i, new(0.1, 0.1, seg.Magnitude), Color3.fromRGB(255, 255, 255), 0.6).CFrame = CFrame.new(p1 + seg / 2, p2)
 		end
-		for i2 = 11, #tbl21.parts do
-			tbl21.parts[i2].Transparency = 1
-		end
-		for i3 = 10, #tbl21.lines do
-			tbl21.lines[i3].Transparency = 1
-		end
+		for i = 11, #tbl21.parts do tbl21.parts[i].Transparency = 1 end
+		for i = 10, #tbl21.lines do tbl21.lines[i].Transparency = 1 end
 	end)
-	if connection then
-		table.insert(tbl10, connection)
-	end
-	tbl21.predictionConnection = connection
+	table.insert(tbl10, conn)
+	tbl21.predictionConnection = conn
 end
+
 v33:CreateSlider({
 	Name = "Ball Size",
 	Range = {1, 10},
@@ -2977,49 +2115,36 @@ v33:CreateSlider({
 	CurrentValue = 2.6,
 	Callback = function(arg1)
 		tbl21.size = arg1
-		local v1 = func25()
-		local v2
-		if v1 and v1:IsA("BasePart") then
-			v2 = v1
-		else
-			v2 = nil
-		end
-		if v2 then
-			v2.Size = new(arg1, arg1, arg1)
-		end
-	end,
+		local ball = func25()
+		if ball and ball:IsA("BasePart") then ball.Size = new(arg1, arg1, arg1) end
+	end
 })
+
 v33:CreateToggle({
 	Name = "Anti Ball Fling",
 	CurrentValue = false,
 	Callback = function(arg1)
 		tbl21.antiFling = arg1
-		local antiFlingConnection = tbl21.antiFlingConnection
-		if antiFlingConnection then
-			func(function()
-				antiFlingConnection:Disconnect()
-			end)
+		if tbl21.antiFlingConnection then
+			func(function() tbl21.antiFlingConnection:Disconnect() end)
+			tbl21.antiFlingConnection = nil
 		end
-		tbl21.antiFlingConnection = nil
 		if arg1 then
-			local connection = RunService.Stepped:Connect(function()
+			local conn = RunService.Stepped:Connect(function()
 				local Character = LocalPlayer.Character
-				if not Character then
-					return
-				end
-				for _, v1 in ipairs(Character:GetDescendants()) do
-					if v1:IsA("BasePart") and v1.CanCollide and (v1.Name == "Right Leg" or v1.Name == "Right Arm" or v1.Name == "Left Arm" or v1.Name == "Torso") then
-						v1.CanCollide = false
+				if not Character then return end
+				for _, v in ipairs(Character:GetDescendants()) do
+					if v:IsA("BasePart") and v.CanCollide and (v.Name == "Right Leg" or v.Name == "Right Arm" or v.Name == "Left Arm" or v.Name == "Torso") then
+						v.CanCollide = false
 					end
 				end
 			end)
-			if connection then
-				table.insert(tbl10, connection)
-			end
-			tbl21.antiFlingConnection = connection
+			table.insert(tbl10, conn)
+			tbl21.antiFlingConnection = conn
 		end
-	end,
+	end
 })
+
 v33:CreateToggle({
 	Name = "Ball Prediction",
 	CurrentValue = false,
@@ -3028,81 +2153,62 @@ v33:CreateToggle({
 		if arg1 then
 			func48()
 		else
-			local predictionConnection = tbl21.predictionConnection
-			if predictionConnection then
-				func(function()
-					predictionConnection:Disconnect()
-				end)
+			if tbl21.predictionConnection then
+				func(function() tbl21.predictionConnection:Disconnect() end)
+				tbl21.predictionConnection = nil
 			end
-			tbl21.predictionConnection = nil
 			func47()
 		end
-	end,
+	end
 })
+
 v33:CreateToggle({
 	Name = "Ball Collision",
 	CurrentValue = false,
 	Callback = function(arg1)
 		tbl21.collision = arg1
 		func(function()
-			local ClientBallProxy_TPS = workspace:FindFirstChild("ClientBallProxy_TPS")
-			local v1 = ClientBallProxy_TPS and ClientBallProxy_TPS:FindFirstChild("ClientBallProxyWeld")
-			if v1 then
-				v1.Enabled = not arg1
-			end
+			local proxy = workspace:FindFirstChild("ClientBallProxy_TPS")
+			local weld = proxy and proxy:FindFirstChild("ClientBallProxyWeld")
+			if weld then weld.Enabled = not arg1 end
 		end)
-	end,
+	end
 })
+
 local tbl22 = {
 	Default = {
-		"rbxassetid://1731401359",
-		"rbxassetid://1731401359",
-		"rbxassetid://1731401811",
-		"rbxassetid://1731401811",
-		"rbxassetid://1731401359",
-		"rbxassetid://1731401359",
+		"rbxassetid://1731401359", "rbxassetid://1731401359", "rbxassetid://1731401811",
+		"rbxassetid://1731401811", "rbxassetid://1731401359", "rbxassetid://1731401359"
 	},
 	["Addidas Brazuca"] = {
-		"http://www.roblox.com/asset/?id=137668136",
-		"http://www.roblox.com/asset/?id=137668129",
-		"http://www.roblox.com/asset/?id=137668136",
-		"http://www.roblox.com/asset/?id=137668136",
-		"http://www.roblox.com/asset/?id=137668136",
-		"rbxassetid://1731401359",
+		"http://www.roblox.com/asset/?id=137668136", "http://www.roblox.com/asset/?id=137668129",
+		"http://www.roblox.com/asset/?id=137668136", "http://www.roblox.com/asset/?id=137668136",
+		"http://www.roblox.com/asset/?id=137668136", "rbxassetid://1731401359"
 	},
 	["Addidas Jabulani"] = {
-		"http://www.roblox.com/asset/?id=76614961",
-		"http://www.roblox.com/asset/?id=76614961",
-		"http://www.roblox.com/asset/?id=76614961",
-		"http://www.roblox.com/asset/?id=76614961",
-		"http://www.roblox.com/asset/?id=76614961",
-		"http://www.roblox.com/asset/?id=76614961",
-	},
+		"http://www.roblox.com/asset/?id=76614961", "http://www.roblox.com/asset/?id=76614961",
+		"http://www.roblox.com/asset/?id=76614961", "http://www.roblox.com/asset/?id=76614961",
+		"http://www.roblox.com/asset/?id=76614961", "http://www.roblox.com/asset/?id=76614961"
+	}
 }
+
 v33:CreateDropdown({
 	Name = "Ball Texture",
 	Options = {"Default", "Addidas Brazuca", "Addidas Jabulani"},
 	CurrentOption = "Default",
 	Callback = function(arg1)
-		local v1 = func25()
-		local v2
-		if v1 and v1:IsA("BasePart") then
-			v2 = v1
-		else
-			v2 = nil
+		local ball = func25()
+		if not (ball and ball:IsA("BasePart")) then return end
+		local key = type(arg1) == "table" and arg1[1] or arg1
+		local textures = tbl22[key]
+		if not textures then return end
+		for i, tex in ipairs(textures) do
+			local dec = ball:FindFirstChild("Decal" .. i)
+			if dec then dec.Texture = tex end
 		end
-		local v3 = tbl22[type(arg1) == "table" and arg1[1] or arg1]
-		if not (v2 and v3) then
-			return
-		end
-		for i, v4 in ipairs(v3) do
-			local v5 = v2:FindFirstChild("Decal" .. i)
-			if v5 then
-				v5.Texture = v4
-			end
-		end
-	end,
+	end
 })
+
 local tbl23 = {
 	Default = {"rbxassetid://2516069845", 0.7, 0.7},
 	["OOF !"] = {"rbxassetid://5143383166", 1, 2},
@@ -3110,29 +2216,26 @@ local tbl23 = {
 	Rust = {"rbxassetid://1255040462", 0.7, 0.7},
 	Bruh = {"rbxassetid://4275842574", 0.7, 0.7},
 }
+
 v33:CreateDropdown({
 	Name = "Ball Sound",
 	Options = {"Default", "OOF !", "Neverloose", "Rust", "Bruh"},
 	CurrentOption = "Default",
 	Callback = function(arg1)
-		local v1 = func25()
-		local v2
-		if v1 and v1:IsA("BasePart") then
-			v2 = v1
-		else
-			v2 = nil
+		local ball = func25()
+		if not (ball and ball:IsA("BasePart")) then return end
+		local snd = ball:FindFirstChild("Sound")
+		local key = type(arg1) == "table" and arg1[1] or arg1
+		local data = tbl23[key]
+		if snd and data then
+			snd.SoundId = data[1]
+			snd.PlaybackSpeed = data[2]
+			snd.Volume = data[3]
 		end
-		local v3 = v2 and v2:FindFirstChild("Sound")
-		local v4 = tbl23[type(arg1) == "table" and arg1[1] or arg1]
-		if v3 and v4 then
-			local v5 = v4[3]
-			local v6 = v4[2]
-			v3.SoundId = v4[1]
-			v3.PlaybackSpeed = v6
-			v3.Volume = v5
-		end
-	end,
+	end
 })
+
+-- Sky Changer
 v33:CreateSection("Sky Changer")
 local tbl24 = {
 	["Night Sky"] = {"12064107", "12064152", "12064121", "12063984", "12064115", "12064131", 0},
@@ -3148,49 +2251,44 @@ local tbl24 = {
 	["Mountain Sky 2"] = {"368385273", "48015300", "368388290", "368390615", "368385190", "48015387", 3000},
 	["Sunset Mountain Sky"] = {"17901353811", "17901366771", "17901356262", "17901359687", "17901362326", "17901365106", 3000},
 }
-local function func49(arg1)
-	local v1 = tbl24[arg1]
-	if not v1 then
-		return
-	end
+
+local function func49(name)
+	local v = tbl24[name]
+	if not v then return end
 	local sky = Instance.new("Sky")
-	sky.SkyboxBk = "http://www.roblox.com/asset/?id=" .. v1[1]
-	sky.SkyboxDn = "http://www.roblox.com/asset/?id=" .. v1[2]
-	sky.SkyboxFt = "http://www.roblox.com/asset/?id=" .. v1[3]
-	sky.SkyboxLf = "http://www.roblox.com/asset/?id=" .. v1[4]
-	sky.SkyboxRt = "http://www.roblox.com/asset/?id=" .. v1[5]
-	sky.SkyboxUp = "http://www.roblox.com/asset/?id=" .. v1[6]
-	sky.StarCount = v1[7]
+	sky.SkyboxBk = "http://www.roblox.com/asset/?id=" .. v[1]
+	sky.SkyboxDn = "http://www.roblox.com/asset/?id=" .. v[2]
+	sky.SkyboxFt = "http://www.roblox.com/asset/?id=" .. v[3]
+	sky.SkyboxLf = "http://www.roblox.com/asset/?id=" .. v[4]
+	sky.SkyboxRt = "http://www.roblox.com/asset/?id=" .. v[5]
+	sky.SkyboxUp = "http://www.roblox.com/asset/?id=" .. v[6]
+	sky.StarCount = v[7]
 	sky.Parent = game:GetService("Lighting")
 end
+
 for k in pairs(tbl24) do
-	v33:CreateButton({
-		Name = k,
-		Callback = function()
-			func49(k)
-		end,
-	})
+	v33:CreateButton({Name = k, Callback = function() func49(k) end})
 end
-local v34 = v2:CreateTab({Name = "Player", Desc = "Script 2 player mods", Icon = "user-round"})
+
+-- ============================================================
+-- TAB 10: PLAYER
+-- ============================================================
+local v34 = Window:CreateTab({Name = "Player", Desc = "Script 2 player mods", Icon = "user-round"})
+
+-- Auto Ball
 v34:CreateSection("Auto Ball")
 local abOn, abConn, abRad = false, nil, 3
+
 v34:CreateToggle({
 	Name = "Auto Ball (Walk to ball)",
 	CurrentValue = false,
 	Callback = function(v)
 		abOn = v
-		if abConn then
-			abConn:Disconnect()
-			abConn = nil
-		end
+		if abConn then abConn:Disconnect() abConn = nil end
 		if not v then
 			local ch = LocalPlayer.Character
-			if ch then
-				local h = ch:FindFirstChildOfClass("Humanoid")
-				if h then
-					h:MoveTo(ch:GetPivot().Position)
-				end
-			end
+			local h = ch and ch:FindFirstChildOfClass("Humanoid")
+			if h then h:MoveTo(ch:GetPivot().Position) end
 			return
 		end
 		abConn = RunService.Heartbeat:Connect(function()
@@ -3198,97 +2296,74 @@ v34:CreateToggle({
 			if not ch then return end
 			local hrp = ch:FindFirstChild("HumanoidRootPart")
 			local hum = ch:FindFirstChildOfClass("Humanoid")
-			if not hrp or not hum then return end
 			local ball = func25()
-			if not ball then return end
+			if not (hrp and hum and ball) then return end
 			local dist = (hrp.Position - ball.Position).Magnitude
-			if dist > abRad then
-				hum:MoveTo(ball.Position)
-			else
-				hum:MoveTo(hrp.Position)
-			end
+			if dist > abRad then hum:MoveTo(ball.Position) else hum:MoveTo(hrp.Position) end
 		end)
-		if abConn then
-			table.insert(tbl10, abConn)
-		end
+		table.insert(tbl10, abConn)
 		v1:Notify({Title = "Auto Ball", Content = "Enabled", Duration = 2})
-	end,
+	end
 })
+
 v34:CreateSlider({
 	Name = "Stop Distance",
 	Range = {1, 10},
 	Increment = 1,
 	CurrentValue = 3,
-	Callback = function(v)
-		abRad = v
-	end,
+	Callback = function(v) abRad = v end
 })
-local tbl20 = {
-	disguiseOn = false,
-	username = "",
-}
-tbl20.description = nil
+
+-- Avatar Stolen
 v34:CreateSection("Avatar Stolen")
+local tbl20 = {disguiseOn = false, username = "", description = nil}
+
 v34:CreateToggle({
 	Name = "Enable Avatar Stolen",
 	CurrentValue = false,
 	Callback = function(arg1)
 		tbl20.disguiseOn = arg1
 		local Character = LocalPlayer.Character
-		local v1 = Character and Character:FindFirstChildOfClass("Humanoid")
+		local hum = Character and Character:FindFirstChildOfClass("Humanoid")
 		if arg1 and Character and tbl20.username ~= "" then
 			task.spawn(function()
-				local v1, v2 = pcall(function()
-					return Players:GetUserIdFromNameAsync(tbl20.username)
-				end)
-				if v1 then
-					local v3, v4 = pcall(function()
-						return Players:GetHumanoidDescriptionFromUserId(v2)
-					end)
-					if v3 then
-						tbl20.description = v4
-						local Character = LocalPlayer.Character
-						if Character and Character:FindFirstChildOfClass("Humanoid") then
-							pcall(function()
-								local Character = LocalPlayer.Character;
-								(Character and Character:FindFirstChildOfClass("Humanoid")):ApplyDescriptionClientServer(v4)
-							end)
-						end
+				local ok1, uid = pcall(function() return Players:GetUserIdFromNameAsync(tbl20.username) end)
+				if ok1 then
+					local ok2, desc = pcall(function() return Players:GetHumanoidDescriptionFromUserId(uid) end)
+					if ok2 then
+						tbl20.description = desc
+						local ch = LocalPlayer.Character
+						local h = ch and ch:FindFirstChildOfClass("Humanoid")
+						if h then pcall(function() h:ApplyDescriptionClientServer(desc) end) end
 					end
 				end
 			end)
-		elseif not arg1 and v1 then
-			pcall(function()
-				v1:ApplyDescriptionClientServer(Players:GetHumanoidDescriptionAsync(LocalPlayer.UserId))
-			end)
+		elseif not arg1 and hum then
+			pcall(function() hum:ApplyDescriptionClientServer(Players:GetHumanoidDescriptionAsync(LocalPlayer.UserId)) end)
 		end
-	end,
+	end
 })
+
 v34:CreateInput({
 	Name = "Avatar Username",
 	PlaceholderText = "Enter username",
-	Callback = function(arg1)
-		tbl20.username = arg1
-	end,
+	Callback = function(arg1) tbl20.username = arg1 end
 })
-local connection6 = LocalPlayer.CharacterAdded:Connect(function(arg1)
+
+local c_as = LocalPlayer.CharacterAdded:Connect(function(arg1_ch)
 	task.defer(function()
-		local v1 = arg1 and arg1:FindFirstChildOfClass("Humanoid")
-		if tbl20.disguiseOn and tbl20.description and v1 then
-			func(function()
-				v1:ApplyDescriptionClientServer(tbl20.description)
-			end)
+		local hum = arg1_ch and arg1_ch:FindFirstChildOfClass("Humanoid")
+		if tbl20.disguiseOn and tbl20.description and hum then
+			func(function() hum:ApplyDescriptionClientServer(tbl20.description) end)
 		end
 	end)
 end)
-if connection6 then
-	table.insert(tbl10, connection6)
-end
+table.insert(tbl10, c_as)
 
+-- Aimbot
 v34:CreateSection("Aimbot")
-local tbl26 = {enabled = false, mode = "Holding", key = Enum.KeyCode.Z, aiming = false}
-tbl26.line = nil
-tbl26.mobileGui = nil
+local tbl26 = {enabled = false, mode = "Holding", key = Enum.KeyCode.Z, aiming = false, line = nil, mobileGui = nil}
+
 func(function()
 	if Drawing and Drawing.new then
 		tbl26.line = Drawing.new("Line")
@@ -3297,48 +2372,38 @@ func(function()
 		tbl26.line.Transparency = 1
 	end
 end)
+
 local tbl27 = {Red = new(0.767262042, 13.819994, 164.451065), Blue = new(-0.352591068, 13.819994, -160.285141)}
+
 local function func51()
 	local Team = LocalPlayer.Team
-	local v1 = Team and tbl27[Team.Name]
+	local goalPos = Team and tbl27[Team.Name]
 	if tbl26.line then
-		tbl26.line.Color = Team and Team.Name == "Red" and Color3.fromRGB(255, 0, 0) or Color3.fromRGB(0, 170, 255)
+		tbl26.line.Color = Team and Team.Name == "Red" and Color3.fromRGB(255, 255, 255) or Color3.fromRGB(220, 220, 220)
 	end
-	return v1
+	return goalPos
 end
+
 local function func52()
 	tbl26.aiming = false
-	if tbl26.line then
-		tbl26.line.Visible = false
-	end
+	if tbl26.line then tbl26.line.Visible = false end
 	local Character = LocalPlayer.Character
-	local v1 = Character and Character:FindFirstChildOfClass("Humanoid")
-	if v1 then
-		v1.AutoRotate = true
-	end
+	local hum = Character and Character:FindFirstChildOfClass("Humanoid")
+	if hum then hum.AutoRotate = true end
 end
-local InputBegan = UserInputService.InputBegan
+
 local function func53()
-	if not tbl26.enabled or not func51() then
-		return
-	end
+	if not tbl26.enabled or not func51() then return end
 	tbl26.aiming = true
-	if tbl26.line then
-		tbl26.line.Visible = true
-	end
+	if tbl26.line then tbl26.line.Visible = true end
 	local Character = LocalPlayer.Character
-	local v1 = Character and Character:FindFirstChildOfClass("Humanoid")
-	if v1 then
-		v1.AutoRotate = false
-	end
+	local hum = Character and Character:FindFirstChildOfClass("Humanoid")
+	if hum then hum.AutoRotate = false end
 end
-local connection7 = InputBegan:Connect(function(arg1, arg2)
-	if arg2 or not tbl26.enabled then
-		return
-	end
-	if (arg1.UserInputType ~= Enum.UserInputType.Keyboard or arg1.KeyCode ~= tbl26.key) and arg1.UserInputType ~= tbl26.key then
-		return
-	end
+
+local c_ab_ib = UserInputService.InputBegan:Connect(function(arg1, arg2)
+	if arg2 or not tbl26.enabled then return end
+	if (arg1.UserInputType ~= Enum.UserInputType.Keyboard or arg1.KeyCode ~= tbl26.key) and arg1.UserInputType ~= tbl26.key then return end
 	if tbl26.mode == "Holding" then
 		func53()
 	elseif tbl26.aiming then
@@ -3347,107 +2412,84 @@ local connection7 = InputBegan:Connect(function(arg1, arg2)
 		func53()
 	end
 end)
-if connection7 then
-	table.insert(tbl10, connection7)
-end
-local connection8 = UserInputService.InputEnded:Connect(function(arg1)
+table.insert(tbl10, c_ab_ib)
+
+local c_ab_ie = UserInputService.InputEnded:Connect(function(arg1)
 	if tbl26.enabled and tbl26.mode == "Holding" then
-		if arg1.UserInputType == Enum.UserInputType.Keyboard and arg1.KeyCode == tbl26.key or arg1.UserInputType == tbl26.key then
+		if (arg1.UserInputType == Enum.UserInputType.Keyboard and arg1.KeyCode == tbl26.key) or arg1.UserInputType == tbl26.key then
 			func52()
 		end
 	end
 end)
-if connection8 then
-	table.insert(tbl10, connection8)
-end
-local connection9 = RunService.RenderStepped:Connect(function()
-	if not (tbl26.enabled and tbl26.aiming) then
-		return
-	end
-	local v1 = func51()
+table.insert(tbl10, c_ab_ie)
+
+local c_ab_rs = RunService.RenderStepped:Connect(function()
+	if not (tbl26.enabled and tbl26.aiming) then return end
+	local goalPos = func51()
 	local Character = LocalPlayer.Character
-	local v2 = Character and Character:FindFirstChild("HumanoidRootPart")
-	if not (v1 and v2) then
-		return
-	end
-	v2.CFrame = CFrame.lookAt(v2.Position, new(v1.X, v2.Position.Y, v1.Z))
+	local hrp = Character and Character:FindFirstChild("HumanoidRootPart")
+	if not (goalPos and hrp) then return end
+	hrp.CFrame = CFrame.lookAt(hrp.Position, new(goalPos.X, hrp.Position.Y, goalPos.Z))
 	if tbl26.line then
-		local CurrentCamera = workspace.CurrentCamera
-		local v3, v4 = CurrentCamera:WorldToViewportPoint(v2.Position)
-		local v5, v6 = CurrentCamera:WorldToViewportPoint(v1)
-		tbl26.line.Visible = v4 and v6
-		if v4 and v6 then
-			tbl26.line.From = Vector2.new(v3.X, v3.Y)
-			tbl26.line.To = Vector2.new(v5.X, v5.Y)
+		local cam = workspace.CurrentCamera
+		local p1, v1_on = cam:WorldToViewportPoint(hrp.Position)
+		local p2, v2_on = cam:WorldToViewportPoint(goalPos)
+		tbl26.line.Visible = v1_on and v2_on
+		if v1_on and v2_on then
+			tbl26.line.From = Vector2.new(p1.X, p1.Y)
+			tbl26.line.To = Vector2.new(p2.X, p2.Y)
 		end
 	end
 end)
-if connection9 then
-	table.insert(tbl10, connection9)
-end
+table.insert(tbl10, c_ab_rs)
+
 local function func54(arg1)
 	if arg1 and not tbl26.mobileGui then
 		local PlayerGui = LocalPlayer:FindFirstChildOfClass("PlayerGui")
-		if not PlayerGui then
-			return
-		end
-		local screenGui = Instance.new("ScreenGui")
-		screenGui.Name = "TPS_MobileAimbot"
-		screenGui.ResetOnSpawn = false
-		screenGui.Parent = PlayerGui
-		local textButton = Instance.new("TextButton")
-		textButton.Size = UDim2.fromScale(0.18, 0.1)
-		textButton.Position = UDim2.fromScale(0.78, 0.75)
-		textButton.Text = "AIM"
-		textButton.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
-		textButton.TextColor3 = Color3.new(1, 1, 1)
-		textButton.TextScaled = true
-		textButton.BorderSizePixel = 0
-		textButton.Parent = screenGui
-		local flag = false
-		local v1
-		local v2
-		textButton.InputBegan:Connect(function(arg1)
-			if arg1.UserInputType == Enum.UserInputType.Touch or arg1.UserInputType == Enum.UserInputType.MouseButton1 then
-				local Position = arg1.Position
-				local Position1 = textButton.Position
-				flag = true
-				v1 = Position
-				local Changed = arg1.Changed
-				v2 = Position1
-				Changed:Connect(function()
-					if arg1.UserInputState == Enum.UserInputState.End then
-						flag = false
-					end
+		if not PlayerGui then return end
+		local sg = Instance.new("ScreenGui")
+		sg.Name = "SpectreMobileAimbot"
+		sg.ResetOnSpawn = false
+		sg.Parent = PlayerGui
+
+		local btn = Instance.new("TextButton")
+		btn.Size = UDim2.fromScale(0.18, 0.1)
+		btn.Position = UDim2.fromScale(0.78, 0.75)
+		btn.Text = "AIM"
+		btn.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+		btn.TextColor3 = Color3.fromRGB(255, 255, 255)
+		btn.TextScaled = true
+		btn.BorderSizePixel = 0
+		btn.Parent = sg
+
+		local dragging = false
+		local dragStart, startPos
+		btn.InputBegan:Connect(function(input)
+			if input.UserInputType == Enum.UserInputType.Touch or input.UserInputType == Enum.UserInputType.MouseButton1 then
+				dragging = true
+				dragStart = input.Position
+				startPos = btn.Position
+				input.Changed:Connect(function()
+					if input.UserInputState == Enum.UserInputState.End then dragging = false end
 				end)
 			end
 		end)
-		textButton.InputChanged:Connect(function(arg1)
-			if flag and (arg1.UserInputType == Enum.UserInputType.Touch or arg1.UserInputType == Enum.UserInputType.MouseMovement) then
-				local v3 = arg1.Position - v1
-				textButton.Position = UDim2.new(v2.X.Scale, v2.X.Offset + v3.X, v2.Y.Scale, v2.Y.Offset + v3.Y)
+		btn.InputChanged:Connect(function(input)
+			if dragging and (input.UserInputType == Enum.UserInputType.Touch or input.UserInputType == Enum.UserInputType.MouseMovement) then
+				local delta = input.Position - dragStart
+				btn.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
 			end
 		end)
-		textButton.MouseButton1Down:Connect(func53)
-		textButton.MouseButton1Up:Connect(function()
-			if tbl26.mode == "Holding" then
-				func52()
-			end
-		end)
-		if screenGui then
-			table.insert(tbl11, screenGui)
-		end
-		tbl26.mobileGui = screenGui
+		btn.MouseButton1Down:Connect(func53)
+		btn.MouseButton1Up:Connect(function() if tbl26.mode == "Holding" then func52() end end)
+		table.insert(tbl11, sg)
+		tbl26.mobileGui = sg
 	elseif not arg1 and tbl26.mobileGui then
-		local mobileGui = tbl26.mobileGui
-		if mobileGui then
-			func(function()
-				mobileGui:Destroy()
-			end)
-		end
+		if tbl26.mobileGui then func(function() tbl26.mobileGui:Destroy() end) end
 		tbl26.mobileGui = nil
 	end
 end
+
 v34:CreateToggle({
 	Name = "Enable / Disable Aimbot",
 	CurrentValue = false,
@@ -3457,51 +2499,46 @@ v34:CreateToggle({
 			func52()
 			func54(false)
 		end
-	end,
+	end
 })
+
 v34:CreateDropdown({
 	Name = "Aimbot Method",
 	Options = {"Holding", "Toggling", "Mobile GUI"},
 	CurrentOption = "Holding",
 	Callback = function(arg1)
-		local v1 = type(arg1) == "table" and arg1[1] or arg1
-		if v1 == "Mobile GUI" then
+		local opt = type(arg1) == "table" and arg1[1] or arg1
+		if opt == "Mobile GUI" then
 			tbl26.mode = "Holding"
 			func54(true)
 		else
-			tbl26.mode = v1
+			tbl26.mode = opt
 			func54(false)
 		end
-	end,
+	end
 })
+
 v34:CreateDropdown({
 	Name = "Aimbot Keybind",
 	Options = {"Z", "X", "C", "V", "F", "G", "H", "B", "Right Click"},
 	CurrentOption = "Z",
 	Callback = function(arg1)
-		local v1 = type(arg1) == "table" and arg1[1] or arg1
-		tbl26.key = v1 == "Right Click" and Enum.UserInputType.MouseButton2 or Enum.KeyCode[v1]
-	end,
+		local opt = type(arg1) == "table" and arg1[1] or arg1
+		tbl26.key = opt == "Right Click" and Enum.UserInputType.MouseButton2 or Enum.KeyCode[opt]
+	end
 })
+
 -- ============================================================
--- AUTO GOAL TAB
+-- TAB 11: AUTO GOAL
 -- ============================================================
-local v_agTab = v2:CreateTab({Name = "Auto Goal", Desc = "Auto goal farm", Icon = "goal"})
+local v_agTab = Window:CreateTab({Name = "Auto Goal", Desc = "Auto goal farm", Icon = "goal"})
 v_agTab:CreateSection("Auto Goal")
 v_agTab:CreateParagraph({
 	Title = "Auto Goal Farm",
 	Content = "Teleport to ball, touch correctly, shoot to goal, fast cooldown, repeat.",
 })
 
-local ag = {
-	on   = false,
-	conn = nil,
-}
-
--- same as func51, tbl27[Team.Name] = enemy goal position
-local function ag_enemyGoalPos()
-	return func51()
-end
+local ag = {on = false, conn = nil}
 
 local function ag_stop()
 	if ag.conn then
@@ -3511,51 +2548,38 @@ local function ag_stop()
 end
 
 local function ag_doGoal()
-	local ch  = LocalPlayer.Character
+	local ch = LocalPlayer.Character
 	if not ch then return end
 	local hrp = ch:FindFirstChild("HumanoidRootPart")
 	local hum = ch:FindFirstChildOfClass("Humanoid")
-	if not hrp or not hum then return end
+	if not (hrp and hum) then return end
 
-	local ball    = func25()
-	local goalPos = ag_enemyGoalPos()
-	if not ball or not goalPos then return end
+	local ball = func25()
+	local goalPos = func51()
+	if not (ball and goalPos) then return end
 
 	local ballPos = ball.Position
 
-	-- Step 1: place HRP inside the ball, look toward the goal
 	func(function()
-		hrp.CFrame = CFrame.lookAt(
-			ballPos,
-			Vector3.new(goalPos.X, ballPos.Y, goalPos.Z)
-		)
+		hrp.CFrame = CFrame.lookAt(ballPos, Vector3.new(goalPos.X, ballPos.Y, goalPos.Z))
 	end)
 
-	-- Step 2: apply ground-level velocity toward the goal - strong low shot
-	local dir2D = Vector3.new(
-		goalPos.X - ballPos.X,
-		0,
-		goalPos.Z - ballPos.Z
-	).Unit
+	local dir2D = Vector3.new(goalPos.X - ballPos.X, 0, goalPos.Z - ballPos.Z).Unit
 	local groundShot = Vector3.new(dir2D.X, -1.5, dir2D.Z).Unit
 	func(function()
 		ball.AssemblyLinearVelocity = groundShot * 120
 	end)
 
-	-- Step 3: func27 same as reach, HRP inside ball = guaranteed kick
 	func27(func26(ch, hum), ball)
 
-	-- Step 4: FireServer kick event (Cobalt method)
 	func(function()
-		local kickEvent = workspace.FE
-			and workspace.FE.System
-			and workspace.FE.System:FindFirstChild("Kick")
+		local kickEvent = workspace.FE and workspace.FE.System and workspace.FE.System:FindFirstChild("Kick")
 		if kickEvent then
-			local ball2 = func25()
-			if ball2 then
+			local b2 = func25()
+			if b2 then
 				kickEvent:FireServer(
 					LocalPlayer.UserId,
-					workspace.TPSSystem and workspace.TPSSystem.TPS or ball2,
+					workspace.TPSSystem and workspace.TPSSystem.TPS or b2,
 					70,
 					Vector3.new(400000, 800, 400000),
 					false,
@@ -3573,11 +2597,9 @@ end
 local function ag_start()
 	ag_stop()
 	if not ag.on then return end
-
 	ag.conn = RunService.Heartbeat:Connect(function()
 		ag_doGoal()
 	end)
-
 	if ag.conn then table.insert(tbl10, ag.conn) end
 end
 
@@ -3587,49 +2609,42 @@ v_agTab:CreateToggle({
 	Callback = function(val)
 		ag.on = val
 		if val then
-			-- enable aimbot automatically
 			tbl26.enabled = true
-			tbl26.aiming  = true
+			tbl26.aiming = true
 			func53()
 			ag_start()
 			v1:Notify({Title = "Auto Goal", Content = "Running + Aimbot ON", Duration = 2})
 		else
 			ag_stop()
-			-- disable aimbot
-			tbl26.aiming  = false
+			tbl26.aiming = false
 			tbl26.enabled = false
 			func52()
 			v1:Notify({Title = "Auto Goal", Content = "Stopped", Duration = 2})
 		end
-	end,
+	end
 })
 
--- Cleanup
-if STATE then
-	STATE.onCleanup(function()
-		ag_stop()
-	end)
-end
-
 -- ============================================================
-local v38 = v2:CreateTab({Name = "Miscellaneous", Desc = "Misc tools", Icon = "panel-left"})
+-- TAB 12: MISCELLANEOUS
+-- ============================================================
+local v38 = Window:CreateTab({Name = "Miscellaneous", Desc = "Misc tools", Icon = "panel-left"})
 v38:CreateSection("Game Functions")
+
 v38:CreateButton({
 	Name = "FPS Booster",
 	Callback = function()
 		func(function()
-			local v1 = game:HttpGet("https://raw.githubusercontent.com/DamThien332/Atlas.dev/refs/heads/main/Src/FPSBooster.lua")
-			loadstring(v1)()
+			local res = game:HttpGet("https://raw.githubusercontent.com/DamThien332/Atlas.dev/refs/heads/main/Src/FPSBooster.lua")
+			loadstring(res)()
 		end)
-	end,
+	end
 })
+
 v38:CreateButton({
 	Name = "Unlock UCL Card",
 	Callback = function()
 		func(function()
-			local event = workspace.FE
-				and workspace.FE.NameLevel
-				and workspace.FE.NameLevel:FindFirstChild("CardSelection")
+			local event = workspace.FE and workspace.FE.NameLevel and workspace.FE.NameLevel:FindFirstChild("CardSelection")
 			if event then
 				event:FireServer(517)
 				v1:Notify({Title = "UCL Card", Content = "Unlocked ✓", Duration = 2})
@@ -3637,19 +2652,22 @@ v38:CreateButton({
 				v1:Notify({Title = "UCL Card", Content = "Event not found!", Duration = 3})
 			end
 		end)
-	end,
+	end
 })
+
 v38:CreateButton({
 	Name = "Remove Map",
 	Callback = function()
-		for _, v1 in ipairs(workspace:GetChildren()) do
-			if v1.Name == "Map" then
-				v1:Destroy()
-			end
+		for _, child in ipairs(workspace:GetChildren()) do
+			if child.Name == "Map" then child:Destroy() end
 		end
-	end,
+	end
 })
-local v32 = v2:CreateTab({Name = "Settings", Desc = "Configuration & Profiles", Icon = "settings"})
+
+-- ============================================================
+-- TAB 13: SETTINGS
+-- ============================================================
+local v32 = Window:CreateTab({Name = "Settings", Desc = "Configuration & Profiles", Icon = "settings"})
 v32:CreateSection("Configuration Manager")
 v32:CreateParagraph({
 	Title = "Profiles",
@@ -3657,91 +2675,40 @@ v32:CreateParagraph({
 })
 
 local tbl8 = {}
-if pcall(function()
-	return json.encode
-end) then
-	tbl8.encode = function(arg1)
-		return json.encode(arg1)
-	end
-	tbl8.decode = function(arg1)
-		return json.decode(arg1)
-	end
+if pcall(function() return json.encode end) then
+	tbl8.encode = function(arg1) return json.encode(arg1) end
+	tbl8.decode = function(arg1) return json.decode(arg1) end
 else
-	tbl8.encode = function(arg1)
-		return HttpService:JSONEncode(arg1)
-	end
-	tbl8.decode = function(arg1)
-		return HttpService:JSONDecode(arg1)
-	end
+	tbl8.encode = function(arg1) return HttpService:JSONEncode(arg1) end
+	tbl8.decode = function(arg1) return HttpService:JSONDecode(arg1) end
 end
 
 local tbl9 = {
-	m1_on = function(arg1)
-		if v9 and v9.Set then v9:Set(arg1) end
-	end,
+	m1_on = function(arg1) if v9 and v9.Set then v9:Set(arg1) end end,
 	m1_dist = function(arg1)
 		if v10 and v10.Set then v10:Set(tostring(arg1)) end
 		tbl1.m1_dist = tonumber(arg1) or tbl1.m1_dist
-		if func4 then func4() end
+		func4()
 	end,
-	m2_on = function(arg1)
-		if v12 and v12.Set then v12:Set(arg1) end
-	end,
-	m2_x = function(arg1)
-		if v13 and v13.Set then v13:Set(arg1) end
-	end,
-	m2_y = function(arg1)
-		if v14 and v14.Set then v14:Set(arg1) end
-	end,
-	m2_z = function(arg1)
-		if v15 and v15.Set then v15:Set(arg1) end
-	end,
-	m2_sync = function(arg1)
-		if v16 and v16.Set then v16:Set(tostring(arg1)) end
-	end,
-	m2_hide = function(arg1)
-		if v17 and v17.Set then v17:Set(arg1) end
-	end,
-	m2_shape = function(arg1)
-		if func11 then func11(arg1) end
-		if v11 and v11.Set then v11:Set(arg1) end
-	end,
-	xeno_on = function(arg1)
-		if v19 and v19.Set then v19:Set(arg1) end
-	end,
-	xeno_dist = function(arg1)
-		if v20 and v20.Set then v20:Set(arg1) end
-	end,
-	gk_on = function(arg1)
-		if v29 and v29.Set then v29:Set(arg1) end
-	end,
-	gk_radius = function(arg1)
-		if v30 and v30.Set then v30:Set(arg1) end
-	end,
-	gk_cooldown = function(arg1)
-		if v31 and v31.Set then v31:Set(arg1) end
-	end,
-	flags_tt = function(arg1)
-		if v25 and v25.Set then v25:Set(tostring(arg1)) end
-		tbl5.tt = arg1
-	end,
-	flags_interp = function(arg1)
-		if v26 and v26.Set then v26:Set(tostring(arg1)) end
-		tbl5.interp = arg1
-	end,
-	flags_s2 = function(arg1)
-		if v27 and v27.Set then v27:Set(tostring(arg1)) end
-		tbl5.s2 = arg1
-	end,
+	m2_on = function(arg1) if v12 and v12.Set then v12:Set(arg1) end end,
+	m2_x = function(arg1) if v13 and v13.Set then v13:Set(arg1) end end,
+	m2_y = function(arg1) if v14 and v14.Set then v14:Set(arg1) end end,
+	m2_z = function(arg1) if v15 and v15.Set then v15:Set(arg1) end end,
+	m2_sync = function(arg1) if v16 and v16.Set then v16:Set(tostring(arg1)) end end,
+	m2_hide = function(arg1) if v17 and v17.Set then v17:Set(arg1) end end,
+	m2_shape = function(arg1) func11(arg1) if v11 and v11.Set then v11:Set(arg1) end end,
+	xeno_on = function(arg1) if v19 and v19.Set then v19:Set(arg1) end end,
+	xeno_dist = function(arg1) if v20 and v20.Set then v20:Set(arg1) end end,
+	flags_tt = function(arg1) if v25 and v25.Set then v25:Set(tostring(arg1)) end tbl5.tt = arg1 end,
+	flags_interp = function(arg1) if v26 and v26.Set then v26:Set(tostring(arg1)) end tbl5.interp = arg1 end,
+	flags_s2 = function(arg1) if v27 and v27.Set then v27:Set(tostring(arg1)) end tbl5.s2 = arg1 end,
 }
 
 local function func23(arg1)
 	if type(arg1) ~= "table" then return end
 	for k in pairs(tbl9) do
 		if arg1[k] ~= nil then
-			func(function()
-				tbl9[k](arg1[k])
-			end)
+			func(function() tbl9[k](arg1[k]) end)
 		end
 	end
 end
@@ -3754,7 +2721,7 @@ local function func22(cfgName, showNotify)
 			if type(makefolder) == "function" then makefolder("TPS_Configs") end
 		end
 	end)
-	tbl1 = {
+	local saveTbl = {
 		m1_on = tbl1.m1_on,
 		m1_dist = tbl1.m1_dist,
 		m2_on = tbl2.on,
@@ -3765,76 +2732,59 @@ local function func22(cfgName, showNotify)
 		m2_hide = tbl2.hide,
 		xeno_on = tbl4.on,
 		xeno_dist = tbl4.dist,
-		gk_on = tbl7.on,
-		gk_radius = tbl7.radius,
-		gk_cooldown = tbl7.cooldown,
 		flags_tt = tbl5.tt,
 		flags_interp = tbl5.interp,
 		flags_s2 = tbl5.s2,
 	}
-	local v2, v3 = pcall(function()
-		return tbl8.encode(tbl1)
-	end)
-	if not v2 then
-		if showNotify then
-			v1:Notify({Title = "Config: Encode Error", Content = tostring(v3), Type = "Error", Duration = 2})
-		end
+	local ok_enc, encoded = pcall(function() return tbl8.encode(saveTbl) end)
+	if not ok_enc then
+		if showNotify then v1:Notify({Title = "Config Error", Content = tostring(encoded), Type = "Error", Duration = 2}) end
 		return false
 	end
-	local v4 = pcall(function()
-		writefile("TPS_Configs/" .. cfgName .. ".json", v3)
-	end)
+	local ok_wr = pcall(function() writefile("TPS_Configs/" .. cfgName .. ".json", encoded) end)
 	if showNotify then
 		v1:Notify({
-			Title = v4 and "Config Saved" or "Save Failed",
-			Content = v4 and ("Saved " .. cfgName .. ".json") or "Could not write file to TPS_Configs",
-			Type = v4 and "Success" or "Error",
+			Title = ok_wr and "Config Saved" or "Save Failed",
+			Content = ok_wr and ("Saved " .. cfgName .. ".json") or "Could not write file to TPS_Configs",
+			Type = ok_wr and "Success" or "Error",
 			Duration = 2,
 		})
 	end
-	return v4
+	return ok_wr
 end
 
 local function func24(cfgName, showNotify)
 	cfgName = tostring(cfgName or "default"):gsub("[^%w_%-]", "")
 	if cfgName == "" then cfgName = "default" end
 	local filePath = "TPS_Configs/" .. cfgName .. ".json"
-	local v4 = nil
+	local content = nil
 	local readOk = pcall(function()
 		if type(isfile) == "function" and isfile(filePath) then
-			v4 = readfile(filePath)
+			content = readfile(filePath)
 		elseif type(readfile) == "function" then
-			v4 = readfile(filePath)
+			content = readfile(filePath)
 		end
 	end)
-	if not readOk or not v4 or v4 == "" then
+	if not readOk or not content or content == "" then
 		if cfgName == "default" then
 			pcall(function()
 				if type(isfile) == "function" and isfile("TPS_Configs/Config.json") then
-					v4 = readfile("TPS_Configs/Config.json")
+					content = readfile("TPS_Configs/Config.json")
 				end
 			end)
 		end
 	end
-	if not v4 or v4 == "" then
-		if showNotify then
-			v1:Notify({Title = "Config File Not Found", Content = cfgName .. ".json does not exist", Type = "Warning", Duration = 2})
-		end
+	if not content or content == "" then
+		if showNotify then v1:Notify({Title = "Not Found", Content = cfgName .. ".json does not exist", Type = "Warning", Duration = 2}) end
 		return false
 	end
-	local v2, v3 = pcall(function()
-		return tbl8.decode(v4)
-	end)
-	if not v2 or type(v3) ~= "table" then
-		if showNotify then
-			v1:Notify({Title = "Config File Corrupted", Content = "Invalid JSON structure", Type = "Error", Duration = 2})
-		end
+	local ok_dec, decoded = pcall(function() return tbl8.decode(content) end)
+	if not ok_dec or type(decoded) ~= "table" then
+		if showNotify then v1:Notify({Title = "Corrupted", Content = "Invalid JSON structure", Type = "Error", Duration = 2}) end
 		return false
 	end
-	func23(v3)
-	if showNotify then
-		v1:Notify({Title = "Config Loaded", Content = "Successfully loaded " .. cfgName, Type = "Success", Duration = 2})
-	end
+	func23(decoded)
+	if showNotify then v1:Notify({Title = "Config Loaded", Content = "Successfully loaded " .. cfgName, Type = "Success", Duration = 2}) end
 	return true
 end
 
@@ -3848,8 +2798,7 @@ local function getSavedConfigsList()
 			if type(makefolder) == "function" then makefolder("TPS_Configs") end
 		end
 		if type(listfiles) == "function" then
-			local files = listfiles("TPS_Configs")
-			for _, filePath in ipairs(files) do
+			for _, filePath in ipairs(listfiles("TPS_Configs")) do
 				local name = filePath:match("([^\\/]+)%.json$")
 				if name and name ~= "" and not table.find(list, name) then
 					table.insert(list, name)
@@ -3867,9 +2816,7 @@ local configNameBox = v32:CreateInput({
 	Callback = function(val)
 		if val and val ~= "" then
 			local clean = tostring(val):gsub("[^%w_%-]", "")
-			if clean ~= "" then
-				currentConfigName = clean
-			end
+			if clean ~= "" then currentConfigName = clean end
 		end
 	end,
 })
@@ -3882,17 +2829,14 @@ savedConfigsDropdown = v32:CreateDropdown({
 		local name = type(selected) == "table" and selected[1] or selected
 		if name and name ~= "" then
 			currentConfigName = tostring(name):gsub("[^%w_%-]", "")
-			if configNameBox and configNameBox.Set then
-				configNameBox:Set(currentConfigName)
-			end
+			if configNameBox and configNameBox.Set then configNameBox:Set(currentConfigName) end
 		end
 	end,
 })
 
 local function refreshConfigDropdown(selectName)
 	if savedConfigsDropdown and savedConfigsDropdown.Refresh then
-		local updated = getSavedConfigsList()
-		savedConfigsDropdown:Refresh(updated, selectName or currentConfigName)
+		savedConfigsDropdown:Refresh(getSavedConfigsList(), selectName or currentConfigName)
 	end
 end
 
@@ -3918,9 +2862,7 @@ local autoLoadToggle = v32:CreateToggle({
 		pcall(function()
 			if type(isfile) == "function" and isfile("TPS_Configs/autoload.txt") then
 				local content = readfile("TPS_Configs/autoload.txt")
-				if content and content:gsub("%s+", "") == currentConfigName then
-					active = true
-				end
+				if content and content:gsub("%s+", "") == currentConfigName then active = true end
 			end
 		end)
 		return active
@@ -3932,26 +2874,12 @@ local autoLoadToggle = v32:CreateToggle({
 					if type(makefolder) == "function" then makefolder("TPS_Configs") end
 				end
 				writefile("TPS_Configs/autoload.txt", currentConfigName)
-				v1:Notify({
-					Title = "Auto Load Enabled",
-					Content = "Preset '" .. currentConfigName .. "' set to auto-load",
-					Type = "Success",
-					Duration = 2,
-				})
+				v1:Notify({Title = "Auto Load Enabled", Content = "Preset '" .. currentConfigName .. "' set to auto-load", Type = "Success", Duration = 2})
 			else
 				if type(isfile) == "function" and isfile("TPS_Configs/autoload.txt") then
-					if type(delfile) == "function" then
-						delfile("TPS_Configs/autoload.txt")
-					else
-						writefile("TPS_Configs/autoload.txt", "")
-					end
+					if type(delfile) == "function" then delfile("TPS_Configs/autoload.txt") else writefile("TPS_Configs/autoload.txt", "") end
 				end
-				v1:Notify({
-					Title = "Auto Load Disabled",
-					Content = "Startup auto-load disabled",
-					Type = "Info",
-					Duration = 2,
-				})
+				v1:Notify({Title = "Auto Load Disabled", Content = "Startup auto-load disabled", Type = "Info", Duration = 2})
 			end
 		end)
 	end,
@@ -3962,22 +2890,11 @@ v32:CreateButton({
 	Callback = function()
 		pcall(function()
 			if type(isfile) == "function" and isfile("TPS_Configs/autoload.txt") then
-				if type(delfile) == "function" then
-					delfile("TPS_Configs/autoload.txt")
-				else
-					writefile("TPS_Configs/autoload.txt", "")
-				end
+				if type(delfile) == "function" then delfile("TPS_Configs/autoload.txt") else writefile("TPS_Configs/autoload.txt", "") end
 			end
 		end)
-		if autoLoadToggle and autoLoadToggle.Set then
-			autoLoadToggle:Set(false)
-		end
-		v1:Notify({
-			Title = "Auto Load Reset",
-			Content = "Startup auto-load cleared",
-			Type = "Success",
-			Duration = 2,
-		})
+		if autoLoadToggle and autoLoadToggle.Set then autoLoadToggle:Set(false) end
+		v1:Notify({Title = "Auto Load Reset", Content = "Startup auto-load cleared", Type = "Success", Duration = 2})
 	end,
 })
 
@@ -3985,43 +2902,23 @@ v32:CreateButton({
 	Name = "Clear Config",
 	Callback = function()
 		if currentConfigName == "default" then
-			v1:Notify({
-				Title = "Cannot Clear Default",
-				Content = "Default profile is protected",
-				Type = "Warning",
-				Duration = 2,
-			})
+			v1:Notify({Title = "Cannot Clear Default", Content = "Default profile is protected", Type = "Warning", Duration = 2})
 			return
 		end
 		local path = "TPS_Configs/" .. currentConfigName .. ".json"
 		local deleted = false
 		pcall(function()
 			if type(isfile) == "function" and isfile(path) then
-				if type(delfile) == "function" then
-					delfile(path)
-					deleted = true
-				end
+				if type(delfile) == "function" then delfile(path) deleted = true end
 			end
 		end)
 		if deleted then
-			v1:Notify({
-				Title = "Config Cleared",
-				Content = "Deleted " .. currentConfigName .. ".json",
-				Type = "Success",
-				Duration = 2,
-			})
+			v1:Notify({Title = "Config Cleared", Content = "Deleted " .. currentConfigName .. ".json", Type = "Success", Duration = 2})
 			currentConfigName = "default"
-			if configNameBox and configNameBox.Set then
-				configNameBox:Set("default")
-			end
+			if configNameBox and configNameBox.Set then configNameBox:Set("default") end
 			refreshConfigDropdown("default")
 		else
-			v1:Notify({
-				Title = "File Not Found",
-				Content = "Could not locate " .. currentConfigName .. ".json",
-				Type = "Warning",
-				Duration = 2,
-			})
+			v1:Notify({Title = "File Not Found", Content = "Could not locate " .. currentConfigName .. ".json", Type = "Warning", Duration = 2})
 		end
 	end,
 })
@@ -4037,16 +2934,13 @@ v32:CreateButton({
 		tbl2.hide = false
 		tbl4.on = false
 		tbl4.dist = 16
-		tbl7.on = false
-		tbl7.radius = 6
-		tbl7.cooldown = 1.2
 		tbl5.tt = "4"
 		tbl5.interp = "60"
 		tbl5.s2 = "38720"
 		if tbl26 then
 			tbl26.enabled = false
-			if func52 then func52() end
-			if func54 then func54(false) end
+			func52()
+			func54(false)
 		end
 		func23({
 			m1_on = false,
@@ -4059,170 +2953,21 @@ v32:CreateButton({
 			m2_hide = false,
 			xeno_on = false,
 			xeno_dist = 16,
-			gk_on = false,
-			gk_radius = 6,
-			gk_cooldown = 1.2,
 			flags_tt = "4",
 			flags_interp = "60",
 			flags_s2 = "38720",
 		})
-		v1:Notify({
-			Title = "Reset to Normal",
-			Content = "All parameters restored to vanilla defaults",
-			Type = "Success",
-			Duration = 2,
-		})
+		v1:Notify({Title = "Reset to Normal", Content = "All parameters restored to vanilla defaults", Type = "Success", Duration = 2})
 	end,
 })
 
-local floatingIconGui = nil
-
-local function toggleFloatingIcon(enable)
-	if not enable then
-		if floatingIconGui then
-			floatingIconGui.Enabled = false
-		end
-		return
-	end
-
-	if floatingIconGui then
-		floatingIconGui.Enabled = true
-		return
-	end
-
-	local targetParent = nil
-	pcall(function()
-		if gethui then
-			targetParent = gethui()
-		elseif game:GetService("CoreGui") then
-			targetParent = game:GetService("CoreGui")
-		end
-	end)
-	if not targetParent then
-		targetParent = LocalPlayer:FindFirstChildOfClass("PlayerGui") or LocalPlayer:WaitForChild("PlayerGui")
-	end
-
-	floatingIconGui = Instance.new("ScreenGui")
-	floatingIconGui.Name = "TPS_MobileFloatingGui"
-	floatingIconGui.ResetOnSpawn = false
-	floatingIconGui.IgnoreGuiInset = true
-	floatingIconGui.DisplayOrder = 99999
-	floatingIconGui.Parent = targetParent
-
-	local btn = Instance.new("TextButton")
-	btn.Name = "FloatingButton"
-	btn.Size = UDim2.new(0, 48, 0, 48)
-	btn.Position = UDim2.new(0, 18, 0.5, -24)
-	btn.BackgroundColor3 = Color3.fromRGB(20, 20, 26)
-	btn.Text = "TPS"
-	btn.Font = Enum.Font.GothamBold
-	btn.TextSize = 14
-	btn.TextColor3 = Color3.fromRGB(255, 255, 255)
-	btn.AutoButtonColor = false
-	btn.Active = true
-	btn.Parent = floatingIconGui
-
-	local corner = Instance.new("UICorner")
-	corner.CornerRadius = UDim.new(1, 0)
-	corner.Parent = btn
-
-	local stroke = Instance.new("UIStroke")
-	stroke.Color = Color3.fromRGB(244, 63, 94)
-	stroke.Thickness = 1.6
-	stroke.Transparency = 0.25
-	stroke.Parent = btn
-
-	local dragging = false
-	local dragStart = nil
-	local startPos = nil
-	local hasMoved = false
-
-	btn.InputBegan:Connect(function(input)
-		if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-			dragging = true
-			hasMoved = false
-			dragStart = input.Position
-			startPos = btn.Position
-
-			local endConn
-			endConn = input.Changed:Connect(function()
-				if input.UserInputState == Enum.UserInputState.End then
-					dragging = false
-					if endConn then
-						endConn:Disconnect()
-					end
-				end
-			end)
-		end
-	end)
-
-	btn.InputChanged:Connect(function(input)
-		if dragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
-			local delta = input.Position - dragStart
-			if math.abs(delta.X) > 6 or math.abs(delta.Y) > 6 then
-				hasMoved = true
-			end
-			btn.Position = UDim2.new(
-				startPos.X.Scale,
-				startPos.X.Offset + delta.X,
-				startPos.Y.Scale,
-				startPos.Y.Offset + delta.Y
-			)
-		end
-	end)
-
-	btn.Activated:Connect(function()
-		if not hasMoved then
-			if v2 and v2.Toggle then
-				v2:Toggle()
-			elseif win and win.Toggle then
-				win:Toggle()
-			end
-		end
-	end)
-
-	pcall(function()
-		getgenv()._TPSFloatingButton = btn
-	end)
-end
-
-v32:CreateSection("Mobile / Floating Icon")
-local isMobileUser = false
-pcall(function()
-	isMobileUser = UserInputService.TouchEnabled and not (UserInputService.KeyboardEnabled and UserInputService.MouseEnabled)
-end)
-
-if isMobileUser then
-	toggleFloatingIcon(true)
-end
-
-v32:CreateToggle({
-	Name = "Floating Icon",
-	Desc = "Turn on or turn off the draggable mobile floating toggle icon",
-	CurrentValue = isMobileUser,
-	Callback = function(enabled)
-		toggleFloatingIcon(enabled)
-		v1:Notify({
-			Title = "Floating Icon",
-			Content = enabled and "Floating icon enabled (tap to toggle menu)" or "Floating icon disabled",
-			Type = "Info",
-			Duration = 2,
-		})
-	end,
-})
-
+-- UI Toggle Keybind
+v32:CreateSection("UI Toggle Keybind")
 local currentKeybindName = "RightShift"
 local keybindDropdown = nil
 
 local keybindOptions = {
-	"RightShift",
-	"RightControl",
-	"LeftControl",
-	"Insert",
-	"Delete",
-	"F4",
-	"F8",
-	"Backquote",
+	"RightShift", "RightControl", "LeftControl", "Insert", "Delete", "F4", "F8", "Backquote"
 }
 
 keybindDropdown = v32:CreateDropdown({
@@ -4233,15 +2978,10 @@ keybindDropdown = v32:CreateDropdown({
 		local opt = type(selected) == "table" and selected[1] or selected
 		if opt and opt ~= "" then
 			currentKeybindName = tostring(opt)
-			if v2 and v2.SetToggleKey then
-				v2:SetToggleKey(currentKeybindName)
+			if Window and Window.SetKeybind then
+				pcall(function() Window:SetKeybind(Enum.KeyCode[currentKeybindName]) end)
 			end
-			v1:Notify({
-				Title = "Keybind Updated",
-				Content = "GUI toggle set to " .. currentKeybindName,
-				Type = "Success",
-				Duration = 2,
-			})
+			v1:Notify({Title = "Keybind Updated", Content = "GUI toggle set to " .. currentKeybindName, Type = "Success", Duration = 2})
 		end
 	end,
 })
@@ -4255,30 +2995,19 @@ v32:CreateInput({
 			local keyName = tostring(val):gsub("%s+", "")
 			if Enum.KeyCode[keyName] then
 				currentKeybindName = keyName
-				if v2 and v2.SetToggleKey then
-					v2:SetToggleKey(currentKeybindName)
+				if Window and Window.SetKeybind then
+					pcall(function() Window:SetKeybind(Enum.KeyCode[currentKeybindName]) end)
 				end
-				if keybindDropdown and keybindDropdown.Set then
-					keybindDropdown:Set(currentKeybindName)
-				end
-				v1:Notify({
-					Title = "Keybind Set",
-					Content = "GUI toggle key is now " .. currentKeybindName,
-					Type = "Success",
-					Duration = 2,
-				})
+				if keybindDropdown and keybindDropdown.Set then keybindDropdown:Set(currentKeybindName) end
+				v1:Notify({Title = "Keybind Set", Content = "GUI toggle key is now " .. currentKeybindName, Type = "Success", Duration = 2})
 			else
-				v1:Notify({
-					Title = "Invalid KeyCode",
-					Content = "'" .. keyName .. "' is not a valid Roblox KeyCode",
-					Type = "Warning",
-					Duration = 2,
-				})
+				v1:Notify({Title = "Invalid KeyCode", Content = "'" .. keyName .. "' is not a valid Roblox KeyCode", Type = "Warning", Duration = 2})
 			end
 		end
 	end,
 })
 
+-- Auto-load saved config on startup
 task.spawn(function()
 	task.wait(1.2)
 	pcall(function()
@@ -4287,12 +3016,7 @@ task.spawn(function()
 			if autoName and autoName ~= "" then
 				autoName = autoName:gsub("%s+", "")
 				if func24(autoName, false) then
-					v1:Notify({
-						Title = "Auto Loaded Config",
-						Content = "Applied: " .. autoName,
-						Type = "Success",
-						Duration = 3,
-					})
+					v1:Notify({Title = "Auto Loaded Config", Content = "Applied: " .. autoName, Type = "Success", Duration = 3})
 					return
 				end
 			end
@@ -4301,48 +3025,48 @@ task.spawn(function()
 	end)
 end)
 
-if STATE then
-	STATE.onCleanup(function()
-		for _, v1 in ipairs(tbl10) do
-			if v1 then
-				func(function()
-					v1:Disconnect()
-				end)
-			end
-		end
-		for _, v2 in ipairs(tbl16.espConnections) do
-			if v2 then
-				func(function()
-					v2:Disconnect()
-				end)
-			end
-		end
-		for _, v3 in ipairs(tbl12) do
-			if v3 then
-				func(function()
-					task.cancel(v3)
-				end)
-			end
-		end
-		func29()
-		func42()
-		local predictionConnection = tbl21.predictionConnection
-		if predictionConnection then
-			func(function()
-				predictionConnection:Disconnect()
-			end)
-		end
+-- Cleanup registration
+local function doFullCleanup()
+	for _, conn in ipairs(tbl10) do
+		if conn then func(function() conn:Disconnect() end) end
+	end
+	for _, conn in ipairs(tbl16.espConnections) do
+		if conn then func(function() conn:Disconnect() end) end
+	end
+	for _, thr in ipairs(tbl12) do
+		if thr then func(function() task.cancel(thr) end) end
+	end
+	func29()
+	func42()
+	hb1_cleanup()
+	hb2_cleanup()
+	hb3_cleanup()
+	if v40 then func(function() v40:Disconnect() end) v40 = nil end
+	if connection10 then func(function() connection10:Disconnect() end) connection10 = nil end
+	if connection11 then func(function() connection11:Disconnect() end) connection11 = nil end
+	if v49 then func(function() v49:Disconnect() end) v49 = nil end
+	if v50 then func(function() task.cancel(v50) end) v50 = nil end
+	if v51 then func(function() task.cancel(v51) end) v51 = nil end
+	if v47 then func(function() task.cancel(v47) end) v47 = nil end
+	if v48 then func(function() task.cancel(v48) end) v48 = nil end
+	if tbl21.predictionConnection then
+		func(function() tbl21.predictionConnection:Disconnect() end)
 		tbl21.predictionConnection = nil
-		func47()
-		func38()
-		func54(false)
-		func52()
-		for _, v4 in ipairs(tbl11) do
-			if v4 then
-				func(function()
-					v4:Destroy()
-				end)
-			end
-		end
-	end)
+	end
+	func47()
+	func38()
+	func54(false)
+	func52()
+	ag_stop()
+	for _, inst in ipairs(tbl11) do
+		if inst then func(function() inst:Destroy() end) end
+	end
+	pcall(function() part:Destroy() end)
+	pcall(function() Window:Destroy() end)
 end
+
+if STATE then
+	STATE.onCleanup(doFullCleanup)
+end
+
+getgenv()._SpectreTPS_Cleanup = doFullCleanup
