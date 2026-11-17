@@ -238,7 +238,7 @@ local function registerControl(tabLabel, name, getter, setter)
 	table.insert(SpectreCfg.order, key)
 end
 
-local TAB_RENAME = {["Ball Reach"] = "Ball Reach"}
+local TAB_RENAME = {}
 local TAB_ICONS = {["Ball Reach"] = "goal", ["Leg Reach"] = "footprints", ["Head Reach"] = "smile", ["React"] = "zap", ["Goalkeeper"] = "shield", ["Air Dribble"] = "wind", ["FastFlags"] = "flag", ["Misc"] = "wrench", ["Skies"] = "cloud-sun"}
 local KEY_NAMES = {"C","F","G","H","J","K","L","Q","E","R","T","Y","X","Z","V","B","N","M","One","Two","Three","Four","F1","F2","F3","F4","F5","F6","F7","F8","F9","F10","F11","F12","LeftControl","RightControl","LeftShift","LeftAlt","Insert","Delete","Home","End","Backquote","Unknown"}
 local function stepFor(minimum, maximum)
@@ -2166,7 +2166,7 @@ do
 		end,
 	})
 
-	local flag12 = true
+	local flag12 = false
 	local num15 = 120
 	local jumpPowerDefaults = setmetatable({}, {__mode = "k"})
 
@@ -2207,7 +2207,7 @@ do
 
 	v60:AddToggle({
 		Name = "Enable Jump Power",
-		Default = true,
+		Default = false,
 		Callback = function(arg1)
 			flag12 = arg1
 			applyJumpPower()
