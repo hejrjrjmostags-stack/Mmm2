@@ -1,10 +1,52 @@
+-- ============================================================
+-- UNIVERSAL EXECUTOR COMPATIBILITY LAYER
+-- Supports: Delta, Fluxus, Codex, Arceus X, Solara, Wave, etc.
+-- ============================================================
+pcall(function()
+    repeat task.wait() until game:IsLoaded()
+end)
+
+local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
+if not LocalPlayer then
+    pcall(function()
+        LocalPlayer = Players.PlayerAdded:Wait()
+    end)
+end
+
+local getgenv = getgenv or function() return _G end
+local newcclosure = newcclosure or function(f) return f end
+local identifyexecutor = identifyexecutor or function() return "Universal" end
+
+local function safeHttpGet(url)
+    local result = nil
+    local ok, res = pcall(function()
+        return game:HttpGet(url, true)
+    end)
+    if ok and res and res ~= "" then return res end
+
+    pcall(function()
+        if request then
+            result = request({Url = url, Method = "GET"}).Body
+        elseif http_request then
+            result = http_request({Url = url, Method = "GET"}).Body
+        elseif syn and syn.request then
+            result = syn.request({Url = url, Method = "GET"}).Body
+        end
+    end)
+    return result or res
+end
+
 --[[
     SPECTRE HUB — TOUCHLINE
     Black & White Edition
     Powered by PEAK / Spectre UI
 ]]
 
-local rawLib = game:HttpGet("https://raw.githubusercontent.com/Twistzzmassivescripts/UI_Libarys/refs/heads/main/OUTLAWS.dev/NEW%20ONE%20PEAK.lua")
+local rawLib = safeHttpGet("https://raw.githubusercontent.com/Twistzzmassivescripts/UI_Libarys/refs/heads/main/OUTLAWS.dev/NEW%20ONE%20PEAK.lua")
+if not rawLib or rawLib == "" then
+	rawLib = game:HttpGet("https://raw.githubusercontent.com/Twistzzmassivescripts/UI_Libarys/refs/heads/main/OUTLAWS.dev/NEW%20ONE%20PEAK.lua")
+end
 
 -- Helper for exact string replacement
 local function replaceExact(source, target, replacement)
@@ -1055,9 +1097,115 @@ do
 	v50:AddButton("React 75%", function()
 		func33("75", "10")
 	end, "Interpolation 75 / Target delay 10")
-	v50:AddButton("React 100%", function()
-		func5("React 100%", "Original callback is incomplete; placeholder only.", 3)
-	end, "Placeholder - source callback was incomplete")
+	local react100Active = false
+	local react100Conn = nil
+	local react100Loop = nil
+
+	local function applyReact100Flags()
+		pcall(function()
+			settings():GetService("NetworkSettings").IncomingReplicationLag = 0
+		end)
+		if setfflag then
+			for _, flag in ipairs({
+				{"InterpolationMaxDelayMSec", "1"},
+				{"TargetTimeDelayFacctorTenths", "0"},
+				{"DFIntTargetTimeDelayFacctorTenths", "0"},
+				{"FIntInterpolationMaxDelayMSec", "1"},
+				{"DFIntS2PhysicsSenderRate", "38720"}
+			}) do
+				pcall(function()
+					local clean = flag[1]:gsub("^DFInt", ""):gsub("^FInt", ""):gsub("^FFlag", "")
+					if getfflag and getfflag(clean) ~= nil then
+						setfflag(clean, flag[2])
+					elseif getfflag and getfflag(flag[1]) ~= nil then
+						setfflag(flag[1], flag[2])
+					else
+						setfflag(clean, flag[2])
+					end
+				end)
+			end
+		end
+	end
+
+	local function startReact100Touch()
+		if react100Conn then
+			react100Conn:Disconnect()
+			react100Conn = nil
+		end
+		react100Conn = RunService.PreSimulation:Connect(function()
+			local char = LocalPlayer.Character
+			if not char then return end
+			local hrp = char:FindFirstChild("HumanoidRootPart")
+			if not hrp then return end
+
+			local ball = nil
+			local dist = nil
+			pcall(function()
+				ball = func23()
+			end)
+			if ball and ball.Parent then
+				dist = (hrp.Position - ball.Position).Magnitude
+			else
+				local fb = workspace:FindFirstChild("Footballs")
+				local b = fb and (fb:FindFirstChild("Ball") or fb:FindFirstChildWhichIsA("BasePart"))
+				if not b then
+					local tps = workspace:FindFirstChild("TPSSystem")
+					b = tps and tps:FindFirstChild("TPS") or workspace:FindFirstChild("Ball")
+				end
+				if b and b:IsA("BasePart") then
+					ball = b
+					dist = (hrp.Position - b.Position).Magnitude
+				end
+			end
+
+			if ball and dist and dist <= 14 then
+				for _, partName in ipairs({"Right Leg", "Left Leg", "RightFoot", "LeftFoot", "RightLowerLeg", "LeftLowerLeg", "HumanoidRootPart"}) do
+					local p = char:FindFirstChild(partName)
+					if p and firetouchinterest then
+						firetouchinterest(p, ball, 0)
+						firetouchinterest(p, ball, 1)
+					end
+				end
+			end
+		end)
+	end
+
+	local function stopReact100Touch()
+		if react100Conn then
+			react100Conn:Disconnect()
+			react100Conn = nil
+		end
+	end
+
+	v50:AddButton("React 100% (Instant Overpowered)", function()
+		applyReact100Flags()
+		startReact100Touch()
+		react100Active = true
+		if react100Loop then task.cancel(react100Loop) end
+		react100Loop = task.spawn(function()
+			while true do
+				applyReact100Flags()
+				task.wait(4)
+			end
+		end)
+		func5("React 100%", "ACTIVATED: 0ms Delay + Instant Touch Magnet ON!", 3)
+	end, "0ms Lag + 0 Delay + PreSimulation Instant Touch (Max OP)")
+
+	v50:AddToggle({
+		Name = "React 100% Auto-Touch (Always ON)",
+		Default = false,
+		Callback = function(val)
+			react100Active = val
+			if val then
+				applyReact100Flags()
+				startReact100Touch()
+				func5("React 100%", "Instant Ball Touch ACTIVE!", 2)
+			else
+				stopReact100Touch()
+				func5("React 100%", "Instant Ball Touch Disabled", 2)
+			end
+		end,
+	})
 	v50:AddSection("Reacts 2")
 	local function func34(arg1, arg2, arg3, arg4)
 		local v1, v2 = pcall(function()
@@ -2250,6 +2398,149 @@ do
 			end
 		end,
 	})
+
+	
+	-- ============================================================
+	-- STREAM PROOF (STEALTH MODE)
+	-- ============================================================
+	v60:AddSection("Stream Proof (Stealth Mode)")
+	v60:AddParagraph(
+		"Stream Proof",
+		"Completely hides the UI and the toggle button circle for Discord stream / screen recording. All features stay active in the background. Tap the top-right corner of the screen or press the keybind to restore."
+	)
+
+	local streamProofActive = false
+	local streamProofKey = Enum.KeyCode.RightControl
+	local secretSensorGui = nil
+	local streamProofToggleRef = nil
+
+	local function getSecretParent()
+		local p = nil
+		pcall(function()
+			if gethui then p = gethui()
+			elseif game:GetService("CoreGui") then p = game:GetService("CoreGui") end
+		end)
+		if not p then
+			p = LocalPlayer:FindFirstChildOfClass("PlayerGui") or LocalPlayer:WaitForChild("PlayerGui", 5)
+		end
+		return p
+	end
+
+	local function cleanupSecretSensor()
+		if secretSensorGui then
+			pcall(function() secretSensorGui:Destroy() end)
+			secretSensorGui = nil
+		end
+	end
+
+	local function setStreamProof(enable)
+		streamProofActive = enable
+
+		pcall(function()
+			if Window then
+				if Window.Gui then
+					Window.Gui.Enabled = not enable
+				end
+				if Window.OpenButton then
+					Window.OpenButton.Visible = not enable
+				end
+				if enable and Window.Root then
+					Window.Root.Visible = false
+					if Window.Open then
+						Window.Open = false
+					end
+				end
+			end
+		end)
+
+		if enable then
+			cleanupSecretSensor()
+			pcall(function()
+				local parent = getSecretParent()
+				if not parent then return end
+
+				local sg = Instance.new("ScreenGui")
+				sg.Name = "SP_SecretSensor"
+				sg.ResetOnSpawn = false
+				sg.DisplayOrder = 999999
+				sg.IgnoreGuiInset = true
+
+				local btn = Instance.new("TextButton")
+				btn.Name = "RevealArea"
+				btn.Size = UDim2.new(0, 80, 0, 80)
+				btn.Position = UDim2.new(1, -85, 0, 5) -- Top-right corner of the screen
+				btn.BackgroundTransparency = 1 -- 100% invisible
+				btn.Text = ""
+				btn.BorderSizePixel = 0
+				btn.AutoButtonColor = false
+				btn.Parent = sg
+
+				btn.Activated:Connect(function()
+					setStreamProof(false)
+					if streamProofToggleRef and streamProofToggleRef.Set then
+						streamProofToggleRef.Set(false)
+					end
+				end)
+
+				sg.Parent = parent
+				secretSensorGui = sg
+			end)
+			func5("Stream Proof", "Stealth active! Tap top-right corner to restore.", 3)
+		else
+			cleanupSecretSensor()
+			func5("Stream Proof", "UI and toggle button restored.", 2)
+		end
+	end
+
+	streamProofToggleRef = v60:AddToggle({
+		Name = "Enable Stream Proof",
+		Default = false,
+		Callback = function(val)
+			if val ~= streamProofActive then
+				setStreamProof(val == true)
+			end
+		end,
+	})
+
+	v60:AddKeybind({
+		Name = "Stream Proof Keybind",
+		Default = "RightControl",
+		Callback = function(key)
+			if typeof(key) == "EnumItem" then
+				streamProofKey = key
+			elseif typeof(key) == "string" and Enum.KeyCode[key] then
+				streamProofKey = Enum.KeyCode[key]
+			end
+		end,
+	})
+
+	v60:AddButton("Quick Hide (Panic)", function()
+		setStreamProof(true)
+		if streamProofToggleRef and streamProofToggleRef.Set then
+			streamProofToggleRef.Set(true)
+		end
+	end, "Instantly hides all UI & buttons")
+
+	v60:AddButton("Restore UI", function()
+		setStreamProof(false)
+		if streamProofToggleRef and streamProofToggleRef.Set then
+			streamProofToggleRef.Set(false)
+		end
+	end, "Forces UI to become visible again")
+
+	pcall(function()
+		UserInputService.InputBegan:Connect(function(input, gpe)
+			if gpe then return end
+			if input.UserInputType == Enum.UserInputType.Keyboard and input.KeyCode == streamProofKey then
+				local newState = not streamProofActive
+				setStreamProof(newState)
+				if streamProofToggleRef and streamProofToggleRef.Set then
+					streamProofToggleRef.Set(newState)
+				end
+			end
+		end)
+	end)
+
 
 	local v61 = tbl24:MakeTab("Skies")
 	v61:AddSection("Skyboxes")
