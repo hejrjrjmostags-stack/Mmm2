@@ -2636,166 +2636,322 @@ v34:CreateDropdown({
 v34:CreateSection("Avatar Stealer")
 
 local avUser2 = ""
-local avSaved2 = nil
-local avLastId2 = nil
+local avSavedItems = nil
+local avLastUid = nil
+local avAutoRespawn = true
+local avInputCtrl = nil
 
-local function avSave2()
-	local ch = LocalPlayer.Character; if not ch then return end
-	local snap = {items={}}
-	for _,v in ipairs(ch:GetChildren()) do
-		if v:IsA("Accessory") or v:IsA("Hat") or v:IsA("Shirt") or v:IsA("Pants") or v:IsA("ShirtGraphic") or v:IsA("CharacterMesh") or v:IsA("BodyColors") or (v:IsA("Decal") and v.Name=="face") then
-			pcall(function() table.insert(snap.items, v:Clone()) end)
-		end
-	end
-	avSaved2 = snap
-end
-
-task.spawn(function() task.wait(3); avSave2() end)
-LocalPlayer.CharacterAdded:Connect(function() task.wait(3); avSave2() end)
-
-local function avClear2(ch)
-	for _,v in ipairs(ch:GetChildren()) do
-		if v:IsA("Accessory") or v:IsA("Hat") or v:IsA("Shirt") or v:IsA("Pants") or v:IsA("ShirtGraphic") or v:IsA("CharacterMesh") or v:IsA("BodyColors") or (v:IsA("Decal") and v.Name=="face") then
-			v:Destroy()
-		end
-	end
-end
-
-local avAttMap2 = {
-	HatAttachment=CFrame.new(0,0.6,0), HairAttachment=CFrame.new(0,0.6,0),
-	FaceFrontAttachment=CFrame.new(0,0,-0.6), FaceCenterAttachment=CFrame.new(0,0,-0.5),
-	HeadFrontAttachment=CFrame.new(0,0,-0.5), HeadTopAttachment=CFrame.new(0,0.5,0),
-	HeadBackAttachment=CFrame.new(0,0,0.5), LeftEarAttachment=CFrame.new(-0.5,0,0),
-	RightEarAttachment=CFrame.new(0.5,0,0), HatFrontAttachment=CFrame.new(0,0.6,-0.5),
-	NeckAttachment=CFrame.new(0,-0.5,0)
+local avAttMap = {
+	HatAttachment = CFrame.new(0, 0.6, 0),
+	HairAttachment = CFrame.new(0, 0.6, 0),
+	FaceFrontAttachment = CFrame.new(0, 0, -0.6),
+	FaceCenterAttachment = CFrame.new(0, 0, -0.5),
+	HeadFrontAttachment = CFrame.new(0, 0, -0.5),
+	HeadTopAttachment = CFrame.new(0, 0.5, 0),
+	HeadBackAttachment = CFrame.new(0, 0, 0.5),
+	LeftEarAttachment = CFrame.new(-0.5, 0, 0),
+	RightEarAttachment = CFrame.new(0.5, 0, 0),
+	HatFrontAttachment = CFrame.new(0, 0.6, -0.5),
+	NeckAttachment = CFrame.new(0, -0.5, 0),
+	BodyBackAttachment = CFrame.new(0, 0, 0.5),
+	WaistBackAttachment = CFrame.new(0, 0, 0.5),
+	WaistCenterAttachment = CFrame.new(0, 0, 0)
 }
 
-local function avEnsureHead2(ch)
-	local head = ch:FindFirstChild("Head"); if not head then return end
-	for nm,cf in pairs(avAttMap2) do
-		if not head:FindFirstChild(nm) then
-			local a = Instance.new("Attachment"); a.Name=nm; a.CFrame=cf; a.Parent=head
+local function avEnsureAttachments(ch)
+	local head = ch:FindFirstChild("Head")
+	if head then
+		for nm, cf in pairs(avAttMap) do
+			if not head:FindFirstChild(nm) then
+				local a = Instance.new("Attachment")
+				a.Name = nm
+				a.CFrame = cf
+				a.Parent = head
+			end
+		end
+	end
+	local torso = ch:FindFirstChild("Torso") or ch:FindFirstChild("UpperTorso")
+	if torso then
+		for _, nm in ipairs({"BodyBackAttachment", "WaistBackAttachment", "WaistCenterAttachment"}) do
+			if not torso:FindFirstChild(nm) then
+				local a = Instance.new("Attachment")
+				a.Name = nm
+				a.CFrame = avAttMap[nm] or CFrame.new()
+				a.Parent = torso
+			end
 		end
 	end
 end
 
-local function avWeld2(acc, ch)
-	local head = ch:FindFirstChild("Head"); if not head then return false end
-	local h = acc:FindFirstChild("Handle"); if not h then return false end
-	local att = h:FindFirstChild("HatAttachment") or h:FindFirstChild("HairAttachment") or h:FindFirstChild("FaceFrontAttachment") or h:FindFirstChild("FaceCenterAttachment") or h:FindFirstChildOfClass("Attachment")
-	if not att then return false end
-	local ha = head:FindFirstChild(att.Name)
+local function avWeld(acc, ch)
+	local head = ch:FindFirstChild("Head")
+	local torso = ch:FindFirstChild("Torso") or ch:FindFirstChild("UpperTorso") or ch:FindFirstChild("HumanoidRootPart")
+	if not head then return false end
+
+	local h = acc:FindFirstChild("Handle")
+	if not h then return false end
+
+	local att = h:FindFirstChildOfClass("Attachment")
+	local parentPart = head
+
+	if att then
+		local nm = att.Name
+		if nm:find("Back") or nm:find("Waist") or nm:find("Body") or nm:find("Torso") then
+			parentPart = torso or head
+		else
+			parentPart = head
+		end
+	end
+
+	local attName = att and att.Name or "HatAttachment"
+	local ha = parentPart:FindFirstChild(attName)
 	if not ha then
-		ha = Instance.new("Attachment"); ha.Name=att.Name; ha.CFrame=avAttMap2[att.Name] or CFrame.new(0,0.6,0); ha.Parent=head
+		ha = Instance.new("Attachment")
+		ha.Name = attName
+		ha.CFrame = avAttMap[attName] or CFrame.new(0, 0.6, 0)
+		ha.Parent = parentPart
 	end
-	h.Anchored=false; h.CanCollide=false; h.Massless=true
-	local osz = h:FindFirstChild("OriginalSize"); local osv = osz and osz.Value or h.Size
+
+	h.Anchored = false
+	h.CanCollide = false
+	h.Massless = true
+
+	local osz = h:FindFirstChild("OriginalSize")
+	local osv = osz and osz.Value or h.Size
+
 	acc.Parent = ch
-	for _,c in ipairs(h:GetChildren()) do
-		if c:IsA("Weld") or c:IsA("Motor6D") or c:IsA("WeldConstraint") then c:Destroy() end
+
+	for _, c in ipairs(h:GetChildren()) do
+		if c:IsA("Weld") or c:IsA("Motor6D") or c:IsA("WeldConstraint") then
+			c:Destroy()
+		end
 	end
-	local w = Instance.new("Motor6D"); w.Name="AccessoryWeld"; w.Part0=head; w.Part1=h
-	w.C0=ha.CFrame; w.C1=att.CFrame; w.Parent=h
-	if osv then task.defer(function() if h and h.Parent then pcall(function() h.Size=osv*0.85 end) end end) end
+
+	local w = Instance.new("Motor6D")
+	w.Name = "AccessoryWeld"
+	w.Part0 = parentPart
+	w.Part1 = h
+	w.C0 = ha.CFrame
+	w.C1 = att and att.CFrame or CFrame.new()
+	w.Parent = h
+
+	pcall(function()
+		h.CFrame = parentPart.CFrame * w.C0 * w.C1:Inverse()
+	end)
+
+	if osv then
+		task.defer(function()
+			if h and h.Parent then pcall(function() h.Size = osv * 0.85 end) end
+		end)
+	end
 	return true
 end
 
-local function avApply2(item, ch, hum)
+local function avApplyItem(item, ch, hum)
 	if item:IsA("Accessory") or item:IsA("Hat") then
 		local c = item:Clone()
-		local osz = c:FindFirstChild("OriginalSize"); local osv = osz and osz.Value
-		if osz then osz:Destroy() end
+		local osz = c:FindFirstChild("OriginalSize")
+		local osv = osz and osz.Value
+		if osz then pcall(function() osz:Destroy() end) end
+
 		local ok = pcall(function() hum:AddAccessory(c) end)
 		if ok then
 			task.defer(function()
 				if c and c.Parent then
 					local h = c:FindFirstChild("Handle")
 					if h and not h:FindFirstChildOfClass("Weld") and not h:FindFirstChildOfClass("Motor6D") then
-						if osv then pcall(function() h.Size = osv*0.85 end) end
-						avWeld2(c, ch)
+						if osv then pcall(function() h.Size = osv * 0.85 end) end
+						avWeld(c, ch)
 					end
 				end
 			end)
 			return 1
 		end
-		if avWeld2(c, ch) then return 1 end
+		if avWeld(c, ch) then return 1 end
 	elseif item:IsA("Shirt") or item:IsA("Pants") or item:IsA("ShirtGraphic") then
-		item:Clone().Parent = ch; return 1
+		local old = ch:FindFirstChildOfClass(item.ClassName)
+		if old then old:Destroy() end
+		item:Clone().Parent = ch
+		return 1
 	elseif item:IsA("BodyColors") then
-		local o = ch:FindFirstChildOfClass("BodyColors"); if o then o:Destroy() end
-		item:Clone().Parent = ch; return 1
+		local old = ch:FindFirstChildOfClass("BodyColors")
+		if old then old:Destroy() end
+		item:Clone().Parent = ch
+		return 1
 	elseif item:IsA("CharacterMesh") then
-		item:Clone().Parent = ch; return 1
-	elseif item:IsA("Decal") and item.Name=="face" then
-		local o = ch:FindFirstChild("face"); if o then o:Destroy() end
-		item:Clone().Parent = ch; return 1
+		item:Clone().Parent = ch
+		return 1
+	elseif item:IsA("Decal") and item.Name == "face" then
+		local head = ch:FindFirstChild("Head")
+		if head then
+			local old = head:FindFirstChild("face")
+			if old then old:Destroy() end
+			local c = item:Clone()
+			c.Parent = head
+		end
+		return 1
 	end
 	return 0
 end
 
-local function avApplyId2(uid, ch, hum)
+local function avClearCharacter(ch)
+	for _, v in ipairs(ch:GetChildren()) do
+		if v:IsA("Accessory") or v:IsA("Hat") or v:IsA("Shirt") or v:IsA("Pants") or v:IsA("ShirtGraphic") or v:IsA("CharacterMesh") or v:IsA("BodyColors") then
+			pcall(function() v:Destroy() end)
+		end
+	end
+	local head = ch:FindFirstChild("Head")
+	if head then
+		local face = head:FindFirstChild("face")
+		if face then pcall(function() face:Destroy() end) end
+	end
+end
+
+local function avSaveCurrent(ch)
+	ch = ch or LocalPlayer.Character
+	if not ch then return end
+	local snap = {items = {}}
+	for _, v in ipairs(ch:GetChildren()) do
+		if v:IsA("Accessory") or v:IsA("Hat") or v:IsA("Shirt") or v:IsA("Pants") or v:IsA("ShirtGraphic") or v:IsA("CharacterMesh") or v:IsA("BodyColors") then
+			pcall(function() table.insert(snap.items, v:Clone()) end)
+		end
+	end
+	local head = ch:FindFirstChild("Head")
+	if head and head:FindFirstChild("face") then
+		pcall(function() table.insert(snap.items, head.face:Clone()) end)
+	end
+	if #snap.items > 0 then
+		avSavedItems = snap
+	end
+end
+task.spawn(function() task.wait(2.5); if not avSavedItems then avSaveCurrent() end end)
+
+local function avApplyAppearance(uid, ch, hum)
 	local ok, model = pcall(function() return Players:GetCharacterAppearanceAsync(uid) end)
-	if not ok or not model then return 0,0 end
-	avEnsureHead2(ch); avClear2(ch); task.wait(0.1)
-	local ac, cc, seen = 0, 0, {}
+	if not ok or not model then return false end
+
+	avEnsureAttachments(ch)
+	avClearCharacter(ch)
+	task.wait(0.08)
+
+	local seen = {}
 	for _, item in ipairs(model:GetDescendants()) do
-		if not item:IsA("Attachment") and not item:IsA("Motor6D") and item.Name~="Handle" and item.Name~="OriginalSize" then
+		if not item:IsA("Attachment") and not item:IsA("Motor6D") and item.Name ~= "Handle" and item.Name ~= "OriginalSize" then
 			if item:IsA("Accessory") or item:IsA("Hat") then
 				local h = item:FindFirstChild("Handle")
 				if not (h and seen[h]) then
-					if h then seen[h]=true end
-					if avApply2(item, ch, hum) > 0 then ac = ac + 1 end
+					if h then seen[h] = true end
+					avApplyItem(item, ch, hum)
 				end
-			elseif item:IsA("Shirt") or item:IsA("Pants") or item:IsA("ShirtGraphic") or item:IsA("BodyColors") or item:IsA("CharacterMesh") or (item:IsA("Decal") and item.Name=="face") then
-				if avApply2(item, ch, hum) > 0 then cc = cc + 1 end
+			elseif item:IsA("Shirt") or item:IsA("Pants") or item:IsA("ShirtGraphic") or item:IsA("BodyColors") or item:IsA("CharacterMesh") or (item:IsA("Decal") and item.Name == "face") then
+				avApplyItem(item, ch, hum)
 			end
 		end
 	end
-	model:Destroy()
-	return ac, cc
+	pcall(function() model:Destroy() end)
+	return true
 end
 
-local function avSteal2(name)
-	if not name or name=="" then v1:Notify({Title="Avatar", Content="Enter username", Duration=2}); return end
-	local uid
-	if tonumber(name) then uid = tonumber(name)
-	else
-		local ok, id = pcall(function() return Players:GetUserIdFromNameAsync(name) end)
-		if ok then uid = id end
+local function avStealCore(nameOrId)
+	local raw = tostring(nameOrId or ""):gsub("^%s+", ""):gsub("%s+$", "")
+	if raw == "" then
+		v1:Notify({Title = "Avatar Stealer", Content = "Please enter a username or ID!", Duration = 2})
+		return
 	end
-	if not uid then v1:Notify({Title="Avatar", Content="User not found", Duration=3}); return end
-	v1:Notify({Title="Avatar", Content="Loading "..name.."...", Duration=2})
-	local ch = LocalPlayer.Character; if not ch then return end
-	local hum = ch:FindFirstChildOfClass("Humanoid"); if not hum then return end
-	if not avSaved2 then avSave2() end
-	local a, c = avApplyId2(uid, ch, hum)
-	avLastId2 = uid
-	v1:Notify({Title="Avatar", Content="✓ "..a.." accs, "..c.." clothes", Duration=3})
+
+	local uid = tonumber(raw)
+	if not uid then
+		v1:Notify({Title = "Avatar Stealer", Content = "Resolving " .. raw .. "...", Duration = 2})
+		local ok, resolvedId = pcall(function()
+			return Players:GetUserIdFromNameAsync(raw)
+		end)
+		if ok and resolvedId then
+			uid = resolvedId
+		end
+	end
+
+	if not uid then
+		v1:Notify({Title = "Avatar Stealer", Content = "User not found!", Duration = 3})
+		return
+	end
+
+	local ch = LocalPlayer.Character
+	local hum = ch and ch:FindFirstChildOfClass("Humanoid")
+	if not (ch and hum) then
+		v1:Notify({Title = "Avatar Stealer", Content = "Character not ready!", Duration = 2})
+		return
+	end
+
+	if not avSavedItems then avSaveCurrent(ch) end
+	avLastUid = uid
+
+	v1:Notify({Title = "Avatar Stealer", Content = "Loading avatar...", Duration = 2})
+	local ok = avApplyAppearance(uid, ch, hum)
+	if ok then
+		v1:Notify({Title = "Avatar Stealer", Content = "Avatar & accessories applied!", Duration = 3})
+	else
+		v1:Notify({Title = "Avatar Stealer", Content = "Failed to load appearance.", Duration = 3})
+	end
 end
 
-v34:CreateInput({
+-- RESPAWN LISTENER (Placed AFTER functions so all variables exist)
+LocalPlayer.CharacterAdded:Connect(function(newChar)
+	if not avAutoRespawn or not avLastUid then return end
+	task.spawn(function()
+		pcall(function()
+			local hum = newChar:WaitForChild("Humanoid", 10)
+			newChar:WaitForChild("Head", 10)
+			task.wait(1.2)
+			if avLastUid and avAutoRespawn and hum then
+				avApplyAppearance(avLastUid, newChar, hum)
+			end
+		end)
+	end)
+end)
+
+avInputCtrl = v34:CreateInput({
 	Name = "Username or ID",
-	PlaceholderText = "e.g. Roblox",
+	PlaceholderText = "e.g. Roblox or 123456",
 	Callback = function(v) avUser2 = v end
+})
+
+v34:CreateToggle({
+	Name = "Keep Skin on Respawn",
+	CurrentValue = true,
+	Callback = function(v) avAutoRespawn = v end
 })
 
 v34:CreateButton({
 	Name = "Apply Avatar",
-	Desc = "Apply the avatar of the entered username",
-	Callback = function() task.spawn(avSteal2, avUser2) end
+	Desc = "Steal & apply the avatar",
+	Callback = function()
+		local text = avUser2
+		if avInputCtrl and avInputCtrl.Get then
+			local t = avInputCtrl:Get()
+			if t and t ~= "" then text = t end
+		end
+		task.spawn(avStealCore, text)
+	end
 })
 
 v34:CreateButton({
 	Name = "Restore Avatar",
 	Desc = "Restore your original avatar",
 	Callback = function()
-		if not avSaved2 then return end
-		local ch = LocalPlayer.Character; if not ch then return end
-		local hum = ch:FindFirstChildOfClass("Humanoid"); if not hum then return end
-		avEnsureHead2(ch); avClear2(ch); task.wait(0.1)
-		for _,item in ipairs(avSaved2.items) do avApply2(item, ch, hum) end
-		avLastId2 = nil
-		v1:Notify({Title="Avatar", Content="Restored", Duration=2})
+		avLastUid = nil
+		local ch = LocalPlayer.Character
+		local hum = ch and ch:FindFirstChildOfClass("Humanoid")
+		if ch and hum and avSavedItems then
+			avEnsureAttachments(ch)
+			avClearCharacter(ch)
+			task.wait(0.08)
+			for _, item in ipairs(avSavedItems.items) do
+				avApplyItem(item, ch, hum)
+			end
+			v1:Notify({Title = "Avatar Stealer", Content = "Original avatar restored!", Duration = 2})
+		else
+			v1:Notify({Title = "Avatar Stealer", Content = "No saved avatar found.", Duration = 2})
+		end
 	end
 })
 
