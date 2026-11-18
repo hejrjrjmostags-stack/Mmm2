@@ -1,10 +1,52 @@
+-- ============================================================
+-- UNIVERSAL EXECUTOR COMPATIBILITY LAYER
+-- Supports: Delta, Fluxus, Codex, Arceus X, Solara, Wave, etc.
+-- ============================================================
+pcall(function()
+    repeat task.wait() until game:IsLoaded()
+end)
+
+local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
+if not LocalPlayer then
+    pcall(function()
+        LocalPlayer = Players.PlayerAdded:Wait()
+    end)
+end
+
+local getgenv = getgenv or function() return _G end
+local newcclosure = newcclosure or function(f) return f end
+local identifyexecutor = identifyexecutor or function() return "Universal" end
+
+local function safeHttpGet(url)
+    local result = nil
+    local ok, res = pcall(function()
+        return game:HttpGet(url, true)
+    end)
+    if ok and res and res ~= "" then return res end
+
+    pcall(function()
+        if request then
+            result = request({Url = url, Method = "GET"}).Body
+        elseif http_request then
+            result = http_request({Url = url, Method = "GET"}).Body
+        elseif syn and syn.request then
+            result = syn.request({Url = url, Method = "GET"}).Body
+        end
+    end)
+    return result or res
+end
+
 --[[
     SPECTRE HUB — TPS STREET SOCCER
     Black & White Edition
     Powered by PEAK / Spectre UI
 ]]
 
-local rawLib = game:HttpGet("https://raw.githubusercontent.com/Twistzzmassivescripts/UI_Libarys/refs/heads/main/OUTLAWS.dev/NEW%20ONE%20PEAK.lua")
+local rawLib = safeHttpGet("https://raw.githubusercontent.com/Twistzzmassivescripts/UI_Libarys/refs/heads/main/OUTLAWS.dev/NEW%20ONE%20PEAK.lua")
+if not rawLib or rawLib == "" then
+	rawLib = game:HttpGet("https://raw.githubusercontent.com/Twistzzmassivescripts/UI_Libarys/refs/heads/main/OUTLAWS.dev/NEW%20ONE%20PEAK.lua")
+end
 
 -- Helper for exact string replacement
 local function replaceExact(source, target, replacement)
@@ -44,6 +86,27 @@ rawLib = rawLib:gsub("outlaw", "spectre")
 rawLib = rawLib:gsub("Kimi", "Spectre")
 rawLib = rawLib:gsub("kimi", "spectre")
 
+
+-- Patch PEAK Tab metatable with Create* aliases for compatibility
+rawLib = rawLib:gsub("local j={}%s*j%.__index=j", [[local j={}j.__index=j
+function j:CreateSection(b) local n = type(b)=="table" and (b.Name or b.Title or "") or tostring(b or ""); return self:Section(n) end
+function j:CreateButton(b) return self:Button(b) end
+function j:CreateToggle(b) return self:Toggle(b) end
+function j:CreateSlider(b)
+	if type(b) == "table" and b.Range then
+		b.Min = b.Range[1]
+		b.Max = b.Range[2]
+		b.Step = b.Increment or 1
+		b.Default = b.CurrentValue or b.Default or b.Min
+	end
+	return self:Slider(b)
+end
+function j:CreateDropdown(b) return self:Dropdown(b) end
+function j:CreateInput(b) return self:Input(b) end
+function j:CreateKeybind(b) return self:Keybind(b) end
+function j:CreateParagraph(b) return self:Paragraph(b) end
+function j:CreateLabel(b) return self:Label(b) end]])
+
 local PEAK = loadstring(rawLib)()
 
 pcall(function()
@@ -56,6 +119,42 @@ local Window = PEAK:CreateWindow({
 	ToggleUIKeybind = "RightShift",
 	Loading = false
 })
+
+-- ============================================================
+-- PEAK UI LIBRARY ADAPTER BRIDGE
+-- ============================================================
+local origCreateTab = Window.CreateTab or Window.Tab
+local function wrapTab(tab)
+	function tab:CreateSection(b)
+		local n = type(b) == "table" and (b.Name or b.Title or "") or tostring(b or "")
+		return self:Section(n)
+	end
+	function tab:CreateButton(b) return self:Button(b) end
+	function tab:CreateToggle(b) return self:Toggle(b) end
+	function tab:CreateSlider(b)
+		if type(b) == "table" and b.Range then
+			b.Min = b.Range[1]
+			b.Max = b.Range[2]
+			b.Step = b.Increment or 1
+			b.Default = b.CurrentValue or b.Default or b.Min
+		end
+		return self:Slider(b)
+	end
+	function tab:CreateDropdown(b) return self:Dropdown(b) end
+	function tab:CreateInput(b) return self:Input(b) end
+	function tab:CreateKeybind(b) return self:Keybind(b) end
+	function tab:CreateParagraph(b) return self:Paragraph(b) end
+	function tab:CreateLabel(b) return self:Label(b) end
+	return tab
+end
+
+Window.CreateTab = function(self, cfg)
+	local tab = origCreateTab(self, cfg)
+	return wrapTab(tab)
+end
+Window.Tab = Window.CreateTab
+
+
 
 local v1 = {}
 function v1:Notify(tbl)
@@ -100,16 +199,23 @@ if not v3.HARDEN.namecallInstalled then
 	v3.HARDEN.namecallInstalled = true
 	v3.HARDEN.blocked = 0
 	local tbl = {Kick1 = true, HandleViolation = true, handleViolation = true}
-	v3.HARDEN._origNamecall = hookmetamethod(game, "__namecall", newcclosure(function(arg1, ...)
-		if getnamecallmethod() == "FireServer" then
-			local str = tostring(arg1.Name)
-			if tbl[str] then
-				v3.HARDEN.blocked = (v3.HARDEN.blocked or 0) + 1
-				return
-			end
+	pcall(function()
+		if hookmetamethod and newcclosure then
+			v3.HARDEN._origNamecall = hookmetamethod(game, "__namecall", newcclosure(function(arg1, ...)
+				local ok, method = pcall(getnamecallmethod)
+				if ok and method == "FireServer" then
+					local str = tostring(arg1.Name)
+					if tbl[str] then
+						v3.HARDEN.blocked = (v3.HARDEN.blocked or 0) + 1
+						return
+					end
+				end
+				if v3.HARDEN._origNamecall then
+					return v3.HARDEN._origNamecall(arg1, ...)
+				end
+			end))
 		end
-		return v3.HARDEN._origNamecall(arg1, ...)
-	end))
+	end)
 end
 
 local num = 0
@@ -149,7 +255,11 @@ if not v3.HARDEN.safeFire then
 		if not remote or typeof(remote) ~= "Instance" then return end
 		local args = {...}
 		local ok = pcall(function()
-			realNamecall(remote, table.unpack(args))
+			if realNamecall then
+				realNamecall(remote, table.unpack(args))
+			else
+				remote:FireServer(table.unpack(args))
+			end
 		end)
 		return ok
 	end)
@@ -224,9 +334,20 @@ local function func27(arg1, arg2)
 end
 
 -- ============================================================
+
+-- ============================================================
+-- SHARED CROSS-TAB STATE (Solves 200 local variables limit)
+-- ============================================================
+local v5, v8, v_armTab, v18, v21, v22, v23, v24, v33, v34, v_agTab, v38, v32
+local v9, v10, v11, v12, v13, v14, v15, v16, v17, v19, v20, v25, v26, v27, v40, v47, v48, v49, v50, v51
+local tbl1, tbl2, tbl4, tbl5, tbl8, tbl9, tbl16, tbl21, tbl26
+local func4, func11, func14, func29, func38, func42, func47, func51, func52, func53, func54
+local streamProofActive, streamProofKey, secretSensorGui, streamProofToggleRef, setStreamProof
+
+do
 -- TAB 1: HOME
 -- ============================================================
-local v5 = Window:CreateTab({Name = "Home", Desc = "Info", Icon = "house"})
+v5 = Window:CreateTab({Name = "Home", Desc = "Info", Icon = "house"})
 Window:SelectTab(v5)
 
 local Stats = game:GetService("Stats")
@@ -337,9 +458,12 @@ v5:CreateLabel({
 })
 
 -- ============================================================
+end
+
+do
 -- TAB 2: REACH
 -- ============================================================
-local v8 = Window:CreateTab({Name = "Reach", Desc = "Reach methods", Icon = "mouse-pointer-click"})
+v8 = Window:CreateTab({Name = "Reach", Desc = "Reach methods", Icon = "mouse-pointer-click"})
 
 local function func2(arg1, arg2)
 	local tbl = {}
@@ -365,10 +489,10 @@ end
 v8:CreateSection("Reach [Method 1]")
 v8:CreateParagraph({Title = "Reach [Method 1]", Content = "NOT Xeno & Solara Support"})
 
-local tbl1 = {m1_on = false, m1_dist = 5}
-local v40 = nil
+tbl1 = {m1_on = false, m1_dist = 5}
+v40 = nil
 
-local function func4()
+function func4()
 	if v40 then
 		v40:Disconnect()
 		v40 = nil
@@ -389,7 +513,7 @@ local function func4()
 	end)
 end
 
-local v9 = v8:CreateToggle({
+v9 = v8:CreateToggle({
 	Name = "Enable / Disable Reach",
 	CurrentValue = false,
 	Callback = function(arg1)
@@ -398,7 +522,7 @@ local v9 = v8:CreateToggle({
 	end,
 })
 
-local v10 = v8:CreateInput({
+v10 = v8:CreateInput({
 	Name = "Reach Size",
 	PlaceholderText = "Distance in studs",
 	Default = "5",
@@ -413,7 +537,7 @@ v10:Set("5")
 v8:CreateSection("Reach [Method 2]")
 v8:CreateParagraph({Title = "Reach [Method 2]", Content = "NOT Xeno & Solara Support"})
 
-local tbl2 = {on = false, shape = "Box", hide = false, size = new(5, 5, 5), transparency = 0.7}
+tbl2 = {on = false, shape = "Box", hide = false, size = new(5, 5, 5), transparency = 0.7}
 local part = Instance.new("Part")
 part.Name = "SpectreReachPart"
 part.Anchored = true
@@ -594,7 +718,7 @@ local function func10()
 	part.CFrame = CFrame.new(0, -9999, 0)
 end
 
-local function func11(arg1)
+function func11(arg1)
 	tbl2.shape = arg1
 	if arg1 == "Box" then
 		part.Shape = Enum.PartType.Block
@@ -606,7 +730,7 @@ local function func11(arg1)
 	if tbl2.on then func9() end
 end
 
-local v11 = v8:CreateDropdown({
+v11 = v8:CreateDropdown({
 	Name = "Select Shape",
 	Options = {"Box", "Sphere", "Cylinder"},
 	CurrentOption = "Box",
@@ -615,7 +739,7 @@ local v11 = v8:CreateDropdown({
 	end,
 })
 
-local v12 = v8:CreateToggle({
+v12 = v8:CreateToggle({
 	Name = "Enable Reach",
 	CurrentValue = false,
 	Callback = function(arg1)
@@ -624,7 +748,7 @@ local v12 = v8:CreateToggle({
 	end,
 })
 
-local v13 = v8:CreateSlider({
+v13 = v8:CreateSlider({
 	Name = "Reach X",
 	Range = {1, 50},
 	Increment = 1,
@@ -636,7 +760,7 @@ local v13 = v8:CreateSlider({
 	end,
 })
 
-local v14 = v8:CreateSlider({
+v14 = v8:CreateSlider({
 	Name = "Reach Y",
 	Range = {1, 50},
 	Increment = 1,
@@ -648,7 +772,7 @@ local v14 = v8:CreateSlider({
 	end,
 })
 
-local v15 = v8:CreateSlider({
+v15 = v8:CreateSlider({
 	Name = "Reach Z",
 	Range = {1, 50},
 	Increment = 1,
@@ -660,7 +784,7 @@ local v15 = v8:CreateSlider({
 	end,
 })
 
-local v16 = v8:CreateInput({
+v16 = v8:CreateInput({
 	Name = "Sync Reach X Y Z",
 	PlaceholderText = "Set all three axes to the same value",
 	Callback = function(arg1)
@@ -673,7 +797,7 @@ local v16 = v8:CreateInput({
 	end,
 })
 
-local v17 = v8:CreateToggle({
+v17 = v8:CreateToggle({
 	Name = "Hide Box",
 	CurrentValue = false,
 	Callback = function(arg1)
@@ -732,7 +856,7 @@ v8:CreateSection("Preferred Foot Shape Reach")
 
 local tbl14 = {on = false, shape = "Box", size = new(1, 1, 1), part = nil, connection = nil}
 
-local function func29()
+function func29()
 	if tbl14.connection then
 		func(function() tbl14.connection:Disconnect() end)
 	end
@@ -848,9 +972,12 @@ v8:CreateToggle({
 })
 
 -- ============================================================
+end
+
+do
 -- TAB 3: ARM REACH
 -- ============================================================
-local v_armTab = Window:CreateTab({Name = "Arm Reach", Desc = "Arm reach methods", Icon = "hand"})
+v_armTab = Window:CreateTab({Name = "Arm Reach", Desc = "Arm reach methods", Icon = "hand"})
 
 local function hb_getArms(ch)
 	local arms = {}
@@ -1108,12 +1235,15 @@ v_armTab:CreateToggle({
 })
 
 -- ============================================================
+end
+
+do
 -- TAB 4: XENO & SOLARA REACH
 -- ============================================================
-local v18 = Window:CreateTab({Name = "Xeno & Solara Reach", Desc = "Leg reach", Icon = "settings-2"})
+v18 = Window:CreateTab({Name = "Xeno & Solara Reach", Desc = "Leg reach", Icon = "settings-2"})
 v18:CreateSection("Xeno & Solara Reach")
 
-local tbl4 = {on = false, dist = 16}
+tbl4 = {on = false, dist = 16}
 local flag_xeno = false
 local connection11
 local RightHip
@@ -1215,7 +1345,7 @@ LocalPlayer.CharacterAdded:Connect(function()
 	end
 end)
 
-local v19 = v18:CreateToggle({
+v19 = v18:CreateToggle({
 	Name = "Enable / Disable Reach",
 	CurrentValue = false,
 	Callback = function(arg1)
@@ -1223,7 +1353,7 @@ local v19 = v18:CreateToggle({
 	end,
 })
 
-local v20 = v18:CreateSlider({
+v20 = v18:CreateSlider({
 	Name = "Reach Size",
 	Range = {1, 25},
 	Increment = 1,
@@ -1280,13 +1410,16 @@ v18:CreateButton({
 })
 
 -- ============================================================
+end
+
+do
 -- TAB 5: HEAD REACH & MOSS
 -- ============================================================
-local v21 = Window:CreateTab({Name = "Head Reach & Moss", Desc = "Head reach", Icon = "headphones"})
+v21 = Window:CreateTab({Name = "Head Reach & Moss", Desc = "Head reach", Icon = "headphones"})
 v21:CreateSection("Head Reach & Moss")
 v21:CreateParagraph({Title = "Head Reach", Content = "wallah best."})
 
-local function func14(arg1)
+function func14(arg1)
 	return tostring(arg1):gsub("^DFInt", ""):gsub("^DFFlag", ""):gsub("FString", ""):gsub("FLog", ""):gsub("^FFlag", ""):gsub("^DFint", ""):gsub("^FInt", "")
 end
 
@@ -1470,9 +1603,12 @@ v21:CreateButton({
 })
 
 -- ============================================================
+end
+
+do
 -- TAB 6: REACT
 -- ============================================================
-local v22 = Window:CreateTab({Name = "React", Desc = "React delay", Icon = "smile-plus"})
+v22 = Window:CreateTab({Name = "React", Desc = "React delay", Icon = "smile-plus"})
 v22:CreateSection("React")
 v22:CreateParagraph({
 	Title = "React",
@@ -1518,7 +1654,7 @@ v22:CreateButton({Name = "React 100%", Desc = "Delay: 7 | Interp: 60 (Lowest del
 
 -- Script 2 React Helpers
 v22:CreateSection("Script 2 React Helpers")
-local tbl16 = {movement = false, guard = false, noCollision = false, esp = false, bigHead = false}
+tbl16 = {movement = false, guard = false, noCollision = false, esp = false, bigHead = false}
 tbl16.moveConnection = nil
 tbl16.guardConnection = nil
 tbl16.collisionConnection = nil
@@ -1656,7 +1792,7 @@ local tbl17 = {
 	TI = Color3.fromRGB(255, 255, 255),
 }
 
-local function func38()
+function func38()
 	for _, v1_pl in ipairs(Players:GetPlayers()) do
 		local ch = v1_pl.Character
 		local head = ch and ch:FindFirstChild("Head")
@@ -1761,9 +1897,12 @@ v22:CreateButton({
 })
 
 -- ============================================================
+end
+
+do
 -- TAB 7: XENO MOSS
 -- ============================================================
-local v23 = Window:CreateTab({Name = "Xeno Moss", Desc = "Moss for Xeno & Solara", Icon = "zap"})
+v23 = Window:CreateTab({Name = "Xeno Moss", Desc = "Moss for Xeno & Solara", Icon = "zap"})
 v23:CreateSection("Xeno Moss")
 v23:CreateParagraph({Title = "Xeno Moss", Content = "Moss for Xeno & Solara. Pick your %. Higher % = bigger hitbox."})
 
@@ -1853,12 +1992,15 @@ v23:CreateButton({Name = "Xeno Moss 100%", Callback = function() func16(4, 5, 4.
 v23:CreateButton({Name = "Stop Xeno Moss", Callback = function() if v49 then v49:Disconnect() v49 = nil end end})
 
 -- ============================================================
+end
+
+do
 -- TAB 8: FLAG FUNC
 -- ============================================================
-local v24 = Window:CreateTab({Name = "Flag Func", Desc = "Flag override", Icon = "settings-2"})
+v24 = Window:CreateTab({Name = "Flag Func", Desc = "Flag override", Icon = "settings-2"})
 v24:CreateSection("Flag Override")
 
-local tbl5 = {tt = "4", interp = "60", s2 = "38720"}
+tbl5 = {tt = "4", interp = "60", s2 = "38720"}
 local v50
 
 local function func17()
@@ -1879,7 +2021,7 @@ local function func17()
 	end
 end
 
-local v25 = v24:CreateInput({
+v25 = v24:CreateInput({
 	Name = "TargetTimeDelay",
 	PlaceholderText = "DFIntTargetTimeDelayFacctorTenths",
 	Default = tbl5.tt,
@@ -1887,7 +2029,7 @@ local v25 = v24:CreateInput({
 })
 v25:Set(tbl5.tt)
 
-local v26 = v24:CreateInput({
+v26 = v24:CreateInput({
 	Name = "Interpolation",
 	PlaceholderText = "FIntInterpolationMaxDelayMSec",
 	Default = tbl5.interp,
@@ -1895,7 +2037,7 @@ local v26 = v24:CreateInput({
 })
 v26:Set(tbl5.interp)
 
-local v27 = v24:CreateInput({
+v27 = v24:CreateInput({
 	Name = "PhysicsSenderRate",
 	PlaceholderText = "DFIntS2PhysicsSenderRate",
 	Default = tbl5.s2,
@@ -1975,9 +2117,12 @@ v24:CreateButton({
 })
 
 -- ============================================================
+end
+
+do
 -- TAB 9: HELPERS
 -- ============================================================
-local v33 = Window:CreateTab({Name = "Helpers", Desc = "Script 2 helpers", Icon = "circle-help"})
+v33 = Window:CreateTab({Name = "Helpers", Desc = "Script 2 helpers", Icon = "bot"})
 
 -- Air Dribble
 v33:CreateSection("Air Dribble")
@@ -1985,7 +2130,7 @@ v33:CreateParagraph({Title = "Helpers", Content = "Script 2 helper functions, pr
 
 local tbl18 = {on = false, radius = 13, height = 1.7, strength = 35, damping = 0.5, connection = nil, velocity = nil}
 
-local function func42()
+function func42()
 	if tbl18.connection then func(function() tbl18.connection:Disconnect() end) end
 	tbl18.connection = nil
 	if tbl18.velocity then func(function() tbl18.velocity:Destroy() end) end
@@ -2047,7 +2192,7 @@ v33:CreateButton({
 
 -- Ball Modifications
 v33:CreateSection("Ball Modifications")
-local tbl21 = {size = 2.6, antiFling = false, prediction = false, collision = false}
+tbl21 = {size = 2.6, antiFling = false, prediction = false, collision = false}
 tbl21.predictionConnection = nil
 tbl21.antiFlingConnection = nil
 tbl21.parts = {}
@@ -2072,7 +2217,7 @@ local function func46(arg1_t, arg2_idx, arg3_sz, arg4_col, arg5_tr)
 	return p
 end
 
-local function func47()
+function func47()
 	for _, v in ipairs(tbl21.parts) do if v then v.Transparency = 1 end end
 	for _, v in ipairs(tbl21.lines) do if v then v.Transparency = 1 end end
 end
@@ -2271,9 +2416,12 @@ for k in pairs(tbl24) do
 end
 
 -- ============================================================
+end
+
+do
 -- TAB 10: PLAYER
 -- ============================================================
-local v34 = Window:CreateTab({Name = "Player", Desc = "Script 2 player mods", Icon = "user-round"})
+v34 = Window:CreateTab({Name = "Player", Desc = "Script 2 player mods", Icon = "user-round"})
 
 -- Auto Ball
 v34:CreateSection("Auto Ball")
@@ -2314,55 +2462,9 @@ v34:CreateSlider({
 	Callback = function(v) abRad = v end
 })
 
--- Avatar Stolen
-v34:CreateSection("Avatar Stolen")
-local tbl20 = {disguiseOn = false, username = "", description = nil}
-
-v34:CreateToggle({
-	Name = "Enable Avatar Stolen",
-	CurrentValue = false,
-	Callback = function(arg1)
-		tbl20.disguiseOn = arg1
-		local Character = LocalPlayer.Character
-		local hum = Character and Character:FindFirstChildOfClass("Humanoid")
-		if arg1 and Character and tbl20.username ~= "" then
-			task.spawn(function()
-				local ok1, uid = pcall(function() return Players:GetUserIdFromNameAsync(tbl20.username) end)
-				if ok1 then
-					local ok2, desc = pcall(function() return Players:GetHumanoidDescriptionFromUserId(uid) end)
-					if ok2 then
-						tbl20.description = desc
-						local ch = LocalPlayer.Character
-						local h = ch and ch:FindFirstChildOfClass("Humanoid")
-						if h then pcall(function() h:ApplyDescriptionClientServer(desc) end) end
-					end
-				end
-			end)
-		elseif not arg1 and hum then
-			pcall(function() hum:ApplyDescriptionClientServer(Players:GetHumanoidDescriptionAsync(LocalPlayer.UserId)) end)
-		end
-	end
-})
-
-v34:CreateInput({
-	Name = "Avatar Username",
-	PlaceholderText = "Enter username",
-	Callback = function(arg1) tbl20.username = arg1 end
-})
-
-local c_as = LocalPlayer.CharacterAdded:Connect(function(arg1_ch)
-	task.defer(function()
-		local hum = arg1_ch and arg1_ch:FindFirstChildOfClass("Humanoid")
-		if tbl20.disguiseOn and tbl20.description and hum then
-			func(function() hum:ApplyDescriptionClientServer(tbl20.description) end)
-		end
-	end)
-end)
-table.insert(tbl10, c_as)
-
 -- Aimbot
 v34:CreateSection("Aimbot")
-local tbl26 = {enabled = false, mode = "Holding", key = Enum.KeyCode.Z, aiming = false, line = nil, mobileGui = nil}
+tbl26 = {enabled = false, mode = "Holding", key = Enum.KeyCode.Z, aiming = false, line = nil, mobileGui = nil}
 
 func(function()
 	if Drawing and Drawing.new then
@@ -2375,7 +2477,7 @@ end)
 
 local tbl27 = {Red = new(0.767262042, 13.819994, 164.451065), Blue = new(-0.352591068, 13.819994, -160.285141)}
 
-local function func51()
+function func51()
 	local Team = LocalPlayer.Team
 	local goalPos = Team and tbl27[Team.Name]
 	if tbl26.line then
@@ -2384,7 +2486,7 @@ local function func51()
 	return goalPos
 end
 
-local function func52()
+function func52()
 	tbl26.aiming = false
 	if tbl26.line then tbl26.line.Visible = false end
 	local Character = LocalPlayer.Character
@@ -2392,7 +2494,7 @@ local function func52()
 	if hum then hum.AutoRotate = true end
 end
 
-local function func53()
+function func53()
 	if not tbl26.enabled or not func51() then return end
 	tbl26.aiming = true
 	if tbl26.line then tbl26.line.Visible = true end
@@ -2443,7 +2545,7 @@ local c_ab_rs = RunService.RenderStepped:Connect(function()
 end)
 table.insert(tbl10, c_ab_rs)
 
-local function func54(arg1)
+function func54(arg1)
 	if arg1 and not tbl26.mobileGui then
 		local PlayerGui = LocalPlayer:FindFirstChildOfClass("PlayerGui")
 		if not PlayerGui then return end
@@ -2529,9 +2631,180 @@ v34:CreateDropdown({
 })
 
 -- ============================================================
+
+-- Avatar Stealer
+v34:CreateSection("Avatar Stealer")
+
+local avUser2 = ""
+local avSaved2 = nil
+local avLastId2 = nil
+
+local function avSave2()
+	local ch = LocalPlayer.Character; if not ch then return end
+	local snap = {items={}}
+	for _,v in ipairs(ch:GetChildren()) do
+		if v:IsA("Accessory") or v:IsA("Hat") or v:IsA("Shirt") or v:IsA("Pants") or v:IsA("ShirtGraphic") or v:IsA("CharacterMesh") or v:IsA("BodyColors") or (v:IsA("Decal") and v.Name=="face") then
+			pcall(function() table.insert(snap.items, v:Clone()) end)
+		end
+	end
+	avSaved2 = snap
+end
+
+task.spawn(function() task.wait(3); avSave2() end)
+LocalPlayer.CharacterAdded:Connect(function() task.wait(3); avSave2() end)
+
+local function avClear2(ch)
+	for _,v in ipairs(ch:GetChildren()) do
+		if v:IsA("Accessory") or v:IsA("Hat") or v:IsA("Shirt") or v:IsA("Pants") or v:IsA("ShirtGraphic") or v:IsA("CharacterMesh") or v:IsA("BodyColors") or (v:IsA("Decal") and v.Name=="face") then
+			v:Destroy()
+		end
+	end
+end
+
+local avAttMap2 = {
+	HatAttachment=CFrame.new(0,0.6,0), HairAttachment=CFrame.new(0,0.6,0),
+	FaceFrontAttachment=CFrame.new(0,0,-0.6), FaceCenterAttachment=CFrame.new(0,0,-0.5),
+	HeadFrontAttachment=CFrame.new(0,0,-0.5), HeadTopAttachment=CFrame.new(0,0.5,0),
+	HeadBackAttachment=CFrame.new(0,0,0.5), LeftEarAttachment=CFrame.new(-0.5,0,0),
+	RightEarAttachment=CFrame.new(0.5,0,0), HatFrontAttachment=CFrame.new(0,0.6,-0.5),
+	NeckAttachment=CFrame.new(0,-0.5,0)
+}
+
+local function avEnsureHead2(ch)
+	local head = ch:FindFirstChild("Head"); if not head then return end
+	for nm,cf in pairs(avAttMap2) do
+		if not head:FindFirstChild(nm) then
+			local a = Instance.new("Attachment"); a.Name=nm; a.CFrame=cf; a.Parent=head
+		end
+	end
+end
+
+local function avWeld2(acc, ch)
+	local head = ch:FindFirstChild("Head"); if not head then return false end
+	local h = acc:FindFirstChild("Handle"); if not h then return false end
+	local att = h:FindFirstChild("HatAttachment") or h:FindFirstChild("HairAttachment") or h:FindFirstChild("FaceFrontAttachment") or h:FindFirstChild("FaceCenterAttachment") or h:FindFirstChildOfClass("Attachment")
+	if not att then return false end
+	local ha = head:FindFirstChild(att.Name)
+	if not ha then
+		ha = Instance.new("Attachment"); ha.Name=att.Name; ha.CFrame=avAttMap2[att.Name] or CFrame.new(0,0.6,0); ha.Parent=head
+	end
+	h.Anchored=false; h.CanCollide=false; h.Massless=true
+	local osz = h:FindFirstChild("OriginalSize"); local osv = osz and osz.Value or h.Size
+	acc.Parent = ch
+	for _,c in ipairs(h:GetChildren()) do
+		if c:IsA("Weld") or c:IsA("Motor6D") or c:IsA("WeldConstraint") then c:Destroy() end
+	end
+	local w = Instance.new("Motor6D"); w.Name="AccessoryWeld"; w.Part0=head; w.Part1=h
+	w.C0=ha.CFrame; w.C1=att.CFrame; w.Parent=h
+	if osv then task.defer(function() if h and h.Parent then pcall(function() h.Size=osv*0.85 end) end end) end
+	return true
+end
+
+local function avApply2(item, ch, hum)
+	if item:IsA("Accessory") or item:IsA("Hat") then
+		local c = item:Clone()
+		local osz = c:FindFirstChild("OriginalSize"); local osv = osz and osz.Value
+		if osz then osz:Destroy() end
+		local ok = pcall(function() hum:AddAccessory(c) end)
+		if ok then
+			task.defer(function()
+				if c and c.Parent then
+					local h = c:FindFirstChild("Handle")
+					if h and not h:FindFirstChildOfClass("Weld") and not h:FindFirstChildOfClass("Motor6D") then
+						if osv then pcall(function() h.Size = osv*0.85 end) end
+						avWeld2(c, ch)
+					end
+				end
+			end)
+			return 1
+		end
+		if avWeld2(c, ch) then return 1 end
+	elseif item:IsA("Shirt") or item:IsA("Pants") or item:IsA("ShirtGraphic") then
+		item:Clone().Parent = ch; return 1
+	elseif item:IsA("BodyColors") then
+		local o = ch:FindFirstChildOfClass("BodyColors"); if o then o:Destroy() end
+		item:Clone().Parent = ch; return 1
+	elseif item:IsA("CharacterMesh") then
+		item:Clone().Parent = ch; return 1
+	elseif item:IsA("Decal") and item.Name=="face" then
+		local o = ch:FindFirstChild("face"); if o then o:Destroy() end
+		item:Clone().Parent = ch; return 1
+	end
+	return 0
+end
+
+local function avApplyId2(uid, ch, hum)
+	local ok, model = pcall(function() return Players:GetCharacterAppearanceAsync(uid) end)
+	if not ok or not model then return 0,0 end
+	avEnsureHead2(ch); avClear2(ch); task.wait(0.1)
+	local ac, cc, seen = 0, 0, {}
+	for _, item in ipairs(model:GetDescendants()) do
+		if not item:IsA("Attachment") and not item:IsA("Motor6D") and item.Name~="Handle" and item.Name~="OriginalSize" then
+			if item:IsA("Accessory") or item:IsA("Hat") then
+				local h = item:FindFirstChild("Handle")
+				if not (h and seen[h]) then
+					if h then seen[h]=true end
+					if avApply2(item, ch, hum) > 0 then ac = ac + 1 end
+				end
+			elseif item:IsA("Shirt") or item:IsA("Pants") or item:IsA("ShirtGraphic") or item:IsA("BodyColors") or item:IsA("CharacterMesh") or (item:IsA("Decal") and item.Name=="face") then
+				if avApply2(item, ch, hum) > 0 then cc = cc + 1 end
+			end
+		end
+	end
+	model:Destroy()
+	return ac, cc
+end
+
+local function avSteal2(name)
+	if not name or name=="" then v1:Notify({Title="Avatar", Content="Enter username", Duration=2}); return end
+	local uid
+	if tonumber(name) then uid = tonumber(name)
+	else
+		local ok, id = pcall(function() return Players:GetUserIdFromNameAsync(name) end)
+		if ok then uid = id end
+	end
+	if not uid then v1:Notify({Title="Avatar", Content="User not found", Duration=3}); return end
+	v1:Notify({Title="Avatar", Content="Loading "..name.."...", Duration=2})
+	local ch = LocalPlayer.Character; if not ch then return end
+	local hum = ch:FindFirstChildOfClass("Humanoid"); if not hum then return end
+	if not avSaved2 then avSave2() end
+	local a, c = avApplyId2(uid, ch, hum)
+	avLastId2 = uid
+	v1:Notify({Title="Avatar", Content="✓ "..a.." accs, "..c.." clothes", Duration=3})
+end
+
+v34:CreateInput({
+	Name = "Username or ID",
+	PlaceholderText = "e.g. Roblox",
+	Callback = function(v) avUser2 = v end
+})
+
+v34:CreateButton({
+	Name = "Apply Avatar",
+	Desc = "Apply the avatar of the entered username",
+	Callback = function() task.spawn(avSteal2, avUser2) end
+})
+
+v34:CreateButton({
+	Name = "Restore Avatar",
+	Desc = "Restore your original avatar",
+	Callback = function()
+		if not avSaved2 then return end
+		local ch = LocalPlayer.Character; if not ch then return end
+		local hum = ch:FindFirstChildOfClass("Humanoid"); if not hum then return end
+		avEnsureHead2(ch); avClear2(ch); task.wait(0.1)
+		for _,item in ipairs(avSaved2.items) do avApply2(item, ch, hum) end
+		avLastId2 = nil
+		v1:Notify({Title="Avatar", Content="Restored", Duration=2})
+	end
+})
+
+end
+
+do
 -- TAB 11: AUTO GOAL
 -- ============================================================
-local v_agTab = Window:CreateTab({Name = "Auto Goal", Desc = "Auto goal farm", Icon = "goal"})
+v_agTab = Window:CreateTab({Name = "Auto Goal", Desc = "Auto goal farm", Icon = "goal"})
 v_agTab:CreateSection("Auto Goal")
 v_agTab:CreateParagraph({
 	Title = "Auto Goal Farm",
@@ -2625,9 +2898,12 @@ v_agTab:CreateToggle({
 })
 
 -- ============================================================
+end
+
+do
 -- TAB 12: MISCELLANEOUS
 -- ============================================================
-local v38 = Window:CreateTab({Name = "Miscellaneous", Desc = "Misc tools", Icon = "panel-left"})
+v38 = Window:CreateTab({Name = "Miscellaneous", Desc = "Misc tools", Icon = "panel-left"})
 v38:CreateSection("Game Functions")
 
 v38:CreateButton({
@@ -2664,17 +2940,171 @@ v38:CreateButton({
 	end
 })
 
+
 -- ============================================================
+end
+
+do
 -- TAB 13: SETTINGS
 -- ============================================================
-local v32 = Window:CreateTab({Name = "Settings", Desc = "Configuration & Profiles", Icon = "settings"})
+
+-- ============================================================
+-- STREAM PROOF (STEALTH MODE)
+-- ============================================================
+v38:CreateSection("Stream Proof (Stealth Mode)")
+v38:CreateParagraph({
+	Title = "Stream Proof",
+	Content = "Completely hides the UI and the toggle button circle for Discord stream / screen recording. All features stay active in the background. Tap the top-right corner of the screen or press the keybind to restore.",
+})
+
+streamProofActive = false
+streamProofKey = Enum.KeyCode.RightControl
+secretSensorGui = nil
+streamProofToggleRef = nil
+
+local function getSecretParent()
+	local p = nil
+	pcall(function()
+		if gethui then p = gethui()
+		elseif game:GetService("CoreGui") then p = game:GetService("CoreGui") end
+	end)
+	if not p then
+		p = LocalPlayer:FindFirstChildOfClass("PlayerGui") or LocalPlayer:WaitForChild("PlayerGui", 5)
+	end
+	return p
+end
+
+local function cleanupSecretSensor()
+	if secretSensorGui then
+		pcall(function() secretSensorGui:Destroy() end)
+		secretSensorGui = nil
+	end
+end
+
+local function setStreamProof(enable)
+	streamProofActive = enable
+
+	pcall(function()
+		if Window then
+			if Window.Gui then
+				Window.Gui.Enabled = not enable
+			end
+			if Window.OpenButton then
+				Window.OpenButton.Visible = not enable
+			end
+			if enable and Window.Root then
+				Window.Root.Visible = false
+				if Window.Open then
+					Window.Open = false
+				end
+			end
+		end
+	end)
+
+	if enable then
+		cleanupSecretSensor()
+		pcall(function()
+			local parent = getSecretParent()
+			if not parent then return end
+
+			local sg = Instance.new("ScreenGui")
+			sg.Name = "SP_SecretSensor"
+			sg.ResetOnSpawn = false
+			sg.DisplayOrder = 999999
+			sg.IgnoreGuiInset = true
+
+			local btn = Instance.new("TextButton")
+			btn.Name = "RevealArea"
+			btn.Size = UDim2.new(0, 80, 0, 80)
+			btn.Position = UDim2.new(1, -85, 0, 5) -- Top-right corner of the screen
+			btn.BackgroundTransparency = 1 -- 100% invisible
+			btn.Text = ""
+			btn.BorderSizePixel = 0
+			btn.AutoButtonColor = false
+			btn.Parent = sg
+
+			btn.Activated:Connect(function()
+				setStreamProof(false)
+				if streamProofToggleRef and streamProofToggleRef.Set then
+					streamProofToggleRef:Set(false)
+				end
+			end)
+
+			sg.Parent = parent
+			secretSensorGui = sg
+		end)
+		v1:Notify({Title = "Stream Proof", Content = "Stealth active! Tap top-right corner to restore.", Duration = 3})
+	else
+		cleanupSecretSensor()
+		v1:Notify({Title = "Stream Proof", Content = "UI and toggle button restored.", Duration = 2})
+	end
+end
+
+streamProofToggleRef = v38:CreateToggle({
+	Name = "Enable Stream Proof",
+	CurrentValue = false,
+	Callback = function(val)
+		if val ~= streamProofActive then
+			setStreamProof(val == true)
+		end
+	end,
+})
+
+v38:CreateKeybind({
+	Name = "Stream Proof Keybind",
+	CurrentKeybind = "RightControl",
+	Callback = function(key)
+		if typeof(key) == "EnumItem" then
+			streamProofKey = key
+		elseif typeof(key) == "string" and Enum.KeyCode[key] then
+			streamProofKey = Enum.KeyCode[key]
+		end
+	end,
+})
+
+v38:CreateButton({
+	Name = "Quick Hide (Panic)",
+	Desc = "Instantly hides all UI & buttons",
+	Callback = function()
+		setStreamProof(true)
+		if streamProofToggleRef and streamProofToggleRef.Set then
+			streamProofToggleRef:Set(true)
+		end
+	end,
+})
+
+v38:CreateButton({
+	Name = "Restore UI",
+	Desc = "Forces UI to become visible again",
+	Callback = function()
+		setStreamProof(false)
+		if streamProofToggleRef and streamProofToggleRef.Set then
+			streamProofToggleRef:Set(false)
+		end
+	end,
+})
+
+pcall(function()
+	UserInputService.InputBegan:Connect(function(input, gpe)
+		if gpe then return end
+		if input.UserInputType == Enum.UserInputType.Keyboard and input.KeyCode == streamProofKey then
+			local newState = not streamProofActive
+			setStreamProof(newState)
+			if streamProofToggleRef and streamProofToggleRef.Set then
+				streamProofToggleRef:Set(newState)
+			end
+		end
+	end)
+end)
+
+v32 = Window:CreateTab({Name = "Settings", Desc = "Configuration & Profiles", Icon = "settings"})
 v32:CreateSection("Configuration Manager")
 v32:CreateParagraph({
 	Title = "Profiles",
 	Content = "Save, load, and manage custom profiles or set an automatic startup preset.\nAll files are safely stored in TPS_Configs/ folder.",
 })
 
-local tbl8 = {}
+tbl8 = {}
 if pcall(function() return json.encode end) then
 	tbl8.encode = function(arg1) return json.encode(arg1) end
 	tbl8.decode = function(arg1) return json.decode(arg1) end
@@ -2683,7 +3113,7 @@ else
 	tbl8.decode = function(arg1) return HttpService:JSONDecode(arg1) end
 end
 
-local tbl9 = {
+tbl9 = {
 	m1_on = function(arg1) if v9 and v9.Set then v9:Set(arg1) end end,
 	m1_dist = function(arg1)
 		if v10 and v10.Set then v10:Set(tostring(arg1)) end
@@ -3070,3 +3500,5 @@ if STATE then
 end
 
 getgenv()._SpectreTPS_Cleanup = doFullCleanup
+end
+
