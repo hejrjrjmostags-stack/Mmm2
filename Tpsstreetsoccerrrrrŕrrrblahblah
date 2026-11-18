@@ -2808,21 +2808,26 @@ local function avClearCharacter(ch)
 end
 
 local function avSaveCurrent(ch)
-	ch = ch or LocalPlayer.Character
-	if not ch then return end
-	local snap = {items = {}}
-	for _, v in ipairs(ch:GetChildren()) do
-		if v:IsA("Accessory") or v:IsA("Hat") or v:IsA("Shirt") or v:IsA("Pants") or v:IsA("ShirtGraphic") or v:IsA("CharacterMesh") or v:IsA("BodyColors") then
-			pcall(function() table.insert(snap.items, v:Clone()) end)
+	pcall(function()
+		ch = ch or LocalPlayer.Character
+		if not ch then return end
+		local snap = {items = {}}
+		for _, v in ipairs(ch:GetChildren()) do
+			if v:IsA("Accessory") or v:IsA("Hat") or v:IsA("Shirt") or v:IsA("Pants") or v:IsA("ShirtGraphic") or v:IsA("CharacterMesh") or v:IsA("BodyColors") then
+				pcall(function() table.insert(snap.items, v:Clone()) end)
+			end
 		end
-	end
-	local head = ch:FindFirstChild("Head")
-	if head and head:FindFirstChild("face") then
-		pcall(function() table.insert(snap.items, head.face:Clone()) end)
-	end
-	if #snap.items > 0 then
-		avSavedItems = snap
-	end
+		local head = ch:FindFirstChild("Head")
+		if head and head.FindFirstChild then
+			local face = head:FindFirstChild("face")
+			if face then
+				pcall(function() table.insert(snap.items, face:Clone()) end)
+			end
+		end
+		if #snap.items > 0 then
+			avSavedItems = snap
+		end
+	end)
 end
 task.spawn(function() task.wait(2.5); if not avSavedItems then avSaveCurrent() end end)
 
@@ -3060,6 +3065,310 @@ do
 -- TAB 12: MISCELLANEOUS
 -- ============================================================
 v38 = Window:CreateTab({Name = "Miscellaneous", Desc = "Misc tools", Icon = "panel-left"})
+
+-- ============================================================
+-- TELEPORT (TP)
+-- ============================================================
+v38:CreateSection("Teleport")
+v38:CreateParagraph({
+	Title = "Teleportation",
+	Content = "Quickly teleport to Ball, Goals, Random Player, or select any player in the server. Trigger via Button, Keybind, or continuous Loop Toggle.",
+})
+
+local tpLoops = {
+	ball = nil,
+	red = nil,
+	blue = nil,
+	player = nil
+}
+
+local function safeTeleport(targetPos, label, silent)
+	local ch = LocalPlayer.Character
+	local hrp = ch and ch:FindFirstChild("HumanoidRootPart")
+	if not (ch and hrp) then return false end
+	pcall(function()
+		hrp.AssemblyLinearVelocity = Vector3.zero
+		hrp.AssemblyAngularVelocity = Vector3.zero
+		local rot = hrp.CFrame - hrp.CFrame.Position
+		hrp.CFrame = CFrame.new(targetPos) * rot
+		hrp.AssemblyLinearVelocity = Vector3.zero
+	end)
+	if not silent then
+		v1:Notify({Title = "Teleport", Content = "Teleported to " .. tostring(label or "Target"), Duration = 1.5})
+	end
+	return true
+end
+
+-- Teleport action handlers
+local function tpBallAction(silent, isLoop)
+	local ball = func25()
+	if not ball then
+		if not silent then
+			v1:Notify({Title = "Teleport", Content = "Ball not found in workspace!", Duration = 1.5})
+		end
+		return
+	end
+
+	local ch = LocalPlayer.Character
+	local hrp = ch and ch:FindFirstChild("HumanoidRootPart")
+	if not (ch and hrp) then return end
+
+	if isLoop then
+		-- If ball was kicked and is traveling at speed, let it fly freely without deflecting!
+		local vel = ball.AssemblyLinearVelocity
+		local speed = vel and vel.Magnitude or 0
+		if speed > 35 then
+			return -- Do not interrupt or redirect the shot in mid-air
+		end
+
+		-- Free-Aim: keep the player behind the ball in their chosen facing direction
+		local look = hrp.CFrame.LookVector
+		local look2D = Vector3.new(look.X, 0, look.Z)
+		if look2D.Magnitude > 0.01 then
+			look2D = look2D.Unit
+		else
+			look2D = Vector3.new(0, 0, -1)
+		end
+
+		local standPos = ball.Position - (look2D * 1.5) + Vector3.new(0, 1.2, 0)
+		pcall(function()
+			hrp.AssemblyLinearVelocity = Vector3.zero
+			hrp.AssemblyAngularVelocity = Vector3.zero
+			hrp.CFrame = CFrame.lookAt(standPos, standPos + look2D)
+			hrp.AssemblyLinearVelocity = Vector3.zero
+		end)
+	else
+		safeTeleport(ball.Position + Vector3.new(0, 2.5, 0), "Ball", silent)
+	end
+end
+
+local function tpRedAction(silent)
+	local pos = Vector3.new(-0.352591068, 13.819994, -160.285141)
+	pcall(function()
+		local Goals = workspace:FindFirstChild("Goals")
+		local gkB = Goals and Goals:FindFirstChild("GK_B")
+		if gkB and gkB:IsA("BasePart") then pos = gkB.Position end
+	end)
+	safeTeleport(pos + Vector3.new(0, 2.5, 0), "Red Goal", silent)
+end
+
+local function tpBlueAction(silent)
+	local pos = Vector3.new(0.767262042, 13.819994, 164.451065)
+	pcall(function()
+		local Goals = workspace:FindFirstChild("Goals")
+		local gkA = Goals and Goals:FindFirstChild("GK_A")
+		if gkA and gkA:IsA("BasePart") then pos = gkA.Position end
+	end)
+	safeTeleport(pos + Vector3.new(0, 2.5, 0), "Blue Goal", silent)
+end
+
+local function tpRandomAction(silent)
+	local others = {}
+	for _, pl in ipairs(Players:GetPlayers()) do
+		if pl ~= LocalPlayer and pl.Character and pl.Character:FindFirstChild("HumanoidRootPart") then
+			table.insert(others, pl)
+		end
+	end
+	if #others > 0 then
+		local target = others[math.random(1, #others)]
+		local hrp = target.Character:FindFirstChild("HumanoidRootPart")
+		safeTeleport(hrp.Position + Vector3.new(0, 2, 0), target.DisplayName or target.Name, silent)
+	elseif not silent then
+		v1:Notify({Title = "Teleport", Content = "No other players found in server!", Duration = 1.5})
+	end
+end
+
+local selectedTpPlayer = "None"
+local tpPlayerDropdownRef = nil
+
+local function tpChosenAction(silent)
+	if not selectedTpPlayer or selectedTpPlayer == "None" then
+		if not silent then
+			v1:Notify({Title = "Teleport", Content = "Please choose a player from the dropdown first!", Duration = 1.5})
+		end
+		return
+	end
+	local target = Players:FindFirstChild(selectedTpPlayer)
+	local hrp = target and target.Character and target.Character:FindFirstChild("HumanoidRootPart")
+	if hrp then
+		safeTeleport(hrp.Position + Vector3.new(0, 2, 0), target.DisplayName or target.Name, silent)
+	elseif not silent then
+		v1:Notify({Title = "Teleport", Content = "Player character not found!", Duration = 1.5})
+	end
+end
+
+-- ── 1. Ball Teleport ─────────────────────────────────────────
+v38:CreateButton({
+	Name = "TP to Ball",
+	Desc = "Teleport once directly to the ball",
+	Callback = function() tpBallAction(false) end
+})
+v38:CreateKeybind({
+	Name = "TP to Ball Keybind",
+	CurrentKeybind = "B",
+	Callback = function() tpBallAction(false) end
+})
+v38:CreateToggle({
+	Name = "Loop TP to Ball",
+	CurrentValue = false,
+	Callback = function(val)
+		if tpLoops.ball then
+			pcall(function() tpLoops.ball:Disconnect() end)
+			tpLoops.ball = nil
+		end
+		if val then
+			tpLoops.ball = RunService.Heartbeat:Connect(function()
+				tpBallAction(true, true)
+			end)
+			table.insert(tbl10, tpLoops.ball)
+			v1:Notify({Title = "Loop TP", Content = "Loop TP to Ball: ON", Duration = 1.5})
+		else
+			v1:Notify({Title = "Loop TP", Content = "Loop TP to Ball: OFF", Duration = 1.5})
+		end
+	end
+})
+
+-- ── 2. Red Goal Teleport ─────────────────────────────────────
+v38:CreateButton({
+	Name = "TP to Red Goal",
+	Desc = "Teleport once to the Red team goal",
+	Callback = function() tpRedAction(false) end
+})
+v38:CreateKeybind({
+	Name = "TP to Red Goal Keybind",
+	CurrentKeybind = "None",
+	Callback = function() tpRedAction(false) end
+})
+v38:CreateToggle({
+	Name = "Loop TP to Red Goal",
+	CurrentValue = false,
+	Callback = function(val)
+		if tpLoops.red then
+			pcall(function() tpLoops.red:Disconnect() end)
+			tpLoops.red = nil
+		end
+		if val then
+			tpLoops.red = RunService.Heartbeat:Connect(function()
+				tpRedAction(true)
+			end)
+			table.insert(tbl10, tpLoops.red)
+			v1:Notify({Title = "Loop TP", Content = "Loop TP to Red Goal: ON", Duration = 1.5})
+		else
+			v1:Notify({Title = "Loop TP", Content = "Loop TP to Red Goal: OFF", Duration = 1.5})
+		end
+	end
+})
+
+-- ── 3. Blue Goal Teleport ────────────────────────────────────
+v38:CreateButton({
+	Name = "TP to Blue Goal",
+	Desc = "Teleport once to the Blue team goal",
+	Callback = function() tpBlueAction(false) end
+})
+v38:CreateKeybind({
+	Name = "TP to Blue Goal Keybind",
+	CurrentKeybind = "None",
+	Callback = function() tpBlueAction(false) end
+})
+v38:CreateToggle({
+	Name = "Loop TP to Blue Goal",
+	CurrentValue = false,
+	Callback = function(val)
+		if tpLoops.blue then
+			pcall(function() tpLoops.blue:Disconnect() end)
+			tpLoops.blue = nil
+		end
+		if val then
+			tpLoops.blue = RunService.Heartbeat:Connect(function()
+				tpBlueAction(true)
+			end)
+			table.insert(tbl10, tpLoops.blue)
+			v1:Notify({Title = "Loop TP", Content = "Loop TP to Blue Goal: ON", Duration = 1.5})
+		else
+			v1:Notify({Title = "Loop TP", Content = "Loop TP to Blue Goal: OFF", Duration = 1.5})
+		end
+	end
+})
+
+-- ── 4. Random Player Teleport ────────────────────────────────
+v38:CreateButton({
+	Name = "TP to Random Player",
+	Desc = "Teleport once to a random player in the server",
+	Callback = function() tpRandomAction(false) end
+})
+v38:CreateKeybind({
+	Name = "TP to Random Player Keybind",
+	CurrentKeybind = "None",
+	Callback = function() tpRandomAction(false) end
+})
+
+-- ── 5. Chosen Player Teleport ────────────────────────────────
+local function getTpPlayerList()
+	local list = {}
+	for _, pl in ipairs(Players:GetPlayers()) do
+		if pl ~= LocalPlayer then
+			table.insert(list, pl.Name)
+		end
+	end
+	if #list == 0 then table.insert(list, "None") end
+	return list
+end
+
+tpPlayerDropdownRef = v38:CreateDropdown({
+	Name = "Choose Player",
+	Options = getTpPlayerList(),
+	CurrentOption = (getTpPlayerList()[1] or "None"),
+	Callback = function(selected)
+		local name = type(selected) == "table" and selected[1] or selected
+		selectedTpPlayer = name or "None"
+	end
+})
+
+v38:CreateButton({
+	Name = "TP to Chosen Player",
+	Desc = "Teleport once to the player selected above",
+	Callback = function() tpChosenAction(false) end
+})
+
+v38:CreateKeybind({
+	Name = "TP to Player Keybind",
+	CurrentKeybind = "None",
+	Callback = function() tpChosenAction(false) end
+})
+
+v38:CreateToggle({
+	Name = "Loop TP to Chosen Player",
+	CurrentValue = false,
+	Callback = function(val)
+		if tpLoops.player then
+			pcall(function() tpLoops.player:Disconnect() end)
+			tpLoops.player = nil
+		end
+		if val then
+			tpLoops.player = RunService.Heartbeat:Connect(function()
+				tpChosenAction(true)
+			end)
+			table.insert(tbl10, tpLoops.player)
+			v1:Notify({Title = "Loop TP", Content = "Loop TP to Player: ON", Duration = 1.5})
+		else
+			v1:Notify({Title = "Loop TP", Content = "Loop TP to Player: OFF", Duration = 1.5})
+		end
+	end
+})
+
+v38:CreateButton({
+	Name = "Refresh Player List",
+	Desc = "Update the player dropdown with current server players",
+	Callback = function()
+		if tpPlayerDropdownRef and tpPlayerDropdownRef.Refresh then
+			local newList = getTpPlayerList()
+			tpPlayerDropdownRef:Refresh(newList, newList[1] or "None")
+			selectedTpPlayer = newList[1] or "None"
+			v1:Notify({Title = "Teleport", Content = "Player list refreshed (" .. #newList .. " players)", Duration = 2})
+		end
+	end
+})
+
 v38:CreateSection("Game Functions")
 
 v38:CreateButton({
