@@ -1,7 +1,3 @@
--- ============================================================
--- UNIVERSAL EXECUTOR COMPATIBILITY LAYER
--- Supports: Delta, Fluxus, Codex, Arceus X, Solara, Wave, etc.
--- ============================================================
 pcall(function()
     repeat task.wait() until game:IsLoaded()
 end)
@@ -3076,7 +3072,6 @@ v38:CreateParagraph({
 })
 
 local tpLoops = {
-	ball = nil,
 	red = nil,
 	blue = nil,
 	player = nil
@@ -3100,45 +3095,12 @@ local function safeTeleport(targetPos, label, silent)
 end
 
 -- Teleport action handlers
-local function tpBallAction(silent, isLoop)
+local function tpBallAction(silent)
 	local ball = func25()
-	if not ball then
-		if not silent then
-			v1:Notify({Title = "Teleport", Content = "Ball not found in workspace!", Duration = 1.5})
-		end
-		return
-	end
-
-	local ch = LocalPlayer.Character
-	local hrp = ch and ch:FindFirstChild("HumanoidRootPart")
-	if not (ch and hrp) then return end
-
-	if isLoop then
-		-- If ball was kicked and is traveling at speed, let it fly freely without deflecting!
-		local vel = ball.AssemblyLinearVelocity
-		local speed = vel and vel.Magnitude or 0
-		if speed > 35 then
-			return -- Do not interrupt or redirect the shot in mid-air
-		end
-
-		-- Free-Aim: keep the player behind the ball in their chosen facing direction
-		local look = hrp.CFrame.LookVector
-		local look2D = Vector3.new(look.X, 0, look.Z)
-		if look2D.Magnitude > 0.01 then
-			look2D = look2D.Unit
-		else
-			look2D = Vector3.new(0, 0, -1)
-		end
-
-		local standPos = ball.Position - (look2D * 1.5) + Vector3.new(0, 1.2, 0)
-		pcall(function()
-			hrp.AssemblyLinearVelocity = Vector3.zero
-			hrp.AssemblyAngularVelocity = Vector3.zero
-			hrp.CFrame = CFrame.lookAt(standPos, standPos + look2D)
-			hrp.AssemblyLinearVelocity = Vector3.zero
-		end)
-	else
+	if ball then
 		safeTeleport(ball.Position + Vector3.new(0, 2.5, 0), "Ball", silent)
+	elseif not silent then
+		v1:Notify({Title = "Teleport", Content = "Ball not found in workspace!", Duration = 1.5})
 	end
 end
 
@@ -3208,25 +3170,7 @@ v38:CreateKeybind({
 	CurrentKeybind = "B",
 	Callback = function() tpBallAction(false) end
 })
-v38:CreateToggle({
-	Name = "Loop TP to Ball",
-	CurrentValue = false,
-	Callback = function(val)
-		if tpLoops.ball then
-			pcall(function() tpLoops.ball:Disconnect() end)
-			tpLoops.ball = nil
-		end
-		if val then
-			tpLoops.ball = RunService.Heartbeat:Connect(function()
-				tpBallAction(true, true)
-			end)
-			table.insert(tbl10, tpLoops.ball)
-			v1:Notify({Title = "Loop TP", Content = "Loop TP to Ball: ON", Duration = 1.5})
-		else
-			v1:Notify({Title = "Loop TP", Content = "Loop TP to Ball: OFF", Duration = 1.5})
-		end
-	end
-})
+
 
 -- ── 2. Red Goal Teleport ─────────────────────────────────────
 v38:CreateButton({
@@ -3368,6 +3312,7 @@ v38:CreateButton({
 		end
 	end
 })
+
 
 v38:CreateSection("Game Functions")
 
