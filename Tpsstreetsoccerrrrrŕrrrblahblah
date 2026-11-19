@@ -1,3 +1,7 @@
+-- ============================================================
+-- UNIVERSAL EXECUTOR COMPATIBILITY LAYER
+-- Supports: Delta, Fluxus, Codex, Arceus X, Solara, Wave, etc.
+-- ============================================================
 pcall(function()
     repeat task.wait() until game:IsLoaded()
 end)
@@ -339,6 +343,7 @@ local v9, v10, v11, v12, v13, v14, v15, v16, v17, v19, v20, v25, v26, v27, v40, 
 local tbl1, tbl2, tbl4, tbl5, tbl8, tbl9, tbl16, tbl21, tbl26
 local func4, func11, func14, func29, func38, func42, func47, func51, func52, func53, func54
 local streamProofActive, streamProofKey, secretSensorGui, streamProofToggleRef, setStreamProof
+local abOn, abConn, abRad, startAutoBall, stopAutoBall
 
 do
 -- TAB 1: HOME
@@ -2060,6 +2065,201 @@ v24:CreateButton({
 	end
 })
 
+v24:CreateSection("Graphics & FPS Flags")
+v24:CreateParagraph({
+	Title = "Graphics Optimization",
+	Content = "Direct real-time FPS optimization: strips textures, turns off stadium lights & all shadows, removes particles, and forces smooth potato performance.",
+})
+
+-- Helper to strip shadows and textures from a part
+local function applyPartOptimization(v)
+	pcall(function()
+		if v:IsA("BasePart") then
+			v.CastShadow = false
+			v.Material = Enum.Material.SmoothPlastic
+			v.Reflectance = 0
+		elseif v:IsA("Decal") or v:IsA("Texture") then
+			local p = v.Parent
+			if p and p.Name ~= "Head" and not p.Parent:FindFirstChildOfClass("Humanoid") then
+				v.Transparency = 1
+			end
+		elseif v:IsA("Light") then
+			v.Enabled = false
+		elseif v:IsA("ParticleEmitter") or v:IsA("Trail") or v:IsA("Beam") or v:IsA("Smoke") or v:IsA("Fire") or v:IsA("Sparkles") then
+			v.Enabled = false
+		end
+	end)
+end
+
+-- 1. Texture Quality
+local potatoActive = false
+v24:CreateDropdown({
+	Name = "Texture Quality Flag",
+	Options = {"Lowest (Potato)", "Low (Max FPS)", "Medium", "High (Default)"},
+	CurrentOption = "Low (Max FPS)",
+	Callback = function(opt)
+		local choice = type(opt) == "table" and opt[1] or opt
+		pcall(function()
+			if setfflag then
+				setfflag("DFFlagTextureQualityOverrideEnabled", "True")
+				local valMap = {["Lowest (Potato)"] = "0", ["Low (Max FPS)"] = "1", ["Medium"] = "2", ["High (Default)"] = "3"}
+				setfflag("DFIntTextureQualityOverride", valMap[choice] or "1")
+			end
+			if choice:find("Potato") or choice:find("Low") then
+				settings().Rendering.QualityLevel = Enum.QualityLevel.Level01
+				for _, v in ipairs(workspace:GetDescendants()) do
+					if v:IsA("BasePart") then
+						v.Material = Enum.Material.SmoothPlastic
+						v.Reflectance = 0
+					elseif (v:IsA("Decal") or v:IsA("Texture")) and v.Parent and v.Parent.Name ~= "Head" and not v.Parent.Parent:FindFirstChildOfClass("Humanoid") then
+						v.Transparency = 1
+					end
+				end
+			elseif choice == "Medium" then
+				settings().Rendering.QualityLevel = Enum.QualityLevel.Level05
+			else
+				settings().Rendering.QualityLevel = Enum.QualityLevel.Automatic
+			end
+		end)
+		v1:Notify({Title = "Texture Quality", Content = "Set to " .. tostring(choice), Duration = 2})
+	end
+})
+
+-- 2. Anti-Aliasing (Alias Flag)
+v24:CreateDropdown({
+	Name = "Anti-Aliasing (MSAA) Flag",
+	Options = {"Off (0x - Best FPS)", "2x MSAA", "4x MSAA (Smooth)", "8x MSAA (Max)"},
+	CurrentOption = "Off (0x - Best FPS)",
+	Callback = function(opt)
+		local choice = type(opt) == "table" and opt[1] or opt
+		local sampleMap = {["Off (0x - Best FPS)"] = "0", ["2x MSAA"] = "2", ["4x MSAA (Smooth)"] = "4", ["8x MSAA (Max)"] = "8"}
+		pcall(function()
+			if setfflag then setfflag("FIntDebugForceMSAASamples", sampleMap[choice] or "0") end
+		end)
+		v1:Notify({Title = "Anti-Aliasing Flag", Content = "MSAA set to " .. tostring(choice), Duration = 2})
+	end
+})
+
+-- 3. Remove Shadows & Stadium Lights (Real-time lag purge)
+v24:CreateToggle({
+	Name = "Remove All Shadows & Lights",
+	CurrentValue = false,
+	Callback = function(val)
+		pcall(function()
+			if setfflag then
+				setfflag("FFlagDebugDisableShadowMapping", val and "True" or "False")
+			end
+			local Lighting = game:GetService("Lighting")
+			Lighting.GlobalShadows = not val
+			Lighting.FogEnd = val and 9e9 or 1000
+			Lighting.ShadowSoftness = val and 0 or 0.5
+			Lighting.Brightness = val and 1 or 2
+			-- Strip CastShadow from all parts and turn off heavy stadium lights
+			for _, v in ipairs(workspace:GetDescendants()) do
+				if v:IsA("BasePart") then
+					v.CastShadow = not val
+				elseif v:IsA("PointLight") or v:IsA("SpotLight") or v:IsA("SurfaceLight") then
+					v.Enabled = not val
+				end
+			end
+		end)
+		v1:Notify({Title = "Shadows & Lights", Content = val and "All Shadows & Stadium Lights Removed" or "Shadows Restored", Duration = 2})
+	end
+})
+
+-- 4. Disable Post-FX & 3D Grass
+v24:CreateToggle({
+	Name = "Disable Post-FX & 3D Grass",
+	CurrentValue = false,
+	Callback = function(val)
+		pcall(function()
+			if setfflag then
+				setfflag("DFFlagDisablePostFx", val and "True" or "False")
+				setfflag("DFIntDebugFRMMaxGrassDistance", val and "0" or "100")
+			end
+			for _, effect in ipairs(game:GetService("Lighting"):GetChildren()) do
+				if effect:IsA("PostEffect") or effect:IsA("BloomEffect") or effect:IsA("BlurEffect") or effect:IsA("SunRaysEffect") or effect:IsA("ColorCorrectionEffect") or effect:IsA("Atmosphere") or effect:IsA("DepthOfFieldEffect") then
+					effect.Enabled = not val
+				end
+			end
+		end)
+		v1:Notify({Title = "Post-FX", Content = val and "Post-FX & Grass Off" or "Post-FX Restored", Duration = 2})
+	end
+})
+
+-- 5. NEW: Full Potato Mode (Strip all textures to SmoothPlastic)
+v24:CreateButton({
+	Name = "Full Potato Textures",
+	Desc = "Forces smooth plastic on all field/stadium parts and deletes heavy textures",
+	Callback = function()
+		pcall(function()
+			for _, v in ipairs(workspace:GetDescendants()) do
+				if v:IsA("BasePart") then
+					v.Material = Enum.Material.SmoothPlastic
+					v.Reflectance = 0
+				elseif v:IsA("Decal") or v:IsA("Texture") then
+					local p = v.Parent
+					if p and p.Name ~= "Head" and not p.Parent:FindFirstChildOfClass("Humanoid") then
+						v:Destroy()
+					end
+				end
+			end
+			v1:Notify({Title = "Potato Mode", Content = "All Textures Stripped to Smooth Plastic!", Duration = 2.5})
+		end)
+	end
+})
+
+-- 6. NEW: Remove Particles, Trails & Emitters
+v24:CreateButton({
+	Name = "Remove Particles & Trails",
+	Desc = "Disables all fire, smoke, sparks, trails, beams, and emitters",
+	Callback = function()
+		local count = 0
+		pcall(function()
+			for _, v in ipairs(workspace:GetDescendants()) do
+				if v:IsA("ParticleEmitter") or v:IsA("Trail") or v:IsA("Beam") or v:IsA("Smoke") or v:IsA("Fire") or v:IsA("Sparkles") then
+					v.Enabled = false
+					count = count + 1
+				end
+			end
+			v1:Notify({Title = "Particle Cleaner", Content = "Disabled " .. count .. " Particle/Trail Emitters!", Duration = 2.5})
+		end)
+	end
+})
+
+-- 7. Quick Ultimate FPS Boost Preset
+v24:CreateButton({
+	Name = "Apply Ultimate FPS Preset",
+	Desc = "One-click: Smooth Plastic + No Shadows + No Lights + No Particles + Lowest Quality",
+	Callback = function()
+		pcall(function()
+			if setfflag then
+				setfflag("DFFlagTextureQualityOverrideEnabled", "True")
+				setfflag("DFIntTextureQualityOverride", "0")
+				setfflag("FIntDebugForceMSAASamples", "0")
+				setfflag("FFlagDebugDisableShadowMapping", "True")
+				setfflag("DFFlagDisablePostFx", "True")
+				setfflag("DFIntDebugFRMMaxGrassDistance", "0")
+			end
+			settings().Rendering.QualityLevel = Enum.QualityLevel.Level01
+			local Lighting = game:GetService("Lighting")
+			Lighting.GlobalShadows = false
+			Lighting.FogEnd = 9e9
+			Lighting.ShadowSoftness = 0
+			Lighting.Brightness = 1
+			for _, effect in ipairs(Lighting:GetChildren()) do
+				if effect:IsA("PostEffect") or effect:IsA("BloomEffect") or effect:IsA("BlurEffect") or effect:IsA("SunRaysEffect") or effect:IsA("ColorCorrectionEffect") or effect:IsA("Atmosphere") or effect:IsA("DepthOfFieldEffect") then
+					effect.Enabled = false
+				end
+			end
+			for _, v in ipairs(workspace:GetDescendants()) do
+				applyPartOptimization(v)
+			end
+			v1:Notify({Title = "Ultimate FPS", Content = "Ultimate Zero-Lag Preset Active!", Duration = 2.5})
+		end)
+	end
+})
+
 v24:CreateSection("Flag Inject")
 v24:CreateParagraph({
 	Title = "Flag Inject",
@@ -2422,31 +2622,54 @@ v34 = Window:CreateTab({Name = "Player", Desc = "Script 2 player mods", Icon = "
 -- Auto Ball
 v34:CreateSection("Auto Ball")
 local abOn, abConn, abRad = false, nil, 3
+local abToggleRef = nil
 
-v34:CreateToggle({
-	Name = "Auto Ball (Walk to ball)",
+local function toggleAutoBall(v)
+	abOn = v
+	if abConn then pcall(function() abConn:Disconnect() end) abConn = nil end
+	if not v then
+		local ch = LocalPlayer.Character
+		local h = ch and ch:FindFirstChildOfClass("Humanoid")
+		if h then pcall(function() h:MoveTo(ch:GetPivot().Position) end) end
+		v1:Notify({Title = "Auto Ball", Content = "Disabled", Duration = 1.5})
+		return
+	end
+	abConn = RunService.Heartbeat:Connect(function()
+		local ch = LocalPlayer.Character
+		if not ch then return end
+		local hrp = ch and ch:FindFirstChild("HumanoidRootPart")
+		local hum = ch and ch:FindFirstChildOfClass("Humanoid")
+		local ball = func25()
+		if not (hrp and hum and ball) then return end
+		local dist = (hrp.Position - ball.Position).Magnitude
+		if dist > (abRad or 3) then
+			hum:MoveTo(ball.Position)
+		else
+			hum:MoveTo(hrp.Position)
+		end
+	end)
+	table.insert(tbl10, abConn)
+	v1:Notify({Title = "Auto Ball", Content = "Enabled", Duration = 1.5})
+end
+
+abToggleRef = v34:CreateToggle({
+	Name = "Auto Ball",
 	CurrentValue = false,
 	Callback = function(v)
-		abOn = v
-		if abConn then abConn:Disconnect() abConn = nil end
-		if not v then
-			local ch = LocalPlayer.Character
-			local h = ch and ch:FindFirstChildOfClass("Humanoid")
-			if h then h:MoveTo(ch:GetPivot().Position) end
-			return
+		toggleAutoBall(v)
+	end
+})
+
+v34:CreateKeybind({
+	Name = "Auto Ball Keybind",
+	CurrentKeybind = "None",
+	Callback = function()
+		abOn = not abOn
+		if abToggleRef and abToggleRef.Set then
+			pcall(function() abToggleRef:Set(abOn) end)
+		else
+			toggleAutoBall(abOn)
 		end
-		abConn = RunService.Heartbeat:Connect(function()
-			local ch = LocalPlayer.Character
-			if not ch then return end
-			local hrp = ch:FindFirstChild("HumanoidRootPart")
-			local hum = ch:FindFirstChildOfClass("Humanoid")
-			local ball = func25()
-			if not (hrp and hum and ball) then return end
-			local dist = (hrp.Position - ball.Position).Magnitude
-			if dist > abRad then hum:MoveTo(ball.Position) else hum:MoveTo(hrp.Position) end
-		end)
-		table.insert(tbl10, abConn)
-		v1:Notify({Title = "Auto Ball", Content = "Enabled", Duration = 2})
 	end
 })
 
