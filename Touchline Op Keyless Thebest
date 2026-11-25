@@ -2594,6 +2594,251 @@ do
 	})
 
 	v60:AddSection("Player")
+
+	-- ============================================================
+	-- PING SPOOFER WITH REALISTIC FLUCTUATION (PORTED & ENHANCED)
+	-- ============================================================
+	local CoreGui = game:GetService("CoreGui")
+	local pingSpoofActive = false
+	local pingSpoofTarget = 25
+	local pingSpoofRealistic = true
+	local pingSpoofJitter = 5
+	local pingSpoofConnections = {}
+
+	local function stopPingSpoofer()
+		pingSpoofActive = false
+		for _, item in ipairs(pingSpoofConnections) do
+			if type(item) == "thread" then
+				pcall(task.cancel, item)
+			elseif type(item) == "RBXScriptConnection" then
+				pcall(function() item:Disconnect() end)
+			end
+		end
+		table.clear(pingSpoofConnections)
+		pcall(function() RunService:UnbindFromRenderStep("PingSpoofLock") end)
+
+		pcall(function()
+			local RobloxGui = CoreGui:FindFirstChild("RobloxGui")
+			if RobloxGui then
+				local PerformanceStats = RobloxGui:FindFirstChild("PerformanceStats")
+				if PerformanceStats then
+					for _, child in ipairs(PerformanceStats:GetChildren()) do
+						local TitleLabel = child:FindFirstChild("TitleLabel", true)
+						if TitleLabel and TitleLabel.Text:lower():gsub(" ", ""):find("networkping") then
+							local PS_BarFrame = child:FindFirstChild("PS_BarFrame", true)
+							if PS_BarFrame then
+								PS_BarFrame.Visible = true
+							end
+							local customGraph = child:FindFirstChild("FinalStableGraph", true)
+							if customGraph then
+								customGraph:Destroy()
+							end
+							break
+						end
+					end
+				end
+			end
+		end)
+	end
+
+	local function startPingSpoofer()
+		stopPingSpoofer()
+		pingSpoofActive = true
+
+		local RobloxGui = CoreGui:FindFirstChild("RobloxGui") or CoreGui:WaitForChild("RobloxGui", 5)
+		if not RobloxGui then return end
+		local PerformanceStats = RobloxGui:FindFirstChild("PerformanceStats")
+		if not PerformanceStats then return end
+
+		local pingStatFrame = nil
+		local ValueLabel = nil
+		local PS_BarFrame = nil
+
+		for _, child in ipairs(PerformanceStats:GetChildren()) do
+			local TitleLabel = child:FindFirstChild("TitleLabel", true)
+			if TitleLabel and TitleLabel.Text:lower():gsub(" ", ""):find("networkping") then
+				pingStatFrame = child
+				ValueLabel = child:FindFirstChild("ValueLabel", true)
+				PS_BarFrame = child:FindFirstChild("PS_BarFrame", true)
+				break
+			end
+		end
+
+		if not pingStatFrame then return end
+
+		local labels = {}
+		for _, desc in ipairs(pingStatFrame:GetDescendants()) do
+			if desc:IsA("TextLabel") then
+				if desc.Text:find("Current:") then
+					labels.Current = desc
+				elseif desc.Text:find("Average:") then
+					labels.Average = desc
+				end
+			end
+		end
+
+		if PS_BarFrame then
+			PS_BarFrame.Visible = false
+		end
+
+		local oldGraph = pingStatFrame:FindFirstChild("FinalStableGraph", true)
+		if oldGraph then
+			pcall(function() oldGraph:Destroy() end)
+		end
+
+		local graphFrame = Instance.new("Frame")
+		graphFrame.Name = "FinalStableGraph"
+		graphFrame.Parent = PS_BarFrame and PS_BarFrame.Parent or pingStatFrame
+		graphFrame.Size = PS_BarFrame and PS_BarFrame.Size or UDim2.new(1, 0, 1, 0)
+		graphFrame.Position = PS_BarFrame and PS_BarFrame.Position or UDim2.new(0, 0, 0, 0)
+		graphFrame.BackgroundTransparency = 1
+		graphFrame.ClipsDescendants = true
+
+		local listLayout = Instance.new("UIListLayout")
+		listLayout.Parent = graphFrame
+		listLayout.FillDirection = Enum.FillDirection.Horizontal
+		listLayout.HorizontalAlignment = Enum.HorizontalAlignment.Right
+		listLayout.VerticalAlignment = Enum.VerticalAlignment.Bottom
+		listLayout.Padding = UDim.new(0, 0)
+
+		local barFrames = {}
+		local history = {}
+		for i = 1, 50 do
+			history[i] = pingSpoofTarget
+			local bar = Instance.new("Frame")
+			bar.Parent = graphFrame
+			bar.BorderSizePixel = 0
+			bar.LayoutOrder = i
+			bar.Size = UDim2.new(0.02, 0, math.clamp(pingSpoofTarget / 100, 0.05, 1), 0)
+			if pingSpoofTarget >= 60 then
+				bar.BackgroundColor3 = Color3.fromRGB(255, 40, 40)
+			elseif pingSpoofTarget >= 30 then
+				bar.BackgroundColor3 = Color3.fromRGB(255, 200, 0)
+			else
+				bar.BackgroundColor3 = Color3.fromRGB(85, 255, 0)
+			end
+			table.insert(barFrames, bar)
+		end
+
+		local currentVal = pingSpoofTarget
+		local targetGoal = pingSpoofTarget
+		local displayCurrent = pingSpoofTarget
+		local displayAverage = pingSpoofTarget
+		local rollingSum = pingSpoofTarget * 50
+		local tickCount = 0
+
+		-- Smooth realistic jitter simulation thread
+		local simThread = task.spawn(function()
+			while pingSpoofActive do
+				if pingSpoofRealistic then
+					tickCount = tickCount + 1
+					if tickCount >= 3 then
+						tickCount = 0
+						local minP = math.max(1, pingSpoofTarget - pingSpoofJitter)
+						local maxP = pingSpoofTarget + pingSpoofJitter
+						local jitter = (math.random(-pingSpoofJitter * 10, pingSpoofJitter * 10) / 10)
+						if math.random(1, 20) == 1 then
+							jitter = jitter + math.random(2, 4)
+						end
+						targetGoal = math.clamp(pingSpoofTarget + jitter, minP, maxP + 4)
+					end
+					currentVal = currentVal + (targetGoal - currentVal) * 0.45 + (math.random(-2, 2) / 10)
+					currentVal = math.max(1, currentVal)
+				else
+					currentVal = pingSpoofTarget
+				end
+
+				local removedVal = table.remove(history, 1) or pingSpoofTarget
+				table.insert(history, currentVal)
+				rollingSum = rollingSum - removedVal + currentVal
+				displayAverage = rollingSum / #history
+				displayCurrent = currentVal
+
+				local maxScale = math.max(100, pingSpoofTarget * 1.3)
+				for i, bar in ipairs(barFrames) do
+					local val = history[i] or currentVal
+					bar.Size = UDim2.new(0.02, 0, math.clamp(val / maxScale, 0.05, 1), 0)
+					if val >= 60 then
+						bar.BackgroundColor3 = Color3.fromRGB(255, 40, 40)
+					elseif val >= 30 then
+						bar.BackgroundColor3 = Color3.fromRGB(255, 200, 0)
+					else
+						bar.BackgroundColor3 = Color3.fromRGB(85, 255, 0)
+					end
+				end
+
+				task.wait(0.35)
+			end
+		end)
+		table.insert(pingSpoofConnections, simThread)
+
+		RunService:BindToRenderStep("PingSpoofLock", Enum.RenderPriority.Last.Value, function()
+			if not pingSpoofActive then return end
+			local curInt = math.floor(displayCurrent + 0.5)
+			local avgInt = math.floor(displayAverage + 0.5)
+			local strCur = tostring(curInt) .. " ms"
+			local strAvg = tostring(avgInt) .. " ms"
+			if ValueLabel then ValueLabel.Text = strCur end
+			if labels.Current then labels.Current.Text = "Current: " .. strCur end
+			if labels.Average then labels.Average.Text = "Average: " .. strAvg end
+		end)
+		table.insert(pingSpoofConnections, "PingSpoofLock")
+	end
+
+	v60:AddToggle({
+		Name = "Enable Ping Spoofer",
+		Default = false,
+		Callback = function(val)
+			if val then
+				startPingSpoofer()
+				func5("Ping Spoofer", "ENABLED (" .. tostring(pingSpoofTarget) .. "ms ±" .. tostring(pingSpoofJitter) .. ")", 2)
+			else
+				stopPingSpoofer()
+				func5("Ping Spoofer", "DISABLED", 2)
+			end
+		end,
+	})
+
+	v60:AddToggle({
+		Name = "Realistic Fluctuation",
+		Default = true,
+		Callback = function(val)
+			pingSpoofRealistic = val
+		end,
+	})
+
+	v60:AddSlider({
+		Name = "Target Ping (ms)",
+		Min = 5,
+		Max = 300,
+		Default = pingSpoofTarget,
+		Callback = function(val)
+			pingSpoofTarget = math.floor(val + 0.5)
+		end,
+	})
+
+	v60:AddSlider({
+		Name = "Fluctuation Range (±ms)",
+		Min = 1,
+		Max = 20,
+		Default = pingSpoofJitter,
+		Callback = function(val)
+			pingSpoofJitter = math.floor(val + 0.5)
+		end,
+	})
+
+	v60:AddTextBox({
+		Name = "Custom Ping",
+		PlaceholderText = "Enter ping (e.g. 25)",
+		Default = tostring(pingSpoofTarget),
+		Callback = function(text)
+			local num = tonumber(text)
+			if num and num > 0 and num <= 1000 then
+				pingSpoofTarget = math.floor(num)
+				func5("Ping Spoofer", "Target set to " .. tostring(pingSpoofTarget) .. "ms", 2)
+			end
+		end,
+	})
 	local flag11 = false
 	local num14 = 22
 	v60:AddToggle({
