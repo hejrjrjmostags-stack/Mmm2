@@ -1,7 +1,3 @@
--- ============================================================
--- UNIVERSAL EXECUTOR COMPATIBILITY LAYER
--- Supports: Delta, Fluxus, Codex, Arceus X, Solara, Wave, etc.
--- ============================================================
 pcall(function()
     repeat task.wait() until game:IsLoaded()
 end)
@@ -37,18 +33,13 @@ local function safeHttpGet(url)
     return result or res
 end
 
---[[
-    SPECTRE HUB — TOUCHLINE
-    Black & White Edition
-    Powered by PEAK / Spectre UI
-]]
 
 local rawLib = safeHttpGet("https://raw.githubusercontent.com/Twistzzmassivescripts/UI_Libarys/refs/heads/main/OUTLAWS.dev/NEW%20ONE%20PEAK.lua")
 if not rawLib or rawLib == "" then
 	rawLib = game:HttpGet("https://raw.githubusercontent.com/Twistzzmassivescripts/UI_Libarys/refs/heads/main/OUTLAWS.dev/NEW%20ONE%20PEAK.lua")
 end
 
--- Helper for exact string replacement
+
 local function replaceExact(source, target, replacement)
 	local p1, p2 = source:find(target, 1, true)
 	if p1 then
@@ -57,26 +48,26 @@ local function replaceExact(source, target, replacement)
 	return source
 end
 
--- 1. Apply Black & White Theme
+
 rawLib = rawLib:gsub(
 	"f%.Theme=%b{}",
 	"f.Theme={Background=Color3.fromRGB(12,12,12),Surface=Color3.fromRGB(18,18,18),Surface2=Color3.fromRGB(24,24,24),Surface3=Color3.fromRGB(34,34,34),Stroke=Color3.fromRGB(46,46,46),StrokeHover=Color3.fromRGB(90,90,90),Accent=Color3.fromRGB(255,255,255),AccentDark=Color3.fromRGB(15,15,15),Text=Color3.fromRGB(255,255,255),Muted=Color3.fromRGB(140,140,140),Warning=Color3.fromRGB(240,176,108),Success=Color3.fromRGB(150,220,170),Error=Color3.fromRGB(240,120,120)}"
 )
 
--- 2. Turn purple glow tint into monochrome white glow
+
 rawLib = rawLib:gsub("Color3%.fromRGB%(226,218,230%)", "Color3.fromRGB(255,255,255)")
 
--- 3. Swap purple logo asset ID for the Spectre S icon
+
 rawLib = rawLib:gsub('Logo="rbxassetid://103859712365480"', 'Logo="rbxassetid://106249189352631"')
 
--- 4. Replace purple top-left logo with bold text "SPECTRE"
+
 local headerTarget = 'local J=c(p,{Name="Header",Size=UDim2.new(1,0,0,72),BackgroundTransparency=1,Parent=C})local X=c("ImageLabel",{Position=UDim2.fromOffset(22,27),Size=UDim2.fromOffset(30,28),BackgroundTransparency=1,Image="",ImageColor3=a.Accent,ScaleType=Enum.ScaleType.Fit,Parent=J})u(X,k.Icon or t.Logo)d{Position=UDim2.fromOffset(60,25),Size=UDim2.new(1,-70,0,20),Text=k.Title or"Airflow",TextSize=20,Parent=J}d{Position=UDim2.fromOffset(60,45),Size=UDim2.new(1,-70,0,14),Text=k.Subtitle or"",TextSize=13,FontFace=i.Regular,TextColor3=a.Muted,Parent=J}'
 
 local newHeader = 'local J=c(p,{Name="Header",Size=UDim2.new(1,0,0,72),BackgroundTransparency=1,Parent=C})c("ImageLabel",{Position=UDim2.fromOffset(22,18),Size=UDim2.fromOffset(28,28),BackgroundTransparency=1,Image="rbxassetid://106249189352631",ImageColor3=a.Text,ScaleType=Enum.ScaleType.Fit,Parent=J})d{Position=UDim2.fromOffset(55,24),Size=UDim2.new(1,-65,0,22),Text="SPECTRE",TextSize=21,FontFace=i.Bold,TextColor3=a.Text,Parent=J}d{Position=UDim2.fromOffset(55,46),Size=UDim2.new(1,-65,0,14),Text=k.Subtitle or"Touchline",TextSize=12,FontFace=i.Regular,TextColor3=a.Muted,Parent=J}'
 
 rawLib = replaceExact(rawLib, headerTarget, newHeader)
 
--- 5. Replace branding names (Outlaw, kimi, airflow -> Spectre)
+
 rawLib = rawLib:gsub("AirFlow", "Spectre")
 rawLib = rawLib:gsub("Airflow", "Spectre")
 rawLib = rawLib:gsub("airflow", "spectre")
@@ -113,9 +104,7 @@ function v1:Notify(tbl)
 	end)
 end
 
--- ============================================================
--- CORE VARIABLES & SERVICES
--- ============================================================
+
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local HttpService = game:GetService("HttpService")
@@ -133,9 +122,7 @@ local function func(...)
 	pcall(...)
 end
 
--- ============================================================
--- TAB 1: HOME
--- ============================================================
+
 local v5 = Window:CreateTab({Name = "Home", Desc = "Info", Icon = "house"})
 Window:SelectTab(v5)
 
@@ -248,9 +235,7 @@ v5:CreateLabel({
 
 local SpectreCfg = {controls = {}, order = {}}
 
--- ============================================================
--- TOUCHLINE FEATURES (ported into the Spectre UI)
--- ============================================================
+
 do
 local function loadTouchlineFeatures()
 local SpectreNotify = v1
@@ -307,7 +292,7 @@ tbl24.MakeTab = function(_, tabName, iconName)
 		end})
 	end
 
-	-- shared helper: one callback per change, whether set by the user or by code
+
 	local function bind(initial, onChange)
 		local state = {current = initial, silent = false, ctrl = nil}
 		function state.fire(v) state.current = v if onChange then onChange(v) end end
@@ -399,7 +384,7 @@ tbl24.MakeTab = function(_, tabName, iconName)
 	return adapter
 end
 
--- ---- Touchline feature code (original UI removed) ----
+
 	game:GetService("HttpService")
 	InsertService = game:GetService("InsertService")
 	Lighting = game:GetService("Lighting")
@@ -1243,9 +1228,7 @@ do
 	end)
 	local v51 = tbl24:MakeTab("Goalkeeper")
 
-	-- ============================================================
-	-- AUTO DIVE GOALKEEPER (PORTED FROM TOUCHLINEOUTLARP)
-	-- ============================================================
+
 	v51:AddSection("Auto Dive Goalkeeper")
 
 	local gkDiveSettings = {
@@ -1553,7 +1536,7 @@ do
 		end,
 	})
 
-	-- ── CLICKER AUTO GOALIE & HITBOX (ORIGINAL) ───────────────────
+
 	v51:AddSection("Clicker Auto GK & Hitbox")
 	local tbl36 = {
 		enabled = false,
@@ -2595,194 +2578,192 @@ do
 
 	v60:AddSection("Player")
 
-	-- ============================================================
-	-- PING SPOOFER WITH REALISTIC FLUCTUATION (PORTED & ENHANCED)
-	-- ============================================================
+	v60:AddSection("Ping Spoofer")
+
 	local CoreGui = game:GetService("CoreGui")
 	local pingSpoofActive = false
 	local pingSpoofTarget = 25
 	local pingSpoofRealistic = true
 	local pingSpoofJitter = 5
 	local pingSpoofConnections = {}
-
+	
 	local function stopPingSpoofer()
-		pingSpoofActive = false
-		for _, item in ipairs(pingSpoofConnections) do
-			if type(item) == "thread" then
-				pcall(task.cancel, item)
-			elseif type(item) == "RBXScriptConnection" then
-				pcall(function() item:Disconnect() end)
-			end
+	pingSpoofActive = false
+	for _, item in ipairs(pingSpoofConnections) do
+		if type(item) == "thread" then
+			pcall(task.cancel, item)
+		elseif type(item) == "RBXScriptConnection" then
+			pcall(function() item:Disconnect() end)
 		end
-		table.clear(pingSpoofConnections)
-		pcall(function() RunService:UnbindFromRenderStep("PingSpoofLock") end)
-
-		pcall(function()
-			local RobloxGui = CoreGui:FindFirstChild("RobloxGui")
-			if RobloxGui then
-				local PerformanceStats = RobloxGui:FindFirstChild("PerformanceStats")
-				if PerformanceStats then
-					for _, child in ipairs(PerformanceStats:GetChildren()) do
-						local TitleLabel = child:FindFirstChild("TitleLabel", true)
-						if TitleLabel and TitleLabel.Text:lower():gsub(" ", ""):find("networkping") then
-							local PS_BarFrame = child:FindFirstChild("PS_BarFrame", true)
-							if PS_BarFrame then
-								PS_BarFrame.Visible = true
-							end
-							local customGraph = child:FindFirstChild("FinalStableGraph", true)
-							if customGraph then
-								customGraph:Destroy()
-							end
-							break
-						end
-					end
-				end
-			end
-		end)
 	end
-
-	local function startPingSpoofer()
-		stopPingSpoofer()
-		pingSpoofActive = true
-
-		local RobloxGui = CoreGui:FindFirstChild("RobloxGui") or CoreGui:WaitForChild("RobloxGui", 5)
-		if not RobloxGui then return end
-		local PerformanceStats = RobloxGui:FindFirstChild("PerformanceStats")
-		if not PerformanceStats then return end
-
-		local pingStatFrame = nil
-		local ValueLabel = nil
-		local PS_BarFrame = nil
-
-		for _, child in ipairs(PerformanceStats:GetChildren()) do
-			local TitleLabel = child:FindFirstChild("TitleLabel", true)
-			if TitleLabel and TitleLabel.Text:lower():gsub(" ", ""):find("networkping") then
-				pingStatFrame = child
-				ValueLabel = child:FindFirstChild("ValueLabel", true)
-				PS_BarFrame = child:FindFirstChild("PS_BarFrame", true)
-				break
-			end
-		end
-
-		if not pingStatFrame then return end
-
-		local labels = {}
-		for _, desc in ipairs(pingStatFrame:GetDescendants()) do
-			if desc:IsA("TextLabel") then
-				if desc.Text:find("Current:") then
-					labels.Current = desc
-				elseif desc.Text:find("Average:") then
-					labels.Average = desc
-				end
-			end
-		end
-
-		if PS_BarFrame then
-			PS_BarFrame.Visible = false
-		end
-
-		local oldGraph = pingStatFrame:FindFirstChild("FinalStableGraph", true)
-		if oldGraph then
-			pcall(function() oldGraph:Destroy() end)
-		end
-
-		local graphFrame = Instance.new("Frame")
-		graphFrame.Name = "FinalStableGraph"
-		graphFrame.Parent = PS_BarFrame and PS_BarFrame.Parent or pingStatFrame
-		graphFrame.Size = PS_BarFrame and PS_BarFrame.Size or UDim2.new(1, 0, 1, 0)
-		graphFrame.Position = PS_BarFrame and PS_BarFrame.Position or UDim2.new(0, 0, 0, 0)
-		graphFrame.BackgroundTransparency = 1
-		graphFrame.ClipsDescendants = true
-
-		local listLayout = Instance.new("UIListLayout")
-		listLayout.Parent = graphFrame
-		listLayout.FillDirection = Enum.FillDirection.Horizontal
-		listLayout.HorizontalAlignment = Enum.HorizontalAlignment.Right
-		listLayout.VerticalAlignment = Enum.VerticalAlignment.Bottom
-		listLayout.Padding = UDim.new(0, 0)
-
-		local barFrames = {}
-		local history = {}
-		for i = 1, 50 do
-			history[i] = pingSpoofTarget
-			local bar = Instance.new("Frame")
-			bar.Parent = graphFrame
-			bar.BorderSizePixel = 0
-			bar.LayoutOrder = i
-			bar.Size = UDim2.new(0.02, 0, math.clamp(pingSpoofTarget / 100, 0.05, 1), 0)
-			if pingSpoofTarget >= 60 then
-				bar.BackgroundColor3 = Color3.fromRGB(255, 40, 40)
-			elseif pingSpoofTarget >= 30 then
-				bar.BackgroundColor3 = Color3.fromRGB(255, 200, 0)
-			else
-				bar.BackgroundColor3 = Color3.fromRGB(85, 255, 0)
-			end
-			table.insert(barFrames, bar)
-		end
-
-		local currentVal = pingSpoofTarget
-		local targetGoal = pingSpoofTarget
-		local displayCurrent = pingSpoofTarget
-		local displayAverage = pingSpoofTarget
-		local rollingSum = pingSpoofTarget * 50
-		local tickCount = 0
-
-		-- Smooth realistic jitter simulation thread
-		local simThread = task.spawn(function()
-			while pingSpoofActive do
-				if pingSpoofRealistic then
-					tickCount = tickCount + 1
-					if tickCount >= 3 then
-						tickCount = 0
-						local minP = math.max(1, pingSpoofTarget - pingSpoofJitter)
-						local maxP = pingSpoofTarget + pingSpoofJitter
-						local jitter = (math.random(-pingSpoofJitter * 10, pingSpoofJitter * 10) / 10)
-						if math.random(1, 20) == 1 then
-							jitter = jitter + math.random(2, 4)
+	table.clear(pingSpoofConnections)
+	pcall(function() RunService:UnbindFromRenderStep("PingSpoofLock") end)
+	
+	pcall(function()
+		local RobloxGui = CoreGui:FindFirstChild("RobloxGui")
+		if RobloxGui then
+			local PerformanceStats = RobloxGui:FindFirstChild("PerformanceStats")
+			if PerformanceStats then
+				for _, child in ipairs(PerformanceStats:GetChildren()) do
+					local TitleLabel = child:FindFirstChild("TitleLabel", true)
+					if TitleLabel and TitleLabel.Text:lower():gsub(" ", ""):find("networkping") then
+						local PS_BarFrame = child:FindFirstChild("PS_BarFrame", true)
+						if PS_BarFrame then
+							PS_BarFrame.Visible = true
 						end
-						targetGoal = math.clamp(pingSpoofTarget + jitter, minP, maxP + 4)
-					end
-					currentVal = currentVal + (targetGoal - currentVal) * 0.45 + (math.random(-2, 2) / 10)
-					currentVal = math.max(1, currentVal)
-				else
-					currentVal = pingSpoofTarget
-				end
-
-				local removedVal = table.remove(history, 1) or pingSpoofTarget
-				table.insert(history, currentVal)
-				rollingSum = rollingSum - removedVal + currentVal
-				displayAverage = rollingSum / #history
-				displayCurrent = currentVal
-
-				local maxScale = math.max(100, pingSpoofTarget * 1.3)
-				for i, bar in ipairs(barFrames) do
-					local val = history[i] or currentVal
-					bar.Size = UDim2.new(0.02, 0, math.clamp(val / maxScale, 0.05, 1), 0)
-					if val >= 60 then
-						bar.BackgroundColor3 = Color3.fromRGB(255, 40, 40)
-					elseif val >= 30 then
-						bar.BackgroundColor3 = Color3.fromRGB(255, 200, 0)
-					else
-						bar.BackgroundColor3 = Color3.fromRGB(85, 255, 0)
+						local customGraph = child:FindFirstChild("FinalStableGraph", true)
+						if customGraph then
+							customGraph:Destroy()
+						end
+						break
 					end
 				end
-
-				task.wait(0.35)
 			end
-		end)
-		table.insert(pingSpoofConnections, simThread)
-
-		RunService:BindToRenderStep("PingSpoofLock", Enum.RenderPriority.Last.Value, function()
-			if not pingSpoofActive then return end
-			local curInt = math.floor(displayCurrent + 0.5)
-			local avgInt = math.floor(displayAverage + 0.5)
-			local strCur = tostring(curInt) .. " ms"
-			local strAvg = tostring(avgInt) .. " ms"
-			if ValueLabel then ValueLabel.Text = strCur end
-			if labels.Current then labels.Current.Text = "Current: " .. strCur end
-			if labels.Average then labels.Average.Text = "Average: " .. strAvg end
-		end)
-		table.insert(pingSpoofConnections, "PingSpoofLock")
+		end
+	end)
+	end
+	
+	local function startPingSpoofer()
+	stopPingSpoofer()
+	pingSpoofActive = true
+	
+	local RobloxGui = CoreGui:FindFirstChild("RobloxGui") or CoreGui:WaitForChild("RobloxGui", 5)
+	if not RobloxGui then return end
+	local PerformanceStats = RobloxGui:FindFirstChild("PerformanceStats")
+	if not PerformanceStats then return end
+	
+	local pingStatFrame = nil
+	local ValueLabel = nil
+	local PS_BarFrame = nil
+	
+	for _, child in ipairs(PerformanceStats:GetChildren()) do
+		local TitleLabel = child:FindFirstChild("TitleLabel", true)
+		if TitleLabel and TitleLabel.Text:lower():gsub(" ", ""):find("networkping") then
+			pingStatFrame = child
+			ValueLabel = child:FindFirstChild("ValueLabel", true)
+			PS_BarFrame = child:FindFirstChild("PS_BarFrame", true)
+			break
+		end
+	end
+	
+	if not pingStatFrame then return end
+	
+	local labels = {}
+	for _, desc in ipairs(pingStatFrame:GetDescendants()) do
+		if desc:IsA("TextLabel") then
+			if desc.Text:find("Current:") then
+				labels.Current = desc
+			elseif desc.Text:find("Average:") then
+				labels.Average = desc
+			end
+		end
+	end
+	
+	if PS_BarFrame then
+		PS_BarFrame.Visible = false
+	end
+	
+	local oldGraph = pingStatFrame:FindFirstChild("FinalStableGraph", true)
+	if oldGraph then
+		pcall(function() oldGraph:Destroy() end)
+	end
+	
+	local graphFrame = Instance.new("Frame")
+	graphFrame.Name = "FinalStableGraph"
+	graphFrame.Parent = PS_BarFrame and PS_BarFrame.Parent or pingStatFrame
+	graphFrame.Size = PS_BarFrame and PS_BarFrame.Size or UDim2.new(1, 0, 1, 0)
+	graphFrame.Position = PS_BarFrame and PS_BarFrame.Position or UDim2.new(0, 0, 0, 0)
+	graphFrame.BackgroundTransparency = 1
+	graphFrame.ClipsDescendants = true
+	
+	local listLayout = Instance.new("UIListLayout")
+	listLayout.Parent = graphFrame
+	listLayout.FillDirection = Enum.FillDirection.Horizontal
+	listLayout.HorizontalAlignment = Enum.HorizontalAlignment.Right
+	listLayout.VerticalAlignment = Enum.VerticalAlignment.Bottom
+	listLayout.Padding = UDim.new(0, 0)
+	
+	local barFrames = {}
+	local history = {}
+	for i = 1, 50 do
+		history[i] = pingSpoofTarget
+		local bar = Instance.new("Frame")
+		bar.Parent = graphFrame
+		bar.BorderSizePixel = 0
+		bar.LayoutOrder = i
+		bar.Size = UDim2.new(0.02, 0, math.clamp(pingSpoofTarget / 100, 0.05, 1), 0)
+		if pingSpoofTarget >= 60 then
+			bar.BackgroundColor3 = Color3.fromRGB(255, 40, 40)
+		elseif pingSpoofTarget >= 30 then
+			bar.BackgroundColor3 = Color3.fromRGB(255, 200, 0)
+		else
+			bar.BackgroundColor3 = Color3.fromRGB(85, 255, 0)
+		end
+		table.insert(barFrames, bar)
+	end
+	
+	local currentVal = pingSpoofTarget
+	local targetGoal = pingSpoofTarget
+	local displayCurrent = pingSpoofTarget
+	local displayAverage = pingSpoofTarget
+	local rollingSum = pingSpoofTarget * 50
+	local tickCount = 0
+	
+	local simThread = task.spawn(function()
+		while pingSpoofActive do
+			if pingSpoofRealistic then
+				tickCount = tickCount + 1
+				if tickCount >= 3 then
+					tickCount = 0
+					local minP = math.max(1, pingSpoofTarget - pingSpoofJitter)
+					local maxP = pingSpoofTarget + pingSpoofJitter
+					local jitter = (math.random(-pingSpoofJitter * 10, pingSpoofJitter * 10) / 10)
+					if math.random(1, 20) == 1 then
+						jitter = jitter + math.random(2, 4)
+					end
+					targetGoal = math.clamp(pingSpoofTarget + jitter, minP, maxP + 4)
+				end
+				currentVal = currentVal + (targetGoal - currentVal) * 0.45 + (math.random(-2, 2) / 10)
+				currentVal = math.max(1, currentVal)
+			else
+				currentVal = pingSpoofTarget
+			end
+	
+			local removedVal = table.remove(history, 1) or pingSpoofTarget
+			table.insert(history, currentVal)
+			rollingSum = rollingSum - removedVal + currentVal
+			displayAverage = rollingSum / #history
+			displayCurrent = currentVal
+	
+			local maxScale = math.max(100, pingSpoofTarget * 1.3)
+			for i, bar in ipairs(barFrames) do
+				local val = history[i] or currentVal
+				bar.Size = UDim2.new(0.02, 0, math.clamp(val / maxScale, 0.05, 1), 0)
+				if val >= 60 then
+					bar.BackgroundColor3 = Color3.fromRGB(255, 40, 40)
+				elseif val >= 30 then
+					bar.BackgroundColor3 = Color3.fromRGB(255, 200, 0)
+				else
+					bar.BackgroundColor3 = Color3.fromRGB(85, 255, 0)
+				end
+			end
+	
+			task.wait(0.35)
+		end
+	end)
+	table.insert(pingSpoofConnections, simThread)
+	
+	RunService:BindToRenderStep("PingSpoofLock", Enum.RenderPriority.Last.Value, function()
+		if not pingSpoofActive then return end
+		local curInt = math.floor(displayCurrent + 0.5)
+		local avgInt = math.floor(displayAverage + 0.5)
+		local strCur = tostring(curInt) .. " ms"
+		local strAvg = tostring(avgInt) .. " ms"
+		if ValueLabel then ValueLabel.Text = strCur end
+		if labels.Current then labels.Current.Text = "Current: " .. strCur end
+		if labels.Average then labels.Average.Text = "Average: " .. strAvg end
+	end)
+	table.insert(pingSpoofConnections, "PingSpoofLock")
 	end
 
 	v60:AddToggle({
@@ -2791,10 +2772,10 @@ do
 		Callback = function(val)
 			if val then
 				startPingSpoofer()
-				func5("Ping Spoofer", "ENABLED (" .. tostring(pingSpoofTarget) .. "ms ±" .. tostring(pingSpoofJitter) .. ")", 2)
+				func5("Ping Spoofer", "Enabled (" .. tostring(pingSpoofTarget) .. "ms ±" .. tostring(pingSpoofJitter) .. ")", 2)
 			else
 				stopPingSpoofer()
-				func5("Ping Spoofer", "DISABLED", 2)
+				func5("Ping Spoofer", "Disabled", 2)
 			end
 		end,
 	})
@@ -2839,6 +2820,7 @@ do
 			end
 		end,
 	})
+
 	local flag11 = false
 	local num14 = 22
 	v60:AddToggle({
@@ -2956,10 +2938,7 @@ do
 		end,
 	})
 
-	
-	-- ============================================================
-	-- STREAM PROOF (STEALTH MODE)
-	-- ============================================================
+
 	v60:AddSection("Stream Proof (Stealth Mode)")
 	v60:AddParagraph(
 		"Stream Proof",
@@ -3025,8 +3004,8 @@ do
 				local btn = Instance.new("TextButton")
 				btn.Name = "RevealArea"
 				btn.Size = UDim2.new(0, 80, 0, 80)
-				btn.Position = UDim2.new(1, -85, 0, 5) -- Top-right corner of the screen
-				btn.BackgroundTransparency = 1 -- 100% invisible
+				btn.Position = UDim2.new(1, -85, 0, 5)
+				btn.BackgroundTransparency = 1
 				btn.Text = ""
 				btn.BorderSizePixel = 0
 				btn.AutoButtonColor = false
@@ -3540,14 +3519,6 @@ end
 end
 
 
-
--- ============================================================
--- TAB 13: SETTINGS
--- ============================================================
-
--- ============================================================
--- SETTINGS (config manager + UI keybind)
--- ============================================================
 local v32 = Window:CreateTab({Name = "Settings", Desc = "Configs & UI", Icon = "settings"})
 
 local CFG_DIR = "SpectreTouchline_Configs"
@@ -3809,7 +3780,7 @@ v32:CreateButton({Name = "Reset All Features to Default", Callback = function()
 	notify("Reset", n .. " controls restored to defaults", "Info")
 end})
 
--- ---- UI toggle keybind ----
+
 v32:CreateSection("UI Toggle Keybind")
 v32:CreateParagraph({Title = "Default key", Content = "RightShift shows/hides the menu. You can change it below."})
 local currentKeybindName = "RightShift"
@@ -3831,7 +3802,7 @@ local function applyUiKey(name, showNotify)
 	return true
 end
 
--- fallback: if the library cannot rebind, a second listener toggles the menu on the new key
+
 UserInputService.InputBegan:Connect(function(input, processed)
 	if processed or libCanRebind then return end
 	if uiKeyCode ~= Enum.KeyCode.RightShift and input.KeyCode == uiKeyCode then
@@ -3857,7 +3828,7 @@ v32:CreateInput({
 	end,
 })
 
--- keybind is saved with the config too
+
 SpectreCfg.controls["Settings/UI Toggle Keybind"] = {
 	get = function() return currentKeybindName end,
 	set = function(v) applyUiKey(v, false) end,
@@ -3870,7 +3841,7 @@ v32:CreateButton({Name = "Destroy UI", Callback = function() pcall(function() Wi
 
 getgenv()._SpectreTouchline_Cleanup = function() pcall(function() Window:Destroy() end) end
 
--- auto-load the chosen config on startup
+
 task.spawn(function()
 	task.wait(2)
 	local name = readAutoload()
@@ -3880,3 +3851,4 @@ task.spawn(function()
 		notify("Auto Loaded", "Applied config: " .. name)
 	end
 end)
+
