@@ -1,7 +1,3 @@
--- ============================================================
--- UNIVERSAL EXECUTOR COMPATIBILITY LAYER
--- Supports: Delta, Fluxus, Codex, Arceus X, Solara, Wave, etc.
--- ============================================================
 pcall(function()
     repeat task.wait() until game:IsLoaded()
 end)
@@ -37,18 +33,13 @@ local function safeHttpGet(url)
     return result or res
 end
 
---[[
-    SPECTRE HUB — TPS STREET SOCCER
-    Black & White Edition
-    Powered by PEAK / Spectre UI
-]]
 
 local rawLib = safeHttpGet("https://raw.githubusercontent.com/Twistzzmassivescripts/UI_Libarys/refs/heads/main/OUTLAWS.dev/NEW%20ONE%20PEAK.lua")
 if not rawLib or rawLib == "" then
 	rawLib = game:HttpGet("https://raw.githubusercontent.com/Twistzzmassivescripts/UI_Libarys/refs/heads/main/OUTLAWS.dev/NEW%20ONE%20PEAK.lua")
 end
 
--- Helper for exact string replacement
+
 local function replaceExact(source, target, replacement)
 	local p1, p2 = source:find(target, 1, true)
 	if p1 then
@@ -57,26 +48,26 @@ local function replaceExact(source, target, replacement)
 	return source
 end
 
--- 1. Apply Black & White Theme
+
 rawLib = rawLib:gsub(
 	"f%.Theme=%b{}",
 	"f.Theme={Background=Color3.fromRGB(12,12,12),Surface=Color3.fromRGB(18,18,18),Surface2=Color3.fromRGB(24,24,24),Surface3=Color3.fromRGB(34,34,34),Stroke=Color3.fromRGB(46,46,46),StrokeHover=Color3.fromRGB(90,90,90),Accent=Color3.fromRGB(255,255,255),AccentDark=Color3.fromRGB(15,15,15),Text=Color3.fromRGB(255,255,255),Muted=Color3.fromRGB(140,140,140),Warning=Color3.fromRGB(240,176,108),Success=Color3.fromRGB(150,220,170),Error=Color3.fromRGB(240,120,120)}"
 )
 
--- 2. Turn purple glow tint into monochrome white glow
+
 rawLib = rawLib:gsub("Color3%.fromRGB%(226,218,230%)", "Color3.fromRGB(255,255,255)")
 
--- 3. Swap purple logo asset ID for the Spectre S icon
+
 rawLib = rawLib:gsub('Logo="rbxassetid://103859712365480"', 'Logo="rbxassetid://106249189352631"')
 
--- 4. Replace purple top-left logo with bold text "SPECTRE"
+
 local headerTarget = 'local J=c(p,{Name="Header",Size=UDim2.new(1,0,0,72),BackgroundTransparency=1,Parent=C})local X=c("ImageLabel",{Position=UDim2.fromOffset(22,27),Size=UDim2.fromOffset(30,28),BackgroundTransparency=1,Image="",ImageColor3=a.Accent,ScaleType=Enum.ScaleType.Fit,Parent=J})u(X,k.Icon or t.Logo)d{Position=UDim2.fromOffset(60,25),Size=UDim2.new(1,-70,0,20),Text=k.Title or"Airflow",TextSize=20,Parent=J}d{Position=UDim2.fromOffset(60,45),Size=UDim2.new(1,-70,0,14),Text=k.Subtitle or"",TextSize=13,FontFace=i.Regular,TextColor3=a.Muted,Parent=J}'
 
 local newHeader = 'local J=c(p,{Name="Header",Size=UDim2.new(1,0,0,72),BackgroundTransparency=1,Parent=C})c("ImageLabel",{Position=UDim2.fromOffset(22,18),Size=UDim2.fromOffset(28,28),BackgroundTransparency=1,Image="rbxassetid://106249189352631",ImageColor3=a.Text,ScaleType=Enum.ScaleType.Fit,Parent=J})d{Position=UDim2.fromOffset(55,24),Size=UDim2.new(1,-65,0,22),Text="SPECTRE",TextSize=21,FontFace=i.Bold,TextColor3=a.Text,Parent=J}d{Position=UDim2.fromOffset(55,46),Size=UDim2.new(1,-65,0,14),Text=k.Subtitle or"TPS Street Soccer",TextSize=12,FontFace=i.Regular,TextColor3=a.Muted,Parent=J}'
 
 rawLib = replaceExact(rawLib, headerTarget, newHeader)
 
--- 5. Replace branding names (Outlaw, kimi, airflow -> Spectre)
+
 rawLib = rawLib:gsub("AirFlow", "Spectre")
 rawLib = rawLib:gsub("Airflow", "Spectre")
 rawLib = rawLib:gsub("airflow", "spectre")
@@ -87,7 +78,6 @@ rawLib = rawLib:gsub("Kimi", "Spectre")
 rawLib = rawLib:gsub("kimi", "spectre")
 
 
--- Patch PEAK Tab metatable with Create* aliases for compatibility
 rawLib = rawLib:gsub("local j={}%s*j%.__index=j", [[local j={}j.__index=j
 function j:CreateSection(b) local n = type(b)=="table" and (b.Name or b.Title or "") or tostring(b or ""); return self:Section(n) end
 function j:CreateButton(b) return self:Button(b) end
@@ -120,9 +110,7 @@ local Window = PEAK:CreateWindow({
 	Loading = false
 })
 
--- ============================================================
--- PEAK UI LIBRARY ADAPTER BRIDGE
--- ============================================================
+
 local origCreateTab = Window.CreateTab or Window.Tab
 local function wrapTab(tab)
 	function tab:CreateSection(b)
@@ -155,7 +143,6 @@ end
 Window.Tab = Window.CreateTab
 
 
-
 local v1 = {}
 function v1:Notify(tbl)
 	tbl = tbl or {}
@@ -170,9 +157,7 @@ function v1:Notify(tbl)
 	end)
 end
 
--- ============================================================
--- CORE VARIABLES & SERVICES
--- ============================================================
+
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local HttpService = game:GetService("HttpService")
@@ -190,9 +175,7 @@ local function func(...)
 	pcall(...)
 end
 
--- ============================================================
--- ANTICHEAT HARDENING & SAFE FIRETOCKINTEREST
--- ============================================================
+
 local v3 = getgenv()
 v3.HARDEN = v3.HARDEN or {}
 if not v3.HARDEN.namecallInstalled then
@@ -265,7 +248,7 @@ if not v3.HARDEN.safeFire then
 	end)
 end
 
--- Cleanup remote exploit honeypots
+
 task.spawn(function()
 	func(function()
 		local FE = workspace:FindFirstChild("FE")
@@ -297,19 +280,19 @@ task.spawn(function()
 	end)
 end)
 
--- Shared arrays for cleanup
+
 local tbl10 = {}
 local tbl11 = {}
 local tbl12 = {}
 
--- Ball resolution helper
+
 local function func25()
 	local TPSSystem = workspace:FindFirstChild("TPSSystem")
 	return TPSSystem and TPSSystem:FindFirstChild("TPS") or workspace:FindFirstChild("Ball")
 end
 local func3 = func25
 
--- Preferred foot part helper
+
 local function func26(arg1, arg2)
 	local Value
 	local v1_light = game:GetService("Lighting"):FindFirstChild(LocalPlayer.Name)
@@ -324,7 +307,7 @@ local function func26(arg1, arg2)
 		or arg1 and arg1:FindFirstChild(v3_val and "Right Leg" or "Left Leg")
 end
 
--- Fire touch interest wrapper
+
 local function func27(arg1, arg2)
 	if not (arg1 and arg2 and firetouchinterest) then return end
 	func(function()
@@ -333,11 +316,7 @@ local function func27(arg1, arg2)
 	end)
 end
 
--- ============================================================
 
--- ============================================================
--- SHARED CROSS-TAB STATE (Solves 200 local variables limit)
--- ============================================================
 local v5, v8, v_armTab, v18, v21, v22, v23, v24, v33, v34, v_agTab, v38, v32
 local v9, v10, v11, v12, v13, v14, v15, v16, v17, v19, v20, v25, v26, v27, v40, v47, v48, v49, v50, v51
 local tbl1, tbl2, tbl4, tbl5, tbl8, tbl9, tbl16, tbl21, tbl26
@@ -346,8 +325,8 @@ local streamProofActive, streamProofKey, secretSensorGui, streamProofToggleRef, 
 local abOn, abConn, abRad, startAutoBall, stopAutoBall
 
 do
--- TAB 1: HOME
--- ============================================================
+
+
 v5 = Window:CreateTab({Name = "Home", Desc = "Info", Icon = "house"})
 Window:SelectTab(v5)
 
@@ -458,12 +437,12 @@ v5:CreateLabel({
 	UpdateRate = 1,
 })
 
--- ============================================================
+
 end
 
 do
--- TAB 2: REACH
--- ============================================================
+
+
 v8 = Window:CreateTab({Name = "Reach", Desc = "Reach methods", Icon = "mouse-pointer-click"})
 
 local function func2(arg1, arg2)
@@ -486,7 +465,7 @@ local function func2(arg1, arg2)
 	return tbl
 end
 
--- Method 1
+
 v8:CreateSection("Reach [Method 1]")
 v8:CreateParagraph({Title = "Reach [Method 1]", Content = "NOT Xeno & Solara Support"})
 
@@ -534,7 +513,7 @@ v10 = v8:CreateInput({
 })
 v10:Set("5")
 
--- Method 2
+
 v8:CreateSection("Reach [Method 2]")
 v8:CreateParagraph({Title = "Reach [Method 2]", Content = "NOT Xeno & Solara Support"})
 
@@ -808,7 +787,7 @@ v17 = v8:CreateToggle({
 	end,
 })
 
--- Preferred Foot Reach
+
 v8:CreateSection("Preferred Foot Reach")
 v8:CreateParagraph({Title = "Preferred Foot Reach", Content = "Script 2's preferred-foot touch method."})
 
@@ -852,7 +831,7 @@ v8:CreateInput({
 	end,
 })
 
--- Preferred Foot Shape Reach
+
 v8:CreateSection("Preferred Foot Shape Reach")
 
 local tbl14 = {on = false, shape = "Box", size = new(1, 1, 1), part = nil, connection = nil}
@@ -972,12 +951,12 @@ v8:CreateToggle({
 	end,
 })
 
--- ============================================================
+
 end
 
 do
--- TAB 3: ARM REACH
--- ============================================================
+
+
 v_armTab = Window:CreateTab({Name = "Arm Reach", Desc = "Arm reach methods", Icon = "hand"})
 
 local function hb_getArms(ch)
@@ -993,7 +972,7 @@ local function hb_getArms(ch)
 	return arms
 end
 
--- Method 1: Input
+
 v_armTab:CreateSection("Method 1 — Input Size")
 v_armTab:CreateParagraph({Title = "Method 1", Content = "Type a number (1-50) to set arm reach size."})
 
@@ -1068,7 +1047,7 @@ v_armTab:CreateToggle({
 	end
 })
 
--- Method 2: Slider
+
 v_armTab:CreateSection("Method 2 — Slider Size")
 v_armTab:CreateParagraph({Title = "Method 2", Content = "Use slider to adjust arm reach size (1-50)."})
 
@@ -1147,7 +1126,7 @@ v_armTab:CreateToggle({
 	end
 })
 
--- Method 3: X/Y/Z
+
 v_armTab:CreateSection("Method 3 — X / Y / Z")
 v_armTab:CreateParagraph({Title = "Method 3", Content = "Control X, Y and Z arm reach size independently (1-50 each)."})
 
@@ -1235,12 +1214,12 @@ v_armTab:CreateToggle({
 	end
 })
 
--- ============================================================
+
 end
 
 do
--- TAB 4: XENO & SOLARA REACH
--- ============================================================
+
+
 v18 = Window:CreateTab({Name = "Xeno & Solara Reach", Desc = "Leg reach", Icon = "settings-2"})
 v18:CreateSection("Xeno & Solara Reach")
 
@@ -1410,12 +1389,12 @@ v18:CreateButton({
 	end,
 })
 
--- ============================================================
+
 end
 
 do
--- TAB 5: HEAD REACH & MOSS
--- ============================================================
+
+
 v21 = Window:CreateTab({Name = "Head Reach & Moss", Desc = "Head reach", Icon = "headphones"})
 v21:CreateSection("Head Reach & Moss")
 v21:CreateParagraph({Title = "Head Reach", Content = "wallah best."})
@@ -1513,7 +1492,7 @@ v21:CreateButton({Name = "Moss 50%", Callback = function() func15("10", "6", "75
 v21:CreateButton({Name = "Moss 75%", Callback = function() func15("8", "3", "67", 3.6, 2.9, 5.1) end})
 v21:CreateButton({Name = "Moss 100%", Callback = function() func15("7", "0", "60", 4, 3.5, 6) end})
 
--- Configurable Mossing
+
 v21:CreateSection("Configurable Mossing")
 v21:CreateParagraph({Title = "Configurable Mossing", Content = "Ground, jump-leg, and head-reach values from Script 2."})
 
@@ -1603,12 +1582,12 @@ v21:CreateButton({
 	end,
 })
 
--- ============================================================
+
 end
 
 do
--- TAB 6: REACT
--- ============================================================
+
+
 v22 = Window:CreateTab({Name = "React", Desc = "React delay", Icon = "smile-plus"})
 v22:CreateSection("React")
 v22:CreateParagraph({
@@ -1653,7 +1632,7 @@ v22:CreateButton({Name = "React 50%", Desc = "Delay: 10 | Interp: 75 (Balanced /
 v22:CreateButton({Name = "React 75%", Desc = "Delay: 8 | Interp: 67 (Fast reaction, competitive)", Callback = function() applyReact("8", "67") end})
 v22:CreateButton({Name = "React 100%", Desc = "Delay: 7 | Interp: 60 (Lowest delay, most aggressive)", Callback = function() applyReact("7", "60") end})
 
--- Script 2 React Helpers
+
 v22:CreateSection("Script 2 React Helpers")
 tbl16 = {movement = false, guard = false, noCollision = false, esp = false, bigHead = false}
 tbl16.moveConnection = nil
@@ -1897,12 +1876,12 @@ v22:CreateButton({
 	end
 })
 
--- ============================================================
+
 end
 
 do
--- TAB 7: XENO MOSS
--- ============================================================
+
+
 v23 = Window:CreateTab({Name = "Xeno Moss", Desc = "Moss for Xeno & Solara", Icon = "zap"})
 v23:CreateSection("Xeno Moss")
 v23:CreateParagraph({Title = "Xeno Moss", Content = "Moss for Xeno & Solara. Pick your %. Higher % = bigger hitbox."})
@@ -1992,12 +1971,12 @@ v23:CreateButton({Name = "Xeno Moss 75%", Callback = function() func16(3.5, 4.5,
 v23:CreateButton({Name = "Xeno Moss 100%", Callback = function() func16(4, 5, 4.5, 1.5) end})
 v23:CreateButton({Name = "Stop Xeno Moss", Callback = function() if v49 then v49:Disconnect() v49 = nil end end})
 
--- ============================================================
+
 end
 
 do
--- TAB 8: FLAG FUNC
--- ============================================================
+
+
 v24 = Window:CreateTab({Name = "Flag Func", Desc = "Flag override", Icon = "settings-2"})
 v24:CreateSection("Flag Override")
 
@@ -2071,7 +2050,7 @@ v24:CreateParagraph({
 	Content = "Direct real-time FPS optimization: strips textures, turns off stadium lights & all shadows, removes particles, and forces smooth potato performance.",
 })
 
--- Helper to strip shadows and textures from a part
+
 local function applyPartOptimization(v)
 	pcall(function()
 		if v:IsA("BasePart") then
@@ -2091,7 +2070,7 @@ local function applyPartOptimization(v)
 	end)
 end
 
--- 1. Texture Quality
+
 local potatoActive = false
 v24:CreateDropdown({
 	Name = "Texture Quality Flag",
@@ -2125,7 +2104,7 @@ v24:CreateDropdown({
 	end
 })
 
--- 2. Anti-Aliasing (Alias Flag)
+
 v24:CreateDropdown({
 	Name = "Anti-Aliasing (MSAA) Flag",
 	Options = {"Off (0x - Best FPS)", "2x MSAA", "4x MSAA (Smooth)", "8x MSAA (Max)"},
@@ -2140,7 +2119,7 @@ v24:CreateDropdown({
 	end
 })
 
--- 3. Remove Shadows & Stadium Lights (Real-time lag purge)
+
 v24:CreateToggle({
 	Name = "Remove All Shadows & Lights",
 	CurrentValue = false,
@@ -2154,7 +2133,7 @@ v24:CreateToggle({
 			Lighting.FogEnd = val and 9e9 or 1000
 			Lighting.ShadowSoftness = val and 0 or 0.5
 			Lighting.Brightness = val and 1 or 2
-			-- Strip CastShadow from all parts and turn off heavy stadium lights
+
 			for _, v in ipairs(workspace:GetDescendants()) do
 				if v:IsA("BasePart") then
 					v.CastShadow = not val
@@ -2167,7 +2146,7 @@ v24:CreateToggle({
 	end
 })
 
--- 4. Disable Post-FX & 3D Grass
+
 v24:CreateToggle({
 	Name = "Disable Post-FX & 3D Grass",
 	CurrentValue = false,
@@ -2187,7 +2166,7 @@ v24:CreateToggle({
 	end
 })
 
--- 5. NEW: Full Potato Mode (Strip all textures to SmoothPlastic)
+
 v24:CreateButton({
 	Name = "Full Potato Textures",
 	Desc = "Forces smooth plastic on all field/stadium parts and deletes heavy textures",
@@ -2209,7 +2188,7 @@ v24:CreateButton({
 	end
 })
 
--- 6. NEW: Remove Particles, Trails & Emitters
+
 v24:CreateButton({
 	Name = "Remove Particles & Trails",
 	Desc = "Disables all fire, smoke, sparks, trails, beams, and emitters",
@@ -2227,7 +2206,7 @@ v24:CreateButton({
 	end
 })
 
--- 7. Quick Ultimate FPS Boost Preset
+
 v24:CreateButton({
 	Name = "Apply Ultimate FPS Preset",
 	Desc = "One-click: Smooth Plastic + No Shadows + No Lights + No Particles + Lowest Quality",
@@ -2312,15 +2291,15 @@ v24:CreateButton({
 	end
 })
 
--- ============================================================
+
 end
 
 do
--- TAB 9: HELPERS
--- ============================================================
+
+
 v33 = Window:CreateTab({Name = "Helpers", Desc = "Script 2 helpers", Icon = "bot"})
 
--- Air Dribble
+
 v33:CreateSection("Air Dribble")
 v33:CreateParagraph({Title = "Helpers", Content = "Script 2 helper functions, presented with the Spectre UI."})
 
@@ -2386,7 +2365,7 @@ v33:CreateButton({
 	end
 })
 
--- Ball Modifications
+
 v33:CreateSection("Ball Modifications")
 tbl21 = {size = 2.6, antiFling = false, prediction = false, collision = false}
 tbl21.predictionConnection = nil
@@ -2576,7 +2555,7 @@ v33:CreateDropdown({
 	end
 })
 
--- Sky Changer
+
 v33:CreateSection("Sky Changer")
 local tbl24 = {
 	["Night Sky"] = {"12064107", "12064152", "12064121", "12063984", "12064115", "12064131", 0},
@@ -2611,17 +2590,14 @@ for k in pairs(tbl24) do
 	v33:CreateButton({Name = k, Callback = function() func49(k) end})
 end
 
--- ============================================================
+
 end
 
 do
--- TAB 10: PLAYER
--- ============================================================
+
+
 v34 = Window:CreateTab({Name = "Player", Desc = "Script 2 player mods", Icon = "user-round"})
 
--- ============================================================
--- PING SPOOFER WITH REALISTIC FLUCTUATION & JITTER
--- ============================================================
 v34:CreateSection("Ping Spoofer")
 
 local CoreGui = game:GetService("CoreGui")
@@ -2753,7 +2729,6 @@ local function startPingSpoofer()
 	local rollingSum = pingSpoofTarget * 50
 	local tickCount = 0
 
-	-- Realistic jitter simulation thread
 	local simThread = task.spawn(function()
 		while pingSpoofActive do
 			if pingSpoofRealistic then
@@ -2865,7 +2840,6 @@ v34:CreateInput({
 	end,
 })
 
--- Auto Ball
 v34:CreateSection("Auto Ball")
 local abOn, abConn, abRad = false, nil, 3
 local abToggleRef = nil
@@ -2927,7 +2901,7 @@ v34:CreateSlider({
 	Callback = function(v) abRad = v end
 })
 
--- Aimbot
+
 v34:CreateSection("Aimbot")
 tbl26 = {enabled = false, mode = "Holding", key = Enum.KeyCode.Z, aiming = false, line = nil, mobileGui = nil}
 
@@ -3095,9 +3069,7 @@ v34:CreateDropdown({
 	end
 })
 
--- ============================================================
 
--- Avatar Stealer
 v34:CreateSection("Avatar Stealer")
 
 local avUser2 = ""
@@ -3364,7 +3336,7 @@ local function avStealCore(nameOrId)
 	end
 end
 
--- RESPAWN LISTENER (Placed AFTER functions so all variables exist)
+
 LocalPlayer.CharacterAdded:Connect(function(newChar)
 	if not avAutoRespawn or not avLastUid then return end
 	task.spawn(function()
@@ -3428,8 +3400,8 @@ v34:CreateButton({
 end
 
 do
--- TAB 11: AUTO GOAL
--- ============================================================
+
+
 v_agTab = Window:CreateTab({Name = "Auto Goal", Desc = "Auto goal farm", Icon = "goal"})
 v_agTab:CreateSection("Auto Goal")
 v_agTab:CreateParagraph({
@@ -3523,17 +3495,15 @@ v_agTab:CreateToggle({
 	end
 })
 
--- ============================================================
+
 end
 
 do
--- TAB 12: MISCELLANEOUS
--- ============================================================
+
+
 v38 = Window:CreateTab({Name = "Miscellaneous", Desc = "Misc tools", Icon = "panel-left"})
 
--- ============================================================
--- TELEPORT (TP)
--- ============================================================
+
 v38:CreateSection("Teleport")
 v38:CreateParagraph({
 	Title = "Teleportation",
@@ -3563,7 +3533,7 @@ local function safeTeleport(targetPos, label, silent)
 	return true
 end
 
--- Teleport action handlers
+
 local function tpBallAction(silent)
 	local ball = func25()
 	if ball then
@@ -3628,7 +3598,7 @@ local function tpChosenAction(silent)
 	end
 end
 
--- ── 1. Ball Teleport ─────────────────────────────────────────
+
 v38:CreateButton({
 	Name = "TP to Ball",
 	Desc = "Teleport once directly to the ball",
@@ -3641,7 +3611,6 @@ v38:CreateKeybind({
 })
 
 
--- ── 2. Red Goal Teleport ─────────────────────────────────────
 v38:CreateButton({
 	Name = "TP to Red Goal",
 	Desc = "Teleport once to the Red team goal",
@@ -3672,7 +3641,7 @@ v38:CreateToggle({
 	end
 })
 
--- ── 3. Blue Goal Teleport ────────────────────────────────────
+
 v38:CreateButton({
 	Name = "TP to Blue Goal",
 	Desc = "Teleport once to the Blue team goal",
@@ -3703,7 +3672,7 @@ v38:CreateToggle({
 	end
 })
 
--- ── 4. Random Player Teleport ────────────────────────────────
+
 v38:CreateButton({
 	Name = "TP to Random Player",
 	Desc = "Teleport once to a random player in the server",
@@ -3715,7 +3684,7 @@ v38:CreateKeybind({
 	Callback = function() tpRandomAction(false) end
 })
 
--- ── 5. Chosen Player Teleport ────────────────────────────────
+
 local function getTpPlayerList()
 	local list = {}
 	for _, pl in ipairs(Players:GetPlayers()) do
@@ -3820,16 +3789,11 @@ v38:CreateButton({
 })
 
 
--- ============================================================
 end
 
 do
--- TAB 13: SETTINGS
--- ============================================================
 
--- ============================================================
--- STREAM PROOF (STEALTH MODE)
--- ============================================================
+
 v38:CreateSection("Stream Proof (Stealth Mode)")
 v38:CreateParagraph({
 	Title = "Stream Proof",
@@ -3895,8 +3859,8 @@ local function setStreamProof(enable)
 			local btn = Instance.new("TextButton")
 			btn.Name = "RevealArea"
 			btn.Size = UDim2.new(0, 80, 0, 80)
-			btn.Position = UDim2.new(1, -85, 0, 5) -- Top-right corner of the screen
-			btn.BackgroundTransparency = 1 -- 100% invisible
+			btn.Position = UDim2.new(1, -85, 0, 5)
+			btn.BackgroundTransparency = 1
 			btn.Text = ""
 			btn.BorderSizePixel = 0
 			btn.AutoButtonColor = false
@@ -4270,7 +4234,7 @@ v32:CreateButton({
 	end,
 })
 
--- UI Toggle Keybind
+
 v32:CreateSection("UI Toggle Keybind")
 local currentKeybindName = "RightShift"
 local keybindDropdown = nil
@@ -4316,7 +4280,7 @@ v32:CreateInput({
 	end,
 })
 
--- Auto-load saved config on startup
+
 task.spawn(function()
 	task.wait(1.2)
 	pcall(function()
@@ -4334,7 +4298,7 @@ task.spawn(function()
 	end)
 end)
 
--- Cleanup registration
+
 local function doFullCleanup()
 	for _, conn in ipairs(tbl10) do
 		if conn then func(function() conn:Disconnect() end) end
@@ -4380,4 +4344,5 @@ end
 
 getgenv()._SpectreTPS_Cleanup = doFullCleanup
 end
+
 
